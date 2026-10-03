@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sanrekhan · Beam alignment game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<style>
+:root{
+  --table:#f2eee5; --panel:#faf8f3; --panel-2:#ebe6da;
+  --ink:#1d1b18; --muted:#6e685c; --line:#dcd5c6; --rule:#1d1b18;
+  --laser:#d8281e; --ok:#3b6e45; --warn:#b5541c;
+  --plate:#2b2926; --plate-2:#3a3733; --hole:#0f0e0d; --card:#f7f4ec; --cardline:#c9c1b0;
+  --scrim:rgba(242,238,229,.86);
+  --display:"Newsreader", "Iowan Old Style", Georgia, serif;
+  --body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --deva:"Tiro Devanagari Hindi", "Noto Serif Devanagari", "Mangal", serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --table:#161513; --panel:#1d1c19; --panel-2:#272520;
+    --ink:#ebe5d8; --muted:#9b9485; --line:#35322c; --rule:#ebe5d8;
+    --laser:#f0483c; --ok:#83b28d; --warn:#e2925a;
+    --plate:#23211e; --plate-2:#34312c; --hole:#080807; --card:#d9d3c5; --cardline:#a59d8c;
+    --scrim:rgba(22,21,19,.86);
+  }
+}
+:root[data-theme="dark"]{
+  --table:#161513; --panel:#1d1c19; --panel-2:#272520;
+  --ink:#ebe5d8; --muted:#9b9485; --line:#35322c; --rule:#ebe5d8;
+  --laser:#f0483c; --ok:#83b28d; --warn:#e2925a;
+  --plate:#23211e; --plate-2:#34312c; --hole:#080807; --card:#d9d3c5; --cardline:#a59d8c;
+  --scrim:rgba(22,21,19,.86);
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;background:var(--table);-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+.hidden{display:none!important}
+.wrap{max-width:1140px;margin:0 auto;padding:0 20px 40px}
+
+.portals{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 0;margin-bottom:26px;border-bottom:1px solid var(--line);font-size:13.5px}
+.portals .home{font-family:var(--display);font-size:18px;text-decoration:none;color:inherit}
+.portals .links{display:flex;gap:18px;flex-wrap:wrap}
+.portals .links a{text-decoration:none;color:var(--muted);padding-bottom:2px;border-bottom:1px solid transparent}
+.portals .links a:hover{color:var(--ink)}
+.portals .links a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
+
+header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px 32px;justify-content:space-between;padding-bottom:18px;border-bottom:1px solid var(--rule)}
+.brand h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,5.4vw,52px);letter-spacing:-.015em;line-height:1;margin:0}
+.brand .deva{font-family:var(--deva);font-size:clamp(17px,2.4vw,22px);color:var(--muted);margin-left:6px}
+.brand p{margin:10px 0 0;color:var(--muted);font-size:14.5px;max-width:50ch}
+.linkbtn{background:none;border:0;padding:0;color:var(--ink);font:inherit;font-size:14px;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;cursor:pointer}
+.linkbtn:hover{text-decoration-color:var(--ink)}
+.stats{display:flex;flex-wrap:wrap}
+.stat{padding:0 18px;border-left:1px solid var(--line);min-width:72px}
+.stat:first-child{border-left:0;padding-left:0}
+.stat span{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.stat b{display:block;font-family:var(--mono);font-size:22px;font-weight:400;font-variant-numeric:tabular-nums;line-height:1.3}
+.stat.timer b{font-size:30px;line-height:1.1}
+.stat.timer.low b{color:var(--warn)}
+@media (max-width:520px){.stat{padding:0 12px;min-width:0}.stat.timer b{font-size:26px}}
+
+.bench{margin:6px 0 22px;padding:10px 0 4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.bench svg{display:block;width:100%;min-width:560px;height:auto}
+
+.main{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px}
+@media (max-width:900px){.main{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:20px}
+.card h2{font-family:var(--display);font-weight:500;font-size:22px;margin:0 0 2px;line-height:1.2}
+.card .sub{color:var(--muted);font-size:13.5px;margin:0 0 14px}
+.eyebrow{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.side{display:flex;flex-direction:column;gap:20px}
+
+.views{position:relative}
+.irises{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:440px){.irises{gap:10px}}
+.iris .t{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.iris .t b{font-family:var(--display);font-weight:500;font-size:17px}
+.iris .t span{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.iris canvas{display:block;width:100%;aspect-ratio:1/1;border-radius:2px;background:var(--plate)}
+.iris .chip{margin-top:8px;width:100%}
+.hint{font-size:13px;color:var(--muted);margin:12px 0 0;min-height:1.5em}
+
+.meter{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.meter .row1{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.meter .read{font-family:var(--mono);font-size:34px;line-height:1.1;font-variant-numeric:tabular-nums}
+.meter .read small{font-size:15px;color:var(--muted);margin-left:4px}
+.meter .of{font-size:13px;color:var(--muted);text-align:right}
+.pbar{position:relative;height:6px;background:var(--line);margin-top:10px}
+.pbar i{display:block;height:100%;width:0;background:var(--ink);transition:width .06s linear}
+.pbar.lock i{background:var(--ok)}
+.pbar .goal{position:absolute;top:-4px;bottom:-4px;width:1.5px;background:var(--ok)}
+.pbar-l{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:6px}
+
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;pointer-events:none;z-index:3}
+.overlay .box{pointer-events:auto;background:var(--panel);border:1px solid var(--rule);border-radius:2px;padding:22px 24px;max-width:380px}
+.overlay h3{font-family:var(--display);font-weight:400;font-size:28px;margin:0 0 6px;line-height:1.15}
+.overlay p{margin:0 0 16px;color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.toast{position:absolute;left:50%;top:-6px;transform:translate(-50%,-4px);background:var(--ink);color:var(--panel);font-weight:500;font-size:13px;letter-spacing:.03em;padding:6px 12px;border-radius:2px;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;z-index:4;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.btn{font-weight:500;font-size:14px;padding:10px 18px;border-radius:2px;border:1px solid var(--rule);background:transparent;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.btn.primary:hover{background:var(--ink);opacity:.88}
+.btn.quiet{border-color:transparent;color:var(--muted);padding-left:4px;padding-right:4px}
+.btn.quiet:hover{background:none;color:var(--ink)}
+.chip{font-size:13px;padding:6px 11px;border-radius:2px;border:1px solid var(--line);background:transparent;cursor:pointer}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.btn:focus-visible,.rot:focus-visible,.chip:focus-visible,.linkbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+.mounts{display:grid;grid-template-columns:1fr 1fr}
+.mount{padding:0 10px}
+.mount:first-child{padding-left:0;border-right:1px solid var(--line)}
+.mount:last-child{padding-right:0}
+.mount h3{font-family:var(--display);font-weight:500;font-size:18px;margin:0;text-align:center}
+.mount .wp{color:var(--muted);font-size:12px;text-align:center}
+.knobs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.knob{text-align:center}
+.knob.active .kl{color:var(--laser)}
+.knob .kl{font-size:12px;color:var(--muted);transition:color .15s}
+.knob svg{width:64px;height:64px;display:block;margin:4px auto 2px}
+.knob .turns{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+.rots{display:flex;gap:4px;justify-content:center;margin-top:6px}
+.rot{width:34px;height:34px;border-radius:2px;border:1px solid var(--line);background:transparent;cursor:pointer;font-size:16px;line-height:1;user-select:none;-webkit-user-select:none;touch-action:none}
+.rot:hover{border-color:var(--ink)}
+.rot:active,.rot.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;padding:0 4px;background:var(--panel);color:var(--ink)}
+.keys{font-size:12px;color:var(--muted);margin-top:6px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);align-items:center}
+#chipEnd{margin-left:auto}
+footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;max-width:80ch}
+
+.float-timer{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));z-index:50;background:var(--panel);border:1px solid var(--rule);border-radius:2px;padding:7px 14px 9px;min-width:92px;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .2s,transform .2s}
+.float-timer.show{opacity:1;transform:none}
+.float-timer span{display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.float-timer b{display:block;font-family:var(--mono);font-size:24px;font-weight:400;font-variant-numeric:tabular-nums;line-height:1.15}
+.float-timer.low b{color:var(--warn)}
+.float-timer .bar{display:block;height:2px;background:var(--line);overflow:hidden;margin-top:5px}
+.float-timer .bar i{display:block;height:100%;width:100%;background:var(--ink);transform-origin:left}
+.float-timer.low .bar i{background:var(--warn)}
+.timebar{height:2px;background:var(--line);overflow:hidden;margin-top:14px}
+.timebar i{display:block;height:100%;width:100%;background:var(--ink);transform-origin:left}
+.timebar.low i{background:var(--warn)}
+
+.intro{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--scrim);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);animation:fade .35s ease-out}
+.sheet{background:var(--panel);border:1px solid var(--rule);border-radius:2px;width:100%;max-width:540px;max-height:calc(100dvh - 32px);overflow:auto;padding:30px 32px 24px;box-shadow:0 30px 70px -40px rgba(0,0,0,.5);animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+.sheet .count{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.sheet h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,34px);line-height:1.1;letter-spacing:-.01em;margin:10px 0 14px}
+.sheet .body{min-height:190px}
+.sheet .body.swap{animation:swap .3s ease-out}
+.sheet p{margin:0 0 12px;font-size:15.5px;line-height:1.6}
+.sheet p.aside{color:var(--muted);font-size:14px}
+.sheet table{border-collapse:collapse;width:100%;font-size:14.5px;margin:4px 0 12px}
+.sheet td{padding:7px 0;border-top:1px solid var(--line)}
+.sheet td:last-child{text-align:right}
+.sheet ol{margin:0 0 12px;padding-left:20px;font-size:15px;line-height:1.55}
+.sheet ol li{margin-bottom:6px}
+.steps{display:flex;gap:6px;margin:22px 0 18px}
+.steps i{flex:1;height:2px;background:var(--line);transition:background .3s}
+.steps i.done{background:var(--ink)}
+.sheet .nav{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.sheet .nav .row{flex-wrap:nowrap}
+@media (max-width:480px){
+  .sheet{padding:24px 22px 20px}
+  .sheet .nav{flex-direction:column-reverse;align-items:stretch}
+  .sheet .nav .row>.btn{flex:1}
+  .sheet .nav #inBack{align-self:flex-start}
+}
+@keyframes fade{from{opacity:0}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes swap{from{opacity:0;transform:translateX(10px)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="intro hidden" id="intro" role="dialog" aria-modal="true" aria-labelledby="inTitle">
+  <div class="sheet">
+    <div class="count" id="inCount"></div>
+    <h2 id="inTitle"></h2>
+    <div class="body" id="inBody"></div>
+    <div class="steps" id="inSteps" aria-hidden="true"></div>
+    <div class="nav">
+      <button class="btn quiet" id="inBack">Back</button>
+      <div class="row" id="inNav"></div>
+    </div>
+  </div>
+</div>
+<div class="float-timer" id="floatTimer" aria-hidden="true"><span>Time</span><b id="fTime">--</b><span class="bar"><i id="fFill"></i></span></div>
+
+<div class="wrap">
+  <nav class="portals" aria-label="Portals">
+    <a class="home" href="index.html">Druvikaran</a>
+    <div class="links">
+      <a href="index.html">Polarisation game</a>
+      <a href="sanrekhan.html" aria-current="page">Alignment game</a>
+      <a href="tomography.html">Tomography lesson</a>
+    </div>
+  </nav>
+  <header>
+    <div class="brand">
+      <h1>Sanrekhan<span class="deva">संरेखण</span></h1>
+      <p>Walk a laser beam through two irises with two mirrors, and get as much light as you can onto the power meter. <button class="linkbtn" id="btnHelp">How to play</button></p>
+    </div>
+    <div class="stats" aria-live="polite">
+      <div class="stat"><span>Level</span><b id="sLevel">1</b></div>
+      <div class="stat"><span>Score</span><b id="sScore">0</b></div>
+      <div class="stat"><span>Best</span><b id="sBest">0</b></div>
+      <div class="stat timer" id="timerStat"><span>Time</span><b id="sTime">--</b></div>
+    </div>
+  </header>
+
+  <div class="bench" aria-label="Optical bench, top view">
+    <svg id="bench" viewBox="0 0 760 196" role="img" aria-label="Laser, two steering mirrors, two irises and a power meter"></svg>
+  </div>
+
+  <div class="main">
+    <section class="card views" id="views">
+      <div class="toast" id="toast">Aligned</div>
+      <div class="overlay hidden" id="overlay">
+        <div class="box">
+          <h3 id="ovTitle"></h3>
+          <p id="ovText"></p>
+          <div class="row">
+            <button class="btn primary" id="btnStart">Play again</button>
+            <button class="btn" id="btnLab">Free practice</button>
+          </div>
+        </div>
+      </div>
+      <span class="eyebrow">Looking down the beam</span>
+      <h2>The two irises</h2>
+      <p class="sub">The spot glows where it hits the iris blades and vanishes into the hole when it's centred.</p>
+      <div class="irises">
+        <div class="iris"><div class="t"><b>Iris 1</b><span id="i1d">near</span></div><canvas id="cv1" aria-label="View of iris 1"></canvas><button class="chip" id="open1" aria-pressed="false">Open iris 1</button></div>
+        <div class="iris"><div class="t"><b>Iris 2</b><span id="i2d">far</span></div><canvas id="cv2" aria-label="View of iris 2"></canvas><button class="chip" id="open2" aria-pressed="false">Open iris 2</button></div>
+      </div>
+      <p class="hint" id="hint"></p>
+      <div class="meter">
+        <div class="row1">
+          <div><span class="eyebrow" style="margin:0">Power meter</span><div class="read" id="pRead">0.00<small>mW</small></div></div>
+          <div class="of" id="pOf"></div>
+        </div>
+        <div class="pbar" id="pbar"><i id="pfill"></i><span class="goal" id="pgoal"></span></div>
+        <div class="pbar-l"><span>0</span><span id="pLock">Hold above the green line to lock</span></div>
+      </div>
+      <div class="timebar" id="timebar"><i id="timefill"></i></div>
+    </section>
+
+    <div class="side">
+      <section class="card">
+        <span class="eyebrow">Steering</span>
+        <h2>Mirror mounts</h2>
+        <p class="sub">Each kinematic mount has two thumbscrews. One full turn tilts the mirror by 8 mrad.</p>
+        <div class="mounts" id="mounts"></div>
+        <div class="toolbar">
+          <button class="chip" id="chipFine" aria-pressed="false">Fine control</button>
+          <button class="chip hidden" id="chipNew">New misalignment</button>
+          <button class="chip" id="chipEnd">End game</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>Model: a 1 mm diameter beam (1/e²) from a 5 mW laser. Mirror 1 sits 150 mm before mirror 2, iris 1 is 250 mm after mirror 2, and iris 2 is 600 mm further on. A mirror tilt of α deflects the beam by 2α. Transmission through each iris is the fraction of the Gaussian beam inside the aperture. Diffraction is ignored.</footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+const el=id=>document.getElementById(id);
+// ---------- geometry (mm) ----------
+const D1=150, A=250, B=600, S=0.016;           // S: beam deflection per knob turn (2 × 8 mrad)
+const W0=0.5, P0=5, OPEN_R=7.5, VIEW=8;         // beam 1/e² radius, laser power (mW), open iris radius, half-width of view
+const RATE=0.22, FINE_RATE=0.03, STEP=0.01, FINE_STEP=0.002, HOLD_DELAY=170, LOCK_TIME=1.0, GOAL=0.9;
+const KNOBS=[
+  {m:0,ax:"x",label:"Horizontal",keys:["d","a"]},{m:0,ax:"y",label:"Vertical",keys:["w","s"]},
+  {m:1,ax:"x",label:"Horizontal",keys:["l","j"]},{m:1,ax:"y",label:"Vertical",keys:["i","k"]},
+];
+
+// ---------- state ----------
+let turns=[0,0,0,0];
+let off={x:[0,0],y:[0,0]};     // beam position at iris 1 and 2 with all knobs at zero
+let mode="idle", level=1, score=0, best=0, timeLeft=0, timeTotal=1, irisR=0.9, drift=0;
+let lockT=0, pause=0, fine=false, shiftDown=false, open=[false,false], introOpen=false;
+const press=[null,null,null,null];
+try{best=parseInt(localStorage.getItem("sanrekhan-best")||"0",10)||0;}catch(e){}
+
+function spot(){
+  const p=ax=>{const t1=turns[ax==="x"?0:1], t2=turns[ax==="x"?2:3], o=off[ax];
+    return [o[0]+S*(t1*(D1+A)+t2*A), o[1]+S*(t1*(D1+A+B)+t2*(A+B))];};
+  const x=p("x"), y=p("y");
+  return [{x:x[0],y:y[0]},{x:x[1],y:y[1]}];
+}
+// fraction of a Gaussian beam centred at (dx,dy) passing a circular aperture of radius r
+function trans(dx,dy,r){
+  const d=Math.hypot(dx,dy); if(d>r+3*W0) return 0;
+  const NR=16, NT=32; let s=0;
+  for(let i=0;i<NR;i++){const rr=(i+0.5)/NR*r, dr=r/NR;
+    for(let j=0;j<NT;j++){const th=(j+0.5)/NT*2*Math.PI, x=rr*Math.cos(th)-dx, y=rr*Math.sin(th)-dy;
+      s+=Math.exp(-2*(x*x+y*y)/(W0*W0))*rr*dr*(2*Math.PI/NT);}}
+  return Math.min(1,s*2/(Math.PI*W0*W0));
+}
+const radius=i=>open[i]?OPEN_R:irisR;
+function power(sp){const t1=trans(sp[0].x,sp[0].y,radius(0)), t2=trans(sp[1].x,sp[1].y,radius(1));return {t1,t2,P:P0*t1*t2};}
+const bestPower=()=>P0*Math.pow(1-Math.exp(-2*irisR*irisR/(W0*W0)),2);
+
+// ---------- rounds ----------
+function levelParams(l){return {time:Math.max(35,90-7*(l-1)), r:Math.max(0.5,0.9-0.06*(l-1)), drift:l>=3?0.02*(l-2):0};}
+function scramble(){
+  turns=[0,0,0,0];
+  const rnd=(a,b)=>a+Math.random()*(b-a), sgn=()=>Math.random()<.5?-1:1;
+  off={x:[sgn()*rnd(1.5,4.5),sgn()*rnd(2,6.5)], y:[sgn()*rnd(1.5,4.5),sgn()*rnd(2,6.5)]};
+}
+function newRound(){
+  scramble(); lockT=0;
+  if(mode==="play"){const p=levelParams(level);timeTotal=timeLeft=p.time;irisR=p.r;drift=p.drift;}
+  else {irisR=0.8;drift=0;}
+  updateStats();
+}
+function startGame(){mode="play";level=1;score=0;hideOverlay();newRound();el("chipNew").classList.add("hidden");}
+function startLab(){mode="lab";hideOverlay();newRound();el("chipNew").classList.remove("hidden");}
+function endGame(reason){
+  const wasPlay=mode==="play"; mode="over";
+  if(wasPlay&&score>best){best=score;try{localStorage.setItem("sanrekhan-best",String(best));}catch(e){}}
+  updateStats();
+  showOverlay(reason==="time"?"Time's up":"Game ended",
+    wasPlay?`You aligned ${level-1} beam${level-1===1?"":"s"} and scored ${score}.${score>=best&&score>0?" That's your best yet.":""}`:"Practice session closed.");
+}
+function success(){
+  if(mode==="play"){const gained=Math.round(100*level+timeLeft*8*level);score+=gained;level++;toast(`Aligned   +${gained}`);}
+  else toast("Aligned");
+  pause=1.3;
+}
+
+// ---------- DOM ----------
+function updateStats(){
+  el("sLevel").textContent=mode==="lab"?"–":level;
+  el("sScore").textContent=mode==="lab"?"–":score;
+  el("sBest").textContent=best;
+}
+function showOverlay(t,x){el("ovTitle").textContent=t;el("ovText").textContent=x;el("overlay").classList.remove("hidden");el("btnStart").focus({preventScroll:true});}
+function hideOverlay(){el("overlay").classList.add("hidden");}
+let toastTimer;
+function toast(t){const e=el("toast");e.textContent=t;e.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.classList.remove("show"),1200);}
+
+// mounts and knobs
+const mounts=el("mounts");
+[0,1].forEach(m=>{
+  const d=document.createElement("div");d.className="mount";
+  d.innerHTML=`<h3>Mirror ${m+1}</h3><div class="wp">${m===0?"first after the laser":"second, nearer the irises"}</div><div class="knobs">${
+    KNOBS.map((k,i)=>k.m!==m?"":`<div class="knob" id="knob${i}"><div class="kl">${k.label}</div>
+      <svg viewBox="-34 -34 68 68" aria-hidden="true">
+        <circle r="30" fill="var(--panel-2)" stroke="var(--line)"/>
+        ${Array.from({length:36},(_,n)=>{const a=n*10*Math.PI/180;return `<line x1="${Math.sin(a)*26}" y1="${-Math.cos(a)*26}" x2="${Math.sin(a)*30}" y2="${-Math.cos(a)*30}" stroke="var(--muted)" stroke-width="1" opacity=".55"/>`;}).join("")}
+        <circle r="20" fill="var(--panel)" stroke="var(--line)"/>
+        <g id="ind${i}"><line x1="0" y1="-6" x2="0" y2="-18" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/></g>
+        <circle r="3" fill="var(--muted)"/>
+      </svg>
+      <div class="turns" id="tn${i}">+0.00</div>
+      <div class="rots"><button class="rot" data-i="${i}" data-d="-1" aria-label="Mirror ${m+1} ${k.label.toLowerCase()} anticlockwise">⟲</button><button class="rot" data-i="${i}" data-d="1" aria-label="Mirror ${m+1} ${k.label.toLowerCase()} clockwise">⟳</button></div>
+      <div class="keys"><kbd>${k.keys[1].toUpperCase()}</kbd> <kbd>${k.keys[0].toUpperCase()}</kbd></div></div>`).join("")}</div>`;
+  mounts.appendChild(d);
+});
+function canControl(){return !introOpen&&(mode==="play"||mode==="lab");}
+function stepNow(i,d){turns[i]+=d*(fine||shiftDown?FINE_STEP:STEP);}
+function startPress(i,d){if(!canControl())return;if(press[i]&&press[i].d===d)return;press[i]={d,t0:performance.now()};stepNow(i,d);}
+function endPress(i){press[i]=null;}
+document.querySelectorAll(".rot").forEach(b=>{
+  const i=+b.dataset.i,d=+b.dataset.d;
+  b.addEventListener("pointerdown",e=>{e.preventDefault();b.setPointerCapture(e.pointerId);b.classList.add("on");startPress(i,d);});
+  const up=()=>{b.classList.remove("on");if(press[i]&&press[i].d===d)endPress(i);};
+  b.addEventListener("pointerup",up);b.addEventListener("pointercancel",up);b.addEventListener("lostpointercapture",up);
+  b.addEventListener("contextmenu",e=>e.preventDefault());
+  b.addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();e.stopPropagation();if(canControl())stepNow(i,d);}});
+});
+const keyMap={};KNOBS.forEach((k,i)=>{keyMap[k.keys[0]]=[i,1];keyMap[k.keys[1]]=[i,-1];});
+window.addEventListener("keydown",e=>{
+  if(introOpen){
+    if(e.key==="ArrowRight"&&step<STEPS.length-1){e.preventDefault();goStep(step+1);}
+    else if(e.key==="ArrowLeft"&&step>0){e.preventDefault();goStep(step-1);}
+    return;
+  }
+  if(e.key==="Shift")shiftDown=true;
+  const k=keyMap[e.key.toLowerCase()];
+  if(k&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();if(!e.repeat)startPress(k[0],k[1]);}
+});
+window.addEventListener("keyup",e=>{if(e.key==="Shift")shiftDown=false;const k=keyMap[e.key.toLowerCase()];if(k&&press[k[0]]&&press[k[0]].d===k[1])endPress(k[0]);});
+window.addEventListener("blur",()=>{press.fill(null);shiftDown=false;});
+
+el("btnStart").onclick=startGame;
+el("btnLab").onclick=startLab;
+el("chipFine").onclick=e=>{fine=!fine;e.currentTarget.setAttribute("aria-pressed",fine);};
+el("chipNew").onclick=()=>{if(mode==="lab")newRound();};
+el("chipEnd").onclick=()=>{if(mode==="play"||mode==="lab")endGame("user");};
+[0,1].forEach(i=>el("open"+(i+1)).onclick=e=>{open[i]=!open[i];e.currentTarget.setAttribute("aria-pressed",open[i]);e.currentTarget.textContent=(open[i]?"Close":"Open")+" iris "+(i+1);});
+
+// ---------- bench schematic (top view) ----------
+const bench=el("bench");
+const ZX={m2:190,i1:190+A*0.52,i2:190+(A+B)*0.52}, BY=58, LY=160, EXA=3.2; // px positions, lateral exaggeration px/mm
+ZX.pm=ZX.i2+56;
+bench.innerHTML=`
+  <line x1="12" y1="188" x2="748" y2="188" stroke="var(--line)"/>
+  <rect x="14" y="${LY-20}" width="104" height="40" rx="1" fill="var(--panel)" stroke="var(--ink)"/>
+  <circle cx="32" cy="${LY}" r="5" fill="var(--laser)"/>
+  <text x="46" y="${LY-2}" font-family="var(--display)" font-size="16" fill="var(--ink)">Laser</text>
+  <text x="46" y="${LY+13}" font-family="var(--mono)" font-size="10.5" fill="var(--muted)">633 nm · 5 mW</text>
+  <line x1="118" y1="${LY}" x2="${ZX.m2}" y2="${LY}" stroke="var(--laser)" stroke-width="1.6"/>
+  <line x1="${ZX.m2}" y1="${LY}" x2="${ZX.m2}" y2="${BY}" stroke="var(--laser)" stroke-width="1.6" id="bUp"/>
+  <polyline id="bOut" fill="none" stroke="var(--laser)" stroke-width="1.6" stroke-linejoin="round"/>
+  <g transform="translate(${ZX.m2} ${LY}) rotate(45)"><rect x="-16" y="-3" width="32" height="6" fill="var(--panel-2)" stroke="var(--ink)"/></g>
+  <g transform="translate(${ZX.m2} ${BY}) rotate(45)"><rect x="-16" y="-3" width="32" height="6" fill="var(--panel-2)" stroke="var(--ink)"/></g>
+  <text x="${ZX.m2+20}" y="${LY+22}" font-family="var(--display)" font-size="14" fill="var(--ink)">Mirror 1</text>
+  <text x="${ZX.m2-22}" y="${BY-24}" text-anchor="end" font-family="var(--display)" font-size="14" fill="var(--ink)">Mirror 2</text>
+  ${["i1","i2"].map((k,n)=>`
+    <line x1="${ZX[k]}" y1="${BY-26}" x2="${ZX[k]}" y2="${BY-4}" stroke="var(--ink)" stroke-width="3"/>
+    <line x1="${ZX[k]}" y1="${BY+4}" x2="${ZX[k]}" y2="${BY+26}" stroke="var(--ink)" stroke-width="3"/>
+    <rect id="ap${n}" x="${ZX[k]-1.5}" y="${BY-4}" width="3" height="8" fill="var(--panel)"/>
+    <text x="${ZX[k]}" y="${BY+44}" text-anchor="middle" font-family="var(--display)" font-size="14" fill="var(--ink)">Iris ${n+1}</text>
+    <text x="${ZX[k]}" y="${BY+58}" text-anchor="middle" font-family="var(--mono)" font-size="10.5" fill="var(--muted)" id="bx${n}">0.00 mm</text>`).join("")}
+  <rect x="${ZX.pm}" y="${BY-18}" width="18" height="36" rx="1" fill="var(--panel)" stroke="var(--ink)"/>
+  <text x="${ZX.pm+9}" y="${BY+44}" text-anchor="middle" font-family="var(--display)" font-size="14" fill="var(--ink)">Meter</text>
+  <text x="${(ZX.m2+ZX.i1)/2}" y="16" text-anchor="middle" font-family="var(--body)" font-size="10.5" fill="var(--muted)">250 mm</text>
+  <text x="${(ZX.i1+ZX.i2)/2}" y="16" text-anchor="middle" font-family="var(--body)" font-size="10.5" fill="var(--muted)">600 mm</text>
+  <text x="400" y="182" font-family="var(--display)" font-style="italic" font-size="12" fill="var(--muted)">top view, sideways error drawn ×${EXA} per mm</text>`;
+function drawBench(sp,pw){
+  const clampY=v=>Math.max(BY-30,Math.min(BY+30,v));
+  const y1=clampY(BY+sp[0].x*EXA), y2=clampY(BY+sp[1].x*EXA);
+  const slope=(y2-y1)/(ZX.i2-ZX.i1), y0=y1-slope*(ZX.i1-ZX.m2);
+  let pts=`${ZX.m2},${BY} ${ZX.i1},${y1}`;
+  if(pw.t1>0.02){pts+=` ${ZX.i2},${y2}`; if(pw.t2>0.02)pts+=` ${ZX.pm},${clampY(y2+slope*(ZX.pm-ZX.i2))}`;}
+  el("bOut").setAttribute("points",pts);
+  el("bOut").setAttribute("opacity",0.35+0.65*Math.max(pw.t1,0.0));
+  [0,1].forEach(n=>{const r=radius(n);el("ap"+n).setAttribute("height",Math.min(44,Math.max(3,r*2*EXA)));el("ap"+n).setAttribute("y",BY-Math.min(22,Math.max(1.5,r*EXA)));
+    el("bx"+n).textContent=`${sp[n].x>=0?"+":"−"}${Math.abs(sp[n].x).toFixed(2)} mm`;});
+}
+
+// ---------- iris views ----------
+let C={};
+function readColors(){const cs=getComputedStyle(document.documentElement);["laser","plate","plate-2","hole","card","cardline","ink","muted","panel","line"].forEach(k=>C[k]=cs.getPropertyValue("--"+k).trim());}
+readColors();
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",readColors);}catch(e){}
+const views=[el("cv1"),el("cv2")].map(cv=>({cv,ctx:cv.getContext("2d"),W:0,DPR:1}));
+function sizeViews(){views.forEach(v=>{v.DPR=Math.min(2,devicePixelRatio||1);const r=v.cv.getBoundingClientRect();v.W=r.width;v.cv.width=Math.round(r.width*v.DPR);v.cv.height=Math.round(r.width*v.DPR);});}
+new ResizeObserver(sizeViews).observe(el("views"));sizeViews();
+function rgba(hex,a){const m=hex.match(/^#?([0-9a-f]{6})$/i);if(!m)return hex;const n=parseInt(m[1],16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
+function drawView(n,sp,bright){
+  const v=views[n],ctx=v.ctx,W=v.W;if(!W)return;
+  ctx.setTransform(v.DPR,0,0,v.DPR,0,0);
+  const c=W/2,k=W/2/VIEW,r=radius(n)*k,bx=c+sp.x*k,by=c-sp.y*k,bw=W0*k;
+  // iris plate
+  ctx.fillStyle=C.plate;ctx.fillRect(0,0,W,W);
+  const g=ctx.createRadialGradient(c,c,r,c,c,W*0.7);g.addColorStop(0,C["plate-2"]);g.addColorStop(1,C.plate);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,W);
+  // leaf edges (a hint of the diaphragm blades)
+  ctx.save();ctx.translate(c,c);ctx.strokeStyle="rgba(255,255,255,.06)";ctx.lineWidth=1;
+  for(let i=0;i<12;i++){ctx.rotate(Math.PI/6);ctx.beginPath();ctx.moveTo(r,0);ctx.lineTo(W*0.7,W*0.18);ctx.stroke();}
+  ctx.restore();
+  // engraved crosshair on the plate
+  ctx.strokeStyle="rgba(255,255,255,.12)";ctx.lineWidth=1;ctx.beginPath();
+  ctx.moveTo(0,c);ctx.lineTo(c-r-4,c);ctx.moveTo(c+r+4,c);ctx.lineTo(W,c);ctx.moveTo(c,0);ctx.lineTo(c,c-r-4);ctx.moveTo(c,c+r+4);ctx.lineTo(c,W);ctx.stroke();
+  // beam on the blades
+  const glow=(alpha)=>{if(alpha<=0.003)return;const gr=ctx.createRadialGradient(bx,by,0,bx,by,bw*2.6);
+    gr.addColorStop(0,rgba("#ffe9e2",Math.min(1,alpha)));gr.addColorStop(0.18,rgba(C.laser,Math.min(1,alpha)));gr.addColorStop(0.55,rgba(C.laser,alpha*0.35));gr.addColorStop(1,rgba(C.laser,0));
+    ctx.fillStyle=gr;ctx.beginPath();ctx.arc(bx,by,bw*2.6,0,7);ctx.fill();};
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,W);ctx.arc(c,c,r,0,7,true);ctx.clip();glow(bright);ctx.restore();
+  // aperture: a dark hole, or a white card seen through an opened iris
+  ctx.save();ctx.beginPath();ctx.arc(c,c,r,0,7);ctx.clip();
+  if(open[n]){
+    ctx.fillStyle=C.card;ctx.fillRect(0,0,W,W);
+    ctx.strokeStyle=C.cardline;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(c-r,c);ctx.lineTo(c+r,c);ctx.moveTo(c,c-r);ctx.lineTo(c,c+r);ctx.stroke();
+    for(let mm=1;mm<VIEW;mm++){[1,-1].forEach(s=>{ctx.beginPath();ctx.moveTo(c+s*mm*k,c-3);ctx.lineTo(c+s*mm*k,c+3);ctx.moveTo(c-3,c+s*mm*k);ctx.lineTo(c+3,c+s*mm*k);ctx.stroke();});}
+    ctx.setLineDash([3,3]);ctx.beginPath();ctx.arc(c,c,irisR*k,0,7);ctx.stroke();ctx.setLineDash([]);
+    glow(bright);
+  } else {ctx.fillStyle=C.hole;ctx.fillRect(0,0,W,W);}
+  ctx.restore();
+  ctx.strokeStyle="rgba(255,255,255,.22)";ctx.lineWidth=1;ctx.beginPath();ctx.arc(c,c,r,0,7);ctx.stroke();
+  // off the edge: an arrow pointing to the beam
+  const out=Math.abs(sp.x)>VIEW*0.96||Math.abs(sp.y)>VIEW*0.96;
+  if(out&&bright>0.003){
+    const ang=Math.atan2(-(sp.y),sp.x),ex=c+Math.cos(ang)*W*0.42,ey=c+Math.sin(ang)*W*0.42;
+    ctx.save();ctx.translate(ex,ey);ctx.rotate(ang);ctx.fillStyle=C.laser;ctx.globalAlpha=Math.min(1,0.5+bright);
+    ctx.beginPath();ctx.moveTo(9,0);ctx.lineTo(-5,-6);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.restore();
+    ctx.fillStyle="rgba(255,255,255,.7)";ctx.font=`11px ${getComputedStyle(document.body).getPropertyValue("--mono")}`;ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText(`${Math.hypot(sp.x,sp.y).toFixed(1)} mm`,c+Math.cos(ang)*W*0.28,c+Math.sin(ang)*W*0.28);
+  }
+}
+
+// ---------- loop ----------
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  for(let i=0;i<4;i++){
+    const p=press[i];
+    if(p&&now-p.t0>HOLD_DELAY&&canControl()&&pause<=0){
+      const held=(now-p.t0-HOLD_DELAY)/1000;
+      turns[i]+=p.d*((fine||shiftDown)?FINE_RATE:RATE*Math.min(2,0.5+held*0.9))*dt;
+    }
+    el("ind"+i).setAttribute("transform",`rotate(${turns[i]*360})`);
+    el("tn"+i).textContent=(turns[i]>=-0.0049?"+":"−")+Math.abs(turns[i]).toFixed(2);
+    el("knob"+i).classList.toggle("active",!!p);
+  }
+  if(canControl()&&drift>0&&pause<=0){["x","y"].forEach(ax=>{off[ax][0]+=(Math.random()-.5)*drift*dt*6;off[ax][1]+=(Math.random()-.5)*drift*dt*14;});}
+  const sp=spot(), pw=power(sp), bp=bestPower(), anyOpen=open[0]||open[1];
+  if(canControl()){
+    if(pause>0){pause-=dt;if(pause<=0)newRound();}
+    else{
+      if(!anyOpen&&pw.P>=GOAL*bp){lockT+=dt;if(lockT>=LOCK_TIME){lockT=LOCK_TIME;success();}}
+      else lockT=Math.max(0,lockT-dt*2);
+      if(mode==="play"){timeLeft-=dt;if(timeLeft<=0){timeLeft=0;endGame("time");}}
+    }
+  }
+  // views: iris 2 only sees what gets through iris 1
+  drawView(0,sp[0],mode==="idle"?0.6:1);
+  drawView(1,sp[1],(mode==="idle"?0.6:1)*pw.t1);
+  // meter
+  el("pRead").innerHTML=`${pw.P.toFixed(2)}<small>mW</small>`;
+  el("pOf").innerHTML=`best possible ${bp.toFixed(2)} mW<br>${(100*pw.P/bp).toFixed(0)}% of that`;
+  el("pfill").style.width=Math.min(100,100*pw.P/P0)+"%";
+  el("pgoal").style.left=(100*GOAL*bp/P0)+"%";
+  el("pbar").classList.toggle("lock",lockT>0);
+  el("pLock").textContent=anyOpen?"Close both irises to lock":lockT>0?"Holding…":"Hold above the green line to lock";
+  // hint
+  let h="";
+  if(mode!=="idle"){
+    if(pw.t1<0.01&&!open[0])h="Iris 1 is blocking the beam completely, so iris 2 is dark. Open iris 1 to see where the beam lands behind it.";
+    else if(pw.t2<0.01&&!open[1])h="Light reaches iris 2 but none gets through. Open it to see where the beam is.";
+    else if(anyOpen)h="Close the irises again once you're near the centre. Only closed irises count.";
+  }
+  el("hint").textContent=h;
+  drawBench(sp,pw);
+  // timer
+  const ts=el("timerStat"),tb=el("timebar"),ft=el("floatTimer");
+  if(mode==="play"||(mode==="over"&&timeLeft===0&&timeTotal>1)){
+    el("sTime").textContent=timeLeft.toFixed(1);el("timefill").style.transform=`scaleX(${timeLeft/timeTotal})`;
+    const low=timeLeft<10;ts.classList.toggle("low",low);tb.classList.toggle("low",low);
+  } else {el("sTime").textContent=mode==="lab"?"∞":"--";el("timefill").style.transform="scaleX(1)";ts.classList.remove("low");tb.classList.remove("low");}
+  ft.classList.toggle("show",mode==="play"&&!timerInView&&!introOpen);
+  if(mode==="play"){el("fTime").textContent=timeLeft.toFixed(1);el("fFill").style.transform=`scaleX(${timeLeft/timeTotal})`;ft.classList.toggle("low",timeLeft<10);}
+  requestAnimationFrame(frame);
+}
+let timerInView=true;
+if("IntersectionObserver" in window)new IntersectionObserver(es=>{timerInView=es[0].isIntersecting;}).observe(el("timerStat"));
+
+// ---------- welcome walkthrough ----------
+const STEPS=[
+  {t:"Two irises, one beam", b:`<p>A laser beam has to pass through two small irises, one near and one far, and land on a power meter. Bumped mounts have knocked it out of line.</p><p>Getting a beam through two apertures is one of the first things anyone learns on an optics bench. Two points define a line, so once the beam passes both irises it is going exactly where it should.</p>`},
+  {t:"Why two mirrors", b:`<p>One mirror can put the spot anywhere you like on one iris, but not on both at once. You need two: together they set both where the beam is and which way it's pointing.</p><p>The catch is that every turn of either mirror moves the spot on <em>both</em> irises. Fix one and you'll usually spoil the other a little.</p>`},
+  {t:"The thumbscrews", b:`<p>Each mirror sits in a kinematic mount with a horizontal and a vertical thumbscrew.</p><table><tr><td>Mirror 1 · horizontal / vertical</td><td><kbd>A</kbd> <kbd>D</kbd> · <kbd>S</kbd> <kbd>W</kbd></td></tr><tr><td>Mirror 2 · horizontal / vertical</td><td><kbd>J</kbd> <kbd>L</kbd> · <kbd>K</kbd> <kbd>I</kbd></td></tr></table><p class="aside">Hold a button or key to turn, or tap it for a small step. Hold <kbd>Shift</kbd> for fine turns.</p>`},
+  {t:"Reading the irises", b:`<p>You're looking down the beam at each iris. Where the beam hits the blades it glows red. When it's centred it disappears into the hole.</p><p>If iris 1 blocks the beam, iris 2 goes dark. Open an iris to see a card behind it with the beam on it, then close it again: only closed irises count.</p><p>Hold the power above the green line for a second to lock the alignment.</p>`},
+  {t:"Walking the beam", b:`<p>The trick experimenters use:</p><ol><li>Use mirror 1 to centre the beam on iris 1.</li><li>Use mirror 2 to centre it on iris 2.</li><li>Repeat. Each pass gets closer.</li></ol><p class="aside">Try it the other way round, mirror 2 for the near iris, and you'll find it drifts further off every pass. Levels shrink the irises, shorten the clock, and from level 3 the beam starts to drift.</p>`},
+];
+let step=0;
+const inSteps=el("inSteps");inSteps.innerHTML=STEPS.map(()=>"<i></i>").join("");
+function goStep(n){
+  step=n;const last=step===STEPS.length-1,midGame=mode==="play"||mode==="lab";
+  el("inCount").textContent=`${step+1} of ${STEPS.length}`;el("inTitle").textContent=STEPS[step].t;
+  const body=el("inBody");body.innerHTML=STEPS[step].b;body.classList.remove("swap");void body.offsetWidth;body.classList.add("swap");
+  [...inSteps.children].forEach((b,i)=>b.classList.toggle("done",i<=step));
+  el("inBack").style.visibility=step>0?"visible":"hidden";
+  const nav=el("inNav");
+  if(!last)nav.innerHTML=`<button class="btn primary" id="inNext">Next</button>`;
+  else if(midGame)nav.innerHTML=`<button class="btn primary" id="inGo">Back to the game</button>`;
+  else nav.innerHTML=`<button class="btn" id="inLab">Practise first</button><button class="btn primary" id="inGo">Start the game</button>`;
+  if(!last)el("inNext").onclick=()=>goStep(step+1);
+  else{el("inGo").onclick=()=>{closeIntro();if(!midGame)startGame();};if(!midGame)el("inLab").onclick=()=>{closeIntro();startLab();};}
+  nav.querySelector(".primary").focus({preventScroll:true});
+}
+el("inBack").onclick=()=>{if(step>0)goStep(step-1);};
+function openIntro(){introOpen=true;press.fill(null);shiftDown=false;el("intro").classList.remove("hidden");document.body.style.overflow="hidden";goStep(0);}
+function closeIntro(){introOpen=false;el("intro").classList.add("hidden");document.body.style.overflow="";}
+el("btnHelp").onclick=openIntro;
+
+updateStats();
+scramble();
+openIntro();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

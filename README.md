@@ -4,6 +4,10 @@ A browser game about polarisation. Light from a laser travels through a fibre in
 
 It's a single self-contained `index.html` with no build step and no dependencies. Open it in a browser, or serve it with GitHub Pages.
 
+## Sanrekhan (संरेखण), the alignment game
+
+`sanrekhan.html` is a classical optics game about beam walking. A laser reflects off two kinematic mirrors and has to pass through two small irises to reach a power meter. Each mirror has a horizontal and a vertical thumbscrew (Mirror 1: A/D, S/W; Mirror 2: J/L, K/I). Every turn moves the spot on both irises, so the trick is to iterate: mirror 1 centres the beam on the near iris, mirror 2 on the far one. Hold the power above 90% of the best possible for a second to lock. Levels shrink the irises and shorten the clock, and from level 3 the beam drifts.
+
 ## Tomography lesson
 
 `tomography.html` is a learning page rather than a game. It walks through two-photon polarisation state tomography in six sections: prepare an entangled state (or a hidden mystery state), choose analyser settings, collect simulated coincidence counts with shot noise and accidentals, then reconstruct the density matrix by linear inversion and by maximum likelihood, and compare fidelity, purity and concurrence with the true state.
