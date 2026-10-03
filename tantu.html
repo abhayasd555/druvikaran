@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sanyojan · Beam combining game</title>
+<title>Tantu · Fibre coupling game</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
@@ -177,9 +177,22 @@ footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:v
 @keyframes rise{from{opacity:0;transform:translateY(14px)}}
 @keyframes swap{from{opacity:0;transform:translateX(10px)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-.iris canvas{background:#050505}
-.sep{font-size:12.5px;color:var(--muted);margin-top:8px}
-.sep b{font-family:var(--mono);font-weight:400;color:var(--ink)}
+.cols2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
+@media (max-width:620px){.cols2{grid-template-columns:1fr}}
+canvas.face{display:block;width:100%;aspect-ratio:1/1;border-radius:2px;background:#1d1c1a}
+.read.big{font-family:var(--mono);font-size:40px;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums}
+.read.big small{font-size:16px;color:var(--muted);margin-left:5px}
+.spark{margin-top:18px}
+.spark canvas{display:block;width:100%;height:76px}
+.spark b{font-family:var(--mono);font-weight:400;color:var(--ink)}
+.facts{margin-top:16px;border-top:1px solid var(--line)}
+.facts div{display:flex;justify-content:space-between;font-size:13.5px;padding:6px 0;border-bottom:1px solid var(--line)}
+.facts span{color:var(--muted)}
+.facts b{font-family:var(--mono);font-weight:400}
+.focusrow{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.focusrow h3{font-family:var(--display);font-weight:500;font-size:18px;margin:0}
+.focusrow .wp{color:var(--muted);font-size:12px}
+.focusrow .knob{min-width:110px}
 </style>
 </head>
 <body>
@@ -203,15 +216,15 @@ footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:v
     <div class="links">
       <a href="index.html">Polarisation game</a>
       <a href="sanrekhan.html">Alignment game</a>
-      <a href="sanyojan.html" aria-current="page">Combining game</a>
-      <a href="tantu.html">Fibre coupling game</a>
+      <a href="sanyojan.html">Combining game</a>
+      <a href="tantu.html" aria-current="page">Fibre coupling game</a>
       <a href="tomography.html">Tomography lesson</a>
     </div>
   </nav>
   <header>
     <div class="brand">
-      <h1>Sanyojan<span class="deva">संयोजन</span></h1>
-      <p>Combine a red and a green laser on a dichroic mirror so the two beams travel as one. <button class="linkbtn" id="btnHelp">How to play</button></p>
+      <h1>Tantu<span class="deva">तंतु</span></h1>
+      <p>Focus a laser into a single-mode fibre with a 4 µm core, and get as much light out of the far end as you can. <button class="linkbtn" id="btnHelp">How to play</button></p>
     </div>
     <div class="stats" aria-live="polite">
       <div class="stat"><span>Level</span><b id="sLevel">1</b></div>
@@ -222,12 +235,12 @@ footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:v
   </header>
 
   <div class="bench" aria-label="Optical bench, top view">
-    <svg id="bench" viewBox="0 0 760 214" role="img" aria-label="Red and green lasers combined on a dichroic mirror and viewed on two cameras"></svg>
+    <svg id="bench" viewBox="0 0 760 200" role="img" aria-label="Laser, two steering mirrors, a lens and a fibre leading to a power meter"></svg>
   </div>
 
   <div class="main">
     <section class="card views" id="views">
-      <div class="toast" id="toast">Combined</div>
+      <div class="toast" id="toast">Coupled</div>
       <div class="overlay hidden" id="overlay">
         <div class="box">
           <h3 id="ovTitle"></h3>
@@ -238,33 +251,40 @@ footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:v
           </div>
         </div>
       </div>
-      <span class="eyebrow">Beam cameras</span>
-      <h2>Near and far</h2>
-      <p class="sub">Red is the reference. Put green on top of it at both cameras. Where they overlap, the colours mix to yellow.</p>
-      <div class="irises">
-        <div class="iris"><div class="t"><b>Camera 1</b><span>300 mm</span></div><canvas id="cv1" aria-label="Camera 1 view"></canvas><div class="sep" id="sep1">–</div></div>
-        <div class="iris"><div class="t"><b>Camera 2</b><span>900 mm</span></div><canvas id="cv2" aria-label="Camera 2 view"></canvas><div class="sep" id="sep2">–</div></div>
-      </div>
-      <div class="meter">
-        <div class="row1">
-          <div><span class="eyebrow" style="margin:0">Mode overlap</span><div class="read" id="oRead">0<small>%</small></div></div>
-          <div class="of" id="oOf">near × far</div>
+      <div class="cols2">
+        <div>
+          <span class="eyebrow">Fibre end face</span>
+          <h2>Where the light lands</h2>
+          <p class="sub">The spot scatters off the ceramic ferrule. Once it's on the core, the light goes into the fibre and you lose sight of it.</p>
+          <canvas id="cvFace" class="face" aria-label="View of the fibre end face"></canvas>
+          <div class="row" style="margin-top:8px" id="zooms"></div>
+          <p class="hint" id="hint"></p>
         </div>
-        <div class="pbar" id="pbar"><i id="pfill"></i><span class="goal" style="left:90%"></span></div>
-        <div class="pbar-l"><span>0</span><span id="pLock">Hold above the green line to lock</span></div>
+        <div>
+          <span class="eyebrow">Power meter at the far end</span>
+          <div class="read big" id="pRead">0<small>nW</small></div>
+          <div class="of" style="text-align:left" id="pOf"></div>
+          <div class="pbar" id="pbar"><i id="pfill"></i><span class="goal" id="pgoal"></span></div>
+          <div class="pbar-l"><span>0</span><span id="pLock">Hold above the green line to lock</span></div>
+          <div class="spark">
+            <div class="pbar-l" style="margin:0 0 4px"><span>Last 12 seconds</span><span>peak <b id="pPeak">–</b></span></div>
+            <canvas id="cvSpark" aria-label="Coupled power over the last 12 seconds"></canvas>
+          </div>
+          <div class="facts" id="facts"></div>
+        </div>
       </div>
       <div class="timebar" id="timebar"><i id="timefill"></i></div>
     </section>
 
     <div class="side">
       <section class="card">
-        <span class="eyebrow">Steering the green beam</span>
-        <h2>Two mounts</h2>
-        <p class="sub">A steering mirror, then the dichroic itself. One full turn tilts either by 8 mrad.</p>
+        <span class="eyebrow">Steering and focus</span>
+        <h2>Three mounts</h2>
+        <p class="sub">The mirrors have fine-thread screws: one turn tilts the mirror 2 mrad. The fibre's focus screw moves it 250 µm per turn.</p>
         <div class="mounts" id="mounts"></div>
+        <div class="focusrow" id="focusrow"></div>
         <div class="toolbar">
           <button class="chip" id="chipFine" aria-pressed="false">Fine control</button>
-          <button class="chip" id="chipZoom" aria-pressed="false">Zoom cameras</button>
           <button class="chip hidden" id="chipNew">New misalignment</button>
           <button class="chip" id="chipEnd">End game</button>
         </div>
@@ -272,71 +292,77 @@ footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:v
     </div>
   </div>
 
-  <footer>Model: the steering mirror sits 120 mm before the dichroic, and the cameras sample the combined beam 300 mm and 900 mm after it. A mount tilt of α deflects the reflected green beam by 2α. The red beam passes through the dichroic's 3 mm glass substrate (n = 1.5), so tilting the dichroic shifts red sideways by about 8 µm per turn, without changing its direction. Overlap is the Gaussian mode overlap of the two beams at each camera, multiplied together and divided by the best possible for these beam sizes.</footer>
+  <footer>Model: a 633 nm laser of 2 mW is steered by two mirrors 150 mm apart, the second 200 mm before an 11 mm focal-length asphere. The single-mode fibre's mode field radius is 2.2 µm. Coupling is the product of the mode-overlap terms for sideways offset at the fibre face, the beam's angle to the fibre axis (set by where it crosses the lens), and defocus, times 85% for lens aberrations and Fresnel losses. A mirror tilt of α deflects the beam by 2α.</footer>
 </div>
 
 <script>
 (() => {
 "use strict";
 const el=id=>document.getElementById(id);
-// ---------- geometry (mm) ----------
-const D1=120, A=300, B=600, S=0.016, PLATE=0.008;  // S: green deflection per turn; PLATE: red shift per dichroic turn
-const RATE=0.2, FINE_RATE=0.025, STEP=0.01, FINE_STEP=0.002, HOLD_DELAY=170, LOCK_TIME=1.0, GOAL=0.9;
+// ---------- optics (lengths in µm unless noted) ----------
+const D1=150, D2=200, S=0.004;            // mirror spacing (mm), beam deflection per turn (rad)
+const F=11000, WF=2.2, LAM=0.633, ZR=Math.PI*WF*WF/LAM, ETA0=0.85, P0=2; // P0 in mW
+const ZSTEP=250;                           // µm per focus turn
+const HOLD_DELAY=170, LOCK_TIME=1.2;
 const KNOBS=[
-  {m:0,ax:"x",label:"Horizontal",keys:["d","a"]},{m:0,ax:"y",label:"Vertical",keys:["w","s"]},
-  {m:1,ax:"x",label:"Horizontal",keys:["l","j"]},{m:1,ax:"y",label:"Vertical",keys:["i","k"]},
+  {g:0,ax:"x",label:"Horizontal",keys:["d","a"]},{g:0,ax:"y",label:"Vertical",keys:["w","s"]},
+  {g:1,ax:"x",label:"Horizontal",keys:["l","j"]},{g:1,ax:"y",label:"Vertical",keys:["i","k"]},
+  {g:2,ax:"z",label:"Focus",keys:["r","f"]},
 ];
-const MOUNTS=[["Steering mirror","green only"],["Dichroic","reflects green, passes red"]];
+// turn rates: mirrors are much more sensitive than focus
+const RATE=[0.12,0.12,0.12,0.12,0.2], FINE_RATE=[0.008,0.008,0.008,0.008,0.02], STEP=[0.01,0.01,0.01,0.01,0.01], FINE_STEP=[0.001,0.001,0.001,0.001,0.002];
+const ACCEL=[10,10,10,10,4];
 
 // ---------- state ----------
-let turns=[0,0,0,0];
-let off={x:[0,0],y:[0,0]};   // green at cameras with all knobs at zero
-let red={x:[0,0],y:[0,0]};   // red reference at cameras
-let mode="idle", level=1, score=0, best=0, timeLeft=0, timeTotal=1, wR=0.9, wG=0.75, drift=0;
-let lockT=0, pause=0, fine=false, shiftDown=false, zoom=false, introOpen=false;
-const press=[null,null,null,null];
-try{best=parseInt(localStorage.getItem("sanyojan-best")||"0",10)||0;}catch(e){}
+let turns=[0,0,0,0,0];
+let off={x:[0,0],y:[0,0],z:0};   // beam angle (rad) and position on lens (mm) per axis, fibre z (µm), with knobs at zero
+let mode="idle", level=1, score=0, best=0, timeLeft=0, timeTotal=1, goal=0.75, drift=0;
+let lockT=0, pause=0, fine=false, shiftDown=false, introOpen=false, zoom=0, peak=0;
+const press=[null,null,null,null,null];
+const hist=[];
+try{best=parseInt(localStorage.getItem("tantu-best")||"0",10)||0;}catch(e){}
 
-function beams(){
-  const g=ax=>{const t1=turns[ax==="x"?0:1],t2=turns[ax==="x"?2:3],o=off[ax];
-    return [o[0]+S*(t1*(D1+A)+t2*A), o[1]+S*(t1*(D1+A+B)+t2*(A+B))];};
-  const r=ax=>{const t2=turns[ax==="x"?2:3];return red[ax].map(v=>v+PLATE*t2);};
-  const gx=g("x"),gy=g("y"),rx=r("x"),ry=r("y");
-  return [0,1].map(n=>({g:{x:gx[n],y:gy[n]},r:{x:rx[n],y:ry[n]}}));
-}
-function overlap(b){
-  const s=wR*wR+wG*wG, d=b.map(c=>(c.g.x-c.r.x)**2+(c.g.y-c.r.y)**2);
-  const each=d.map(d2=>Math.exp(-2*d2/s));
-  return {each, total:each[0]*each[1], d:d.map(Math.sqrt)};
+function state(){
+  const ax=a=>{const t1=turns[a==="x"?0:1],t2=turns[a==="x"?2:3],o=off[a];
+    const th=o[0]+S*(t1+t2), xL=o[1]+S*(t1*(D1+D2)+t2*D2);  // rad, mm
+    return {th,xL};};
+  const X=ax("x"),Y=ax("y"), z=off.z+ZSTEP*turns[4];
+  // spot at the fibre face (µm): angle → offset through the lens, plus a defocus term
+  const spot=a=>F*a.th-z*(a.xL*1000)/F;
+  const dx=spot(X),dy=spot(Y), ax_=X.xL*1000/F, ay_=Y.xL*1000/F; // tilt at the fibre (rad)
+  const eOff=Math.exp(-(dx*dx+dy*dy)/(WF*WF));
+  const eTilt=Math.exp(-Math.pow(Math.PI*WF/LAM,2)*(ax_*ax_+ay_*ay_));
+  const eFoc=1/(1+Math.pow(z/(2*ZR),2));
+  return {dx,dy,z,xL:Math.hypot(X.xL,Y.xL),tilt:Math.hypot(ax_,ay_),eOff,eTilt,eFoc,eta:ETA0*eOff*eTilt*eFoc,wz:WF*Math.sqrt(1+(z/ZR)**2)};
 }
 
 // ---------- rounds ----------
-function levelParams(l){const k=Math.max(0.45,1-0.08*(l-1));return {time:Math.max(35,90-7*(l-1)),wR:0.9*k,wG:0.75*k,drift:l>=3?0.015*(l-2):0};}
-function scramble(){
-  turns=[0,0,0,0];
+function levelParams(l){return {time:Math.max(60,150-10*(l-1)),goal:Math.min(0.92,0.75+0.03*(l-1)),drift:l>=4?0.4*(l-3):0,scale:Math.min(1.6,1+0.08*(l-1))};}
+function scramble(scale=1){
+  turns=[0,0,0,0,0];
   const rnd=(a,b)=>a+Math.random()*(b-a),sgn=()=>Math.random()<.5?-1:1;
-  red={x:[rnd(-0.6,0.6),rnd(-0.9,0.9)],y:[rnd(-0.6,0.6),rnd(-0.9,0.9)]};
-  ["x","y"].forEach(ax=>{off[ax]=[red[ax][0]+sgn()*rnd(0.8,2.6),red[ax][1]+sgn()*rnd(1.4,3.6)];});
+  ["x","y"].forEach(a=>{off[a]=[sgn()*rnd(18,64)*scale/F, sgn()*rnd(0.15,0.55)*scale];});
+  off.z=sgn()*rnd(40,120)*scale;
+  peak=0;hist.length=0;
 }
 function newRound(){
-  scramble();lockT=0;
-  if(mode==="play"){const p=levelParams(level);timeTotal=timeLeft=p.time;wR=p.wR;wG=p.wG;drift=p.drift;}
-  else{wR=0.8;wG=0.66;drift=0;}
-  updateStats();
+  if(mode==="play"){const p=levelParams(level);timeTotal=timeLeft=p.time;goal=p.goal;drift=p.drift;scramble(p.scale);}
+  else{goal=0.8;drift=0;scramble(1);}
+  lockT=0;updateStats();
 }
 function startGame(){mode="play";level=1;score=0;hideOverlay();newRound();el("chipNew").classList.add("hidden");}
 function startLab(){mode="lab";hideOverlay();newRound();el("chipNew").classList.remove("hidden");}
 function endGame(reason){
   const wasPlay=mode==="play";mode="over";
-  if(wasPlay&&score>best){best=score;try{localStorage.setItem("sanyojan-best",String(best));}catch(e){}}
+  if(wasPlay&&score>best){best=score;try{localStorage.setItem("tantu-best",String(best));}catch(e){}}
   updateStats();
   showOverlay(reason==="time"?"Time's up":"Game ended",
-    wasPlay?`You combined ${level-1} pair${level-1===1?"":"s"} of beams and scored ${score}.${score>=best&&score>0?" That's your best yet.":""}`:"Practice session closed.");
+    wasPlay?`You coupled ${level-1} fibre${level-1===1?"":"s"} and scored ${score}.${score>=best&&score>0?" That's your best yet.":""}`:"Practice session closed.");
 }
 function success(){
-  if(mode==="play"){const gained=Math.round(100*level+timeLeft*8*level);score+=gained;level++;toast(`Combined   +${gained}`);}
-  else toast("Combined");
-  pause=1.3;
+  if(mode==="play"){const gained=Math.round(150*level+timeLeft*6*level);score+=gained;level++;toast(`Coupled   +${gained}`);}
+  else toast("Coupled");
+  pause=1.4;
 }
 
 // ---------- DOM ----------
@@ -345,26 +371,29 @@ function showOverlay(t,x){el("ovTitle").textContent=t;el("ovText").textContent=x
 function hideOverlay(){el("overlay").classList.add("hidden");}
 let toastTimer;
 function toast(t){const e=el("toast");e.textContent=t;e.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.classList.remove("show"),1200);}
+function fmtP(mw){if(mw>=1)return [mw.toFixed(3),"mW"];if(mw>=1e-3)return [(mw*1e3).toFixed(mw>=0.1?1:2),"µW"];return [(mw*1e6).toFixed(mw*1e6>=10?0:1),"nW"];}
 
-const mounts=el("mounts");
-[0,1].forEach(m=>{
-  const d=document.createElement("div");d.className="mount";
-  d.innerHTML=`<h3>${MOUNTS[m][0]}</h3><div class="wp">${MOUNTS[m][1]}</div><div class="knobs">${
-    KNOBS.map((k,i)=>k.m!==m?"":`<div class="knob" id="knob${i}"><div class="kl">${k.label}</div>
-      <svg viewBox="-34 -34 68 68" aria-hidden="true">
-        <circle r="30" fill="var(--panel-2)" stroke="var(--line)"/>
-        ${Array.from({length:36},(_,n)=>{const a=n*10*Math.PI/180;return `<line x1="${Math.sin(a)*26}" y1="${-Math.cos(a)*26}" x2="${Math.sin(a)*30}" y2="${-Math.cos(a)*30}" stroke="var(--muted)" stroke-width="1" opacity=".55"/>`;}).join("")}
-        <circle r="20" fill="var(--panel)" stroke="var(--line)"/>
-        <g id="ind${i}"><line x1="0" y1="-6" x2="0" y2="-18" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/></g>
-        <circle r="3" fill="var(--muted)"/>
-      </svg>
-      <div class="turns" id="tn${i}">+0.00</div>
-      <div class="rots"><button class="rot" data-i="${i}" data-d="-1" aria-label="${MOUNTS[m][0]} ${k.label.toLowerCase()} anticlockwise">⟲</button><button class="rot" data-i="${i}" data-d="1" aria-label="${MOUNTS[m][0]} ${k.label.toLowerCase()} clockwise">⟳</button></div>
-      <div class="keys"><kbd>${k.keys[1].toUpperCase()}</kbd> <kbd>${k.keys[0].toUpperCase()}</kbd></div></div>`).join("")}</div>`;
-  mounts.appendChild(d);
-});
+function knobHTML(i,k,groupName){
+  return `<div class="knob" id="knob${i}"><div class="kl">${k.label}</div>
+    <svg viewBox="-34 -34 68 68" aria-hidden="true">
+      <circle r="30" fill="var(--panel-2)" stroke="var(--line)"/>
+      ${Array.from({length:36},(_,n)=>{const a=n*10*Math.PI/180;return `<line x1="${Math.sin(a)*26}" y1="${-Math.cos(a)*26}" x2="${Math.sin(a)*30}" y2="${-Math.cos(a)*30}" stroke="var(--muted)" stroke-width="1" opacity=".55"/>`;}).join("")}
+      <circle r="20" fill="var(--panel)" stroke="var(--line)"/>
+      <g id="ind${i}"><line x1="0" y1="-6" x2="0" y2="-18" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/></g>
+      <circle r="3" fill="var(--muted)"/>
+    </svg>
+    <div class="turns" id="tn${i}">+0.000</div>
+    <div class="rots"><button class="rot" data-i="${i}" data-d="-1" aria-label="${groupName} ${k.label.toLowerCase()} anticlockwise">⟲</button><button class="rot" data-i="${i}" data-d="1" aria-label="${groupName} ${k.label.toLowerCase()} clockwise">⟳</button></div>
+    <div class="keys"><kbd>${k.keys[1].toUpperCase()}</kbd> <kbd>${k.keys[0].toUpperCase()}</kbd></div></div>`;
+}
+const GROUPS=[["Mirror 1","first after the laser"],["Mirror 2","just before the lens"],["Fibre focus","moves the fibre along the beam"]];
+[0,1].forEach(g=>{const d=document.createElement("div");d.className="mount";
+  d.innerHTML=`<h3>${GROUPS[g][0]}</h3><div class="wp">${GROUPS[g][1]}</div><div class="knobs">${KNOBS.map((k,i)=>k.g===g?knobHTML(i,k,GROUPS[g][0]):"").join("")}</div>`;
+  el("mounts").appendChild(d);});
+el("focusrow").innerHTML=`<div><h3>${GROUPS[2][0]}</h3><div class="wp">${GROUPS[2][1]}</div></div>${knobHTML(4,KNOBS[4],GROUPS[2][0])}`;
+
 function canControl(){return !introOpen&&(mode==="play"||mode==="lab");}
-function stepNow(i,d){turns[i]+=d*(fine||shiftDown?FINE_STEP:STEP);}
+function stepNow(i,d){turns[i]+=d*(fine||shiftDown?FINE_STEP[i]:STEP[i]);}
 function startPress(i,d){if(!canControl())return;if(press[i]&&press[i].d===d)return;press[i]={d,t0:performance.now()};stepNow(i,d);}
 function endPress(i){press[i]=null;}
 document.querySelectorAll(".rot").forEach(b=>{
@@ -392,132 +421,148 @@ window.addEventListener("blur",()=>{press.fill(null);shiftDown=false;});
 el("btnStart").onclick=startGame;
 el("btnLab").onclick=startLab;
 el("chipFine").onclick=e=>{fine=!fine;e.currentTarget.setAttribute("aria-pressed",fine);};
-el("chipZoom").onclick=e=>{zoom=!zoom;e.currentTarget.setAttribute("aria-pressed",zoom);};
 el("chipNew").onclick=()=>{if(mode==="lab")newRound();};
 el("chipEnd").onclick=()=>{if(mode==="play"||mode==="lab")endGame("user");};
+const ZOOMS=[[1300,"Ferrule"],[160,"Cladding"],[16,"Core"]];
+el("zooms").innerHTML=ZOOMS.map((z,i)=>`<button class="chip" data-z="${i}" aria-pressed="${i===0}">${z[1]}</button>`).join("");
+el("zooms").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{zoom=+b.dataset.z;el("zooms").querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===b));});
 
 // ---------- bench schematic (top view) ----------
 const bench=el("bench");
-const DM={x:330,y:62}, SM={x:330,y:168}, K=0.42, C1=DM.x+A*K, C2=DM.x+(A+B)*K, EXA=4;
-const GREEN="#2f9e44";
+const LY=160, BY=60, MX=170, LX=MX+D2*1.1, FX=LX+70, EXA=14;
 bench.innerHTML=`
-  <line x1="12" y1="206" x2="748" y2="206" stroke="var(--line)"/>
-  <rect x="14" y="${DM.y-20}" width="112" height="40" rx="1" fill="var(--panel)" stroke="var(--ink)"/>
-  <circle cx="32" cy="${DM.y}" r="5" fill="var(--laser)"/>
-  <text x="46" y="${DM.y-2}" font-family="var(--display)" font-size="16" fill="var(--ink)">Red laser</text>
-  <text x="46" y="${DM.y+13}" font-family="var(--mono)" font-size="10.5" fill="var(--muted)">633 nm</text>
-  <rect x="14" y="${SM.y-20}" width="112" height="40" rx="1" fill="var(--panel)" stroke="var(--ink)"/>
-  <circle cx="32" cy="${SM.y}" r="5" fill="${GREEN}"/>
-  <text x="46" y="${SM.y-2}" font-family="var(--display)" font-size="16" fill="var(--ink)">Green laser</text>
-  <text x="46" y="${SM.y+13}" font-family="var(--mono)" font-size="10.5" fill="var(--muted)">532 nm</text>
-  <line x1="126" y1="${DM.y}" x2="${DM.x}" y2="${DM.y}" stroke="var(--laser)" stroke-width="1.6"/>
-  <line x1="126" y1="${SM.y}" x2="${SM.x}" y2="${SM.y}" stroke="${GREEN}" stroke-width="1.6"/>
-  <line x1="${SM.x}" y1="${SM.y}" x2="${SM.x}" y2="${DM.y}" stroke="${GREEN}" stroke-width="1.6"/>
-  <polyline id="bRed" fill="none" stroke="var(--laser)" stroke-width="1.6"/>
-  <polyline id="bGreen" fill="none" stroke="${GREEN}" stroke-width="1.6" stroke-dasharray="7 4"/>
-  <g transform="translate(${SM.x} ${SM.y}) rotate(-45)"><rect x="-16" y="-3" width="32" height="6" fill="var(--panel-2)" stroke="var(--ink)"/></g>
-  <g transform="translate(${DM.x} ${DM.y}) rotate(-45)"><rect x="-17" y="-2.5" width="34" height="5" fill="var(--panel)" stroke="var(--ink)" stroke-dasharray="0"/><line x1="-17" y1="-2.5" x2="17" y2="-2.5" stroke="${GREEN}" stroke-width="1.6"/></g>
-  <text x="${SM.x+22}" y="${SM.y+5}" font-family="var(--display)" font-size="14" fill="var(--ink)">Steering mirror</text>
-  <text x="${DM.x+4}" y="${DM.y-28}" text-anchor="middle" font-family="var(--display)" font-size="14" fill="var(--ink)">Dichroic</text>
-  ${[C1,C2].map((x,n)=>`
-    <g transform="translate(${x} ${DM.y}) rotate(-45)"><line x1="-11" y1="0" x2="11" y2="0" stroke="var(--muted)" stroke-width="1.2"/></g>
-    <rect x="${x-9}" y="${DM.y-44}" width="18" height="14" rx="1" fill="var(--panel)" stroke="var(--ink)"/>
-    <line x1="${x}" y1="${DM.y-4}" x2="${x}" y2="${DM.y-30}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>
-    <text x="${x}" y="${DM.y+40}" text-anchor="middle" font-family="var(--display)" font-size="14" fill="var(--ink)">Camera ${n+1}</text>
-    <text x="${x}" y="${DM.y+54}" text-anchor="middle" font-family="var(--mono)" font-size="10.5" fill="var(--muted)" id="bs${n}">–</text>`).join("")}
-  <text x="${(DM.x+C1)/2}" y="16" text-anchor="middle" font-family="var(--body)" font-size="10.5" fill="var(--muted)">300 mm</text>
-  <text x="${(C1+C2)/2}" y="16" text-anchor="middle" font-family="var(--body)" font-size="10.5" fill="var(--muted)">600 mm</text>
-  <text x="420" y="196" font-family="var(--display)" font-style="italic" font-size="12" fill="var(--muted)">top view, sideways error drawn ×${EXA} per mm</text>`;
-function drawBench(b){
-  const cl=v=>Math.max(DM.y-30,Math.min(DM.y+30,v)), end=752;
-  const line=(p1,p2)=>{const y1=cl(DM.y+p1*EXA),y2=cl(DM.y+p2*EXA),sl=(y2-y1)/(C2-C1);return `${DM.x},${cl(y1-sl*(C1-DM.x))} ${C1},${y1} ${C2},${y2} ${end},${cl(y2+sl*(end-C2))}`;};
-  el("bRed").setAttribute("points",line(b[0].r.x,b[1].r.x));
-  el("bGreen").setAttribute("points",line(b[0].g.x,b[1].g.x));
+  <line x1="12" y1="192" x2="748" y2="192" stroke="var(--line)"/>
+  <rect x="14" y="${LY-20}" width="104" height="40" rx="1" fill="var(--panel)" stroke="var(--ink)"/>
+  <circle cx="32" cy="${LY}" r="5" fill="var(--laser)"/>
+  <text x="46" y="${LY-2}" font-family="var(--display)" font-size="16" fill="var(--ink)">Laser</text>
+  <text x="46" y="${LY+13}" font-family="var(--mono)" font-size="10.5" fill="var(--muted)">633 nm · 2 mW</text>
+  <line x1="118" y1="${LY}" x2="${MX}" y2="${LY}" stroke="var(--laser)" stroke-width="1.6"/>
+  <line x1="${MX}" y1="${LY}" x2="${MX}" y2="${BY}" stroke="var(--laser)" stroke-width="1.6"/>
+  <polyline id="bOut" fill="none" stroke="var(--laser)" stroke-width="1.6" stroke-linejoin="round"/>
+  <g transform="translate(${MX} ${LY}) rotate(45)"><rect x="-16" y="-3" width="32" height="6" fill="var(--panel-2)" stroke="var(--ink)"/></g>
+  <g transform="translate(${MX} ${BY}) rotate(45)"><rect x="-16" y="-3" width="32" height="6" fill="var(--panel-2)" stroke="var(--ink)"/></g>
+  <text x="${MX+20}" y="${LY+22}" font-family="var(--display)" font-size="14" fill="var(--ink)">Mirror 1</text>
+  <text x="${MX-22}" y="${BY-24}" text-anchor="end" font-family="var(--display)" font-size="14" fill="var(--ink)">Mirror 2</text>
+  <path d="M${LX} ${BY-26} q 10 26 0 52 q -10 -26 0 -52 z" fill="var(--panel)" stroke="var(--ink)"/>
+  <text x="${LX}" y="${BY+46}" text-anchor="middle" font-family="var(--display)" font-size="14" fill="var(--ink)">Lens</text>
+  <text x="${LX}" y="${BY+60}" text-anchor="middle" font-family="var(--mono)" font-size="10.5" fill="var(--muted)">f = 11 mm</text>
+  <rect x="${FX}" y="${BY-9}" width="34" height="18" rx="1" fill="var(--panel-2)" stroke="var(--ink)"/>
+  <text x="${FX+17}" y="${BY+46}" text-anchor="middle" font-family="var(--display)" font-size="14" fill="var(--ink)">Fibre</text>
+  <text x="${FX+17}" y="${BY+60}" text-anchor="middle" font-family="var(--mono)" font-size="10.5" fill="var(--muted)" id="bz">z 0 µm</text>
+  <path id="fib" d="M${FX+34} ${BY} C ${FX+120} ${BY}, ${FX+110} ${BY+110}, ${FX+190} ${BY+100} S ${FX+260} ${BY+20}, 690 ${BY+30}" fill="none" stroke="#e8b21e" stroke-width="3" stroke-linecap="round"/>
+  <path id="fibGlow" d="M${FX+34} ${BY} C ${FX+120} ${BY}, ${FX+110} ${BY+110}, ${FX+190} ${BY+100} S ${FX+260} ${BY+20}, 690 ${BY+30}" fill="none" stroke="var(--laser)" stroke-width="1.4" stroke-linecap="round" opacity="0"/>
+  <rect x="690" y="${BY+10}" width="56" height="40" rx="1" fill="var(--panel)" stroke="var(--ink)"/>
+  <text x="718" y="${BY+34}" text-anchor="middle" font-family="var(--display)" font-size="13" fill="var(--ink)">Meter</text>
+  <text x="${(MX+LX)/2}" y="16" text-anchor="middle" font-family="var(--body)" font-size="10.5" fill="var(--muted)">200 mm</text>
+  <text x="300" y="186" font-family="var(--display)" font-style="italic" font-size="12" fill="var(--muted)">top view, beam error at the lens drawn ×${EXA} per mm</text>`;
+function drawBench(s,xLx){
+  const cl=v=>Math.max(BY-24,Math.min(BY+24,v)), yl=cl(BY+xLx*EXA), yf=cl(BY+Math.max(-9,Math.min(9,s.dx/8)));
+  el("bOut").setAttribute("points",`${MX},${BY} ${LX},${yl} ${FX},${yf}`);
+  el("fibGlow").setAttribute("opacity",Math.min(1,s.eta*1.3).toFixed(2));
+  el("bz").textContent=`z ${s.z>=0?"+":"−"}${Math.abs(s.z).toFixed(0)} µm`;
 }
 
-// ---------- camera views ----------
+// ---------- fibre face view ----------
 let C={};
-function readColors(){const cs=getComputedStyle(document.documentElement);C.mono=cs.getPropertyValue("--mono").trim();}
+function readColors(){const cs=getComputedStyle(document.documentElement);["ink","muted","line","panel","laser"].forEach(k=>C[k]=cs.getPropertyValue("--"+k).trim());C.mono=cs.getPropertyValue("--mono").trim();}
 readColors();
-const views=[el("cv1"),el("cv2")].map(cv=>({cv,ctx:cv.getContext("2d"),W:0,DPR:1}));
-function sizeViews(){views.forEach(v=>{v.DPR=Math.min(2,devicePixelRatio||1);const r=v.cv.getBoundingClientRect();v.W=r.width;v.cv.width=Math.round(r.width*v.DPR);v.cv.height=Math.round(r.width*v.DPR);});}
-new ResizeObserver(sizeViews).observe(el("views"));sizeViews();
-function spotGlow(ctx,x,y,w,rgb,a){
-  const g=ctx.createRadialGradient(x,y,0,x,y,w*1.6);
-  g.addColorStop(0,`rgba(${rgb},${a})`);g.addColorStop(0.45,`rgba(${rgb},${a*0.55})`);g.addColorStop(1,`rgba(${rgb},0)`);
-  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,w*1.6,0,7);ctx.fill();
+const face={cv:el("cvFace"),W:0,DPR:1}, spark={cv:el("cvSpark"),W:0,H:0,DPR:1};
+function sizeAll(){[face,spark].forEach(v=>{v.DPR=Math.min(2,devicePixelRatio||1);const r=v.cv.getBoundingClientRect();v.W=r.width;v.H=r.height;v.cv.width=Math.round(r.width*v.DPR);v.cv.height=Math.round(r.height*v.DPR);});}
+new ResizeObserver(sizeAll).observe(el("views"));sizeAll();
+function drawFace(s){
+  const ctx=face.cv.getContext("2d"),W=face.W;if(!W)return;
+  ctx.setTransform(face.DPR,0,0,face.DPR,0,0);
+  const half=ZOOMS[zoom][0], k=W/2/half, c=W/2, P=(x,y)=>[c+x*k,c-y*k];
+  // connector body, ceramic ferrule, glass cladding, core
+  ctx.fillStyle="#1d1c1a";ctx.fillRect(0,0,W,W);
+  const fr=ctx.createRadialGradient(c-W*0.1,c-W*0.12,0,c,c,1250*k);fr.addColorStop(0,"#f4f0e6");fr.addColorStop(1,"#d9d2c2");
+  ctx.fillStyle=fr;ctx.beginPath();ctx.arc(c,c,1250*k,0,7);ctx.fill();
+  ctx.fillStyle="#b9c2c4";ctx.beginPath();ctx.arc(c,c,Math.max(1,62.5*k),0,7);ctx.fill();
+  ctx.strokeStyle="rgba(0,0,0,.25)";ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle="#8e9a9d";ctx.beginPath();ctx.arc(c,c,Math.max(0.6,2*k),0,7);ctx.fill();
+  // scattered light: strong on ceramic, weak on glass, none once it's guided by the core
+  const r=Math.hypot(s.dx,s.dy), on=r<62.5?(r<3?0.15+0.85*(1-s.eOff):0.3):1;
+  const rad=Math.max(3,s.wz*k*1.4), [x,y]=P(s.dx,s.dy), a=Math.min(1,on*(mode==="idle"?0.6:1)*Math.min(1,6/Math.sqrt(Math.max(1,s.wz/WF))));
+  if(a>0.01){
+    ctx.globalCompositeOperation="source-over";
+    const g=ctx.createRadialGradient(x,y,0,x,y,rad*3);
+    g.addColorStop(0,`rgba(255,235,225,${a})`);g.addColorStop(0.25,`rgba(230,40,30,${a})`);g.addColorStop(0.6,`rgba(230,40,30,${a*0.25})`);g.addColorStop(1,"rgba(230,40,30,0)");
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,rad*3,0,7);ctx.fill();
+  }
+  // off the field of view
+  if(Math.abs(s.dx)>half*0.95||Math.abs(s.dy)>half*0.95){
+    const ang=Math.atan2(-s.dy,s.dx),ex=c+Math.cos(ang)*W*0.42,ey=c+Math.sin(ang)*W*0.42;
+    ctx.save();ctx.translate(ex,ey);ctx.rotate(ang);ctx.fillStyle="#e8322a";ctx.beginPath();ctx.moveTo(9,0);ctx.lineTo(-5,-6);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.restore();
+  }
+  // scale bar
+  const bar=[500,50,5][zoom];ctx.fillStyle=zoom?"rgba(30,28,25,.75)":"rgba(255,255,255,.75)";ctx.fillRect(10,W-14,bar*k,2);
+  ctx.font=`10.5px ${C.mono}`;ctx.textBaseline="bottom";ctx.fillText(`${bar} µm`,10,W-18);
 }
-function drawView(n,c,live){
-  const v=views[n],ctx=v.ctx,W=v.W;if(!W)return;
-  ctx.setTransform(v.DPR,0,0,v.DPR,0,0);
-  const half=zoom?1.5:5, k=W/2/half, cx=W/2, P=p=>[cx+p.x*k,cx-p.y*k];
-  ctx.globalCompositeOperation="source-over";
-  ctx.fillStyle="#050505";ctx.fillRect(0,0,W,W);
-  // sensor grid, 1 mm (or 0.25 mm zoomed)
-  const g=zoom?0.25:1;ctx.strokeStyle="rgba(255,255,255,.07)";ctx.lineWidth=1;ctx.beginPath();
-  for(let m=-half;m<=half+1e-9;m+=g){const p=cx+m*k;ctx.moveTo(p,0);ctx.lineTo(p,W);ctx.moveTo(0,p);ctx.lineTo(W,p);}ctx.stroke();
-  ctx.strokeStyle="rgba(255,255,255,.18)";ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,W);ctx.moveTo(0,cx);ctx.lineTo(W,cx);ctx.stroke();
-  // beams, added like light
-  ctx.globalCompositeOperation="lighter";
-  const a=live?0.95:0.6;
-  const [rx,ry]=P(c.r),[gx,gy]=P(c.g);
-  spotGlow(ctx,rx,ry,wR*k,"255,40,28",a);
-  spotGlow(ctx,gx,gy,wG*k,"40,255,70",a);
-  ctx.globalCompositeOperation="source-over";
-  // off-screen pointers
-  [[c.g,"rgb(60,230,90)"],[c.r,"rgb(255,70,60)"]].forEach(([p,col])=>{
-    if(Math.abs(p.x)<half*0.95&&Math.abs(p.y)<half*0.95)return;
-    const ang=Math.atan2(-p.y,p.x),ex=cx+Math.cos(ang)*W*0.42,ey=cx+Math.sin(ang)*W*0.42;
-    ctx.save();ctx.translate(ex,ey);ctx.rotate(ang);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(9,0);ctx.lineTo(-5,-6);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.restore();
-  });
-  // scale label
-  ctx.fillStyle="rgba(255,255,255,.55)";ctx.font=`10.5px ${C.mono}`;ctx.textAlign="left";ctx.textBaseline="bottom";
-  ctx.fillText(zoom?"grid 0.25 mm":"grid 1 mm",8,W-6);
+function drawSpark(){
+  const ctx=spark.cv.getContext("2d"),W=spark.W,H=spark.H;if(!W)return;
+  ctx.setTransform(spark.DPR,0,0,spark.DPR,0,0);ctx.clearRect(0,0,W,H);
+  const best=ETA0*P0, y=v=>H-2-(H-6)*Math.min(1,v/best);
+  ctx.strokeStyle=C.line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,H-1.5);ctx.lineTo(W,H-1.5);ctx.stroke();
+  ctx.setLineDash([4,4]);ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue("--ok").trim();ctx.beginPath();ctx.moveTo(0,y(goal*best));ctx.lineTo(W,y(goal*best));ctx.stroke();ctx.setLineDash([]);
+  if(hist.length<2)return;
+  const t1=hist[hist.length-1].t, x=t=>W-(t1-t)/12*W;
+  ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.lineJoin="round";ctx.beginPath();
+  hist.forEach((h,i)=>{const X=x(h.t),Y=y(h.p);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);});ctx.stroke();
 }
 
 // ---------- loop ----------
 let last=performance.now();
 function frame(now){
   const dt=Math.min(0.05,(now-last)/1000);last=now;
-  for(let i=0;i<4;i++){
+  for(let i=0;i<5;i++){
     const p=press[i];
     if(p&&now-p.t0>HOLD_DELAY&&canControl()&&pause<=0){
       const held=(now-p.t0-HOLD_DELAY)/1000;
-      turns[i]+=p.d*((fine||shiftDown)?FINE_RATE:RATE*Math.min(2,0.5+held*0.9))*dt;
+      turns[i]+=p.d*((fine||shiftDown)?FINE_RATE[i]:RATE[i]*Math.min(ACCEL[i],0.5+held*1.6))*dt;
     }
     el("ind"+i).setAttribute("transform",`rotate(${turns[i]*360})`);
-    el("tn"+i).textContent=(turns[i]>=-0.0049?"+":"−")+Math.abs(turns[i]).toFixed(2);
+    el("tn"+i).textContent=(turns[i]>=-0.0005?"+":"−")+Math.abs(turns[i]).toFixed(3);
     el("knob"+i).classList.toggle("active",!!p);
   }
-  if(canControl()&&drift>0&&pause<=0){["x","y"].forEach(ax=>{red[ax][0]+=(Math.random()-.5)*drift*dt*6;red[ax][1]+=(Math.random()-.5)*drift*dt*14;});}
-  const b=beams(), ov=overlap(b);
+  if(canControl()&&drift>0&&pause<=0){off.z+=(Math.random()-.5)*drift*dt*40;["x","y"].forEach(a=>{off[a][0]+=(Math.random()-.5)*drift*dt*0.25/F;});}
+  const s=state(), Pw=P0*s.eta, best=ETA0*P0;
   if(canControl()){
     if(pause>0){pause-=dt;if(pause<=0)newRound();}
     else{
-      if(ov.total>=GOAL){lockT+=dt;if(lockT>=LOCK_TIME){lockT=LOCK_TIME;success();}}
+      if(Pw>=goal*best){lockT+=dt;if(lockT>=LOCK_TIME){lockT=LOCK_TIME;success();}}
       else lockT=Math.max(0,lockT-dt*2);
       if(mode==="play"){timeLeft-=dt;if(timeLeft<=0){timeLeft=0;endGame("time");}}
     }
+    peak=Math.max(peak,Pw);
+    hist.push({t:now/1000,p:Pw});while(hist.length&&now/1000-hist[0].t>12)hist.shift();
   }
-  drawView(0,b[0],mode!=="idle");drawView(1,b[1],mode!=="idle");
-  [0,1].forEach(n=>{
-    el("sep"+(n+1)).innerHTML=`apart by <b>${ov.d[n].toFixed(2)} mm</b> · overlap <b>${(100*ov.each[n]).toFixed(0)}%</b>`;
-    el("bs"+n).textContent=`Δ ${ov.d[n].toFixed(2)} mm`;
-  });
-  el("oRead").innerHTML=`${(100*ov.total).toFixed(0)}<small>%</small>`;
-  el("oOf").innerHTML=`near ${(100*ov.each[0]).toFixed(0)}% × far ${(100*ov.each[1]).toFixed(0)}%`;
-  el("pfill").style.width=(100*ov.total)+"%";
-  const holding=canControl()&&pause<=0&&ov.total>=GOAL;
+  drawFace(s);drawSpark();
+  const [v,u]=fmtP(Pw);el("pRead").innerHTML=`${v}<small>${u}</small>`;
+  el("pOf").textContent=`${(100*s.eta).toFixed(1)}% coupled · best possible ${(100*ETA0).toFixed(0)}%`;
+  el("pfill").style.width=(100*Pw/best)+"%";el("pgoal").style.left=(100*goal)+"%";
+  const holding=canControl()&&pause<=0&&Pw>=goal*best;
   el("pbar").classList.toggle("lock",holding);
-  el("pLock").textContent=holding?"Holding…":"Hold above the green line to lock";
-  drawBench(b);
+  el("pLock").textContent=holding?"Holding…":`Hold above ${(100*goal).toFixed(0)}% of best to lock`;
+  const [pv,pu]=fmtP(peak);el("pPeak").textContent=peak>0?`${pv} ${pu}`:"–";
+  const r=Math.hypot(s.dx,s.dy);
+  el("facts").innerHTML=`<div><span>Spot from core</span><b>${r>=100?r.toFixed(0):r.toFixed(1)} µm</b></div><div><span>Beam on lens, off axis</span><b>${s.xL.toFixed(2)} mm</b></div><div><span>Fibre from focus</span><b>${s.z>=0?"+":"−"}${Math.abs(s.z).toFixed(0)} µm</b></div>`;
+  let h="";
+  if(mode==="play"||mode==="lab"){
+    if(r>62.5)h="The spot is on the ceramic ferrule. Steer it onto the glass in the middle.";
+    else if(s.eOff<0.05)h="It's on the cladding but not the core yet. Zoom in and keep going.";
+    else if(Pw<goal*best&&s.eOff>0.8&&s.eTilt<0.85)h=`The spot is on the core, but the beam crosses the lens ${s.xL.toFixed(1)} mm off centre, so it arrives at an angle. Walk the beam: nudge mirror 1 to bring that number down, win the power back with mirror 2, repeat.`;
+    else if(Pw<goal*best&&s.eOff>0.8&&s.eFoc<0.85)h="Try the focus screw. The spot looks bigger than the core.";
+    else if(Pw<goal*best)h="Light is going in. Peak it up with mirror 2, then fine-tune.";
+  }
+  el("hint").textContent=h;
+  drawBench(s,(turns[0]*(D1+D2)+turns[2]*D2)*S+off.x[1]);
   const ts=el("timerStat"),tb=el("timebar"),ft=el("floatTimer");
   if(mode==="play"||(mode==="over"&&timeLeft===0&&timeTotal>1)){
     el("sTime").textContent=timeLeft.toFixed(1);el("timefill").style.transform=`scaleX(${timeLeft/timeTotal})`;
-    const low=timeLeft<10;ts.classList.toggle("low",low);tb.classList.toggle("low",low);
+    const low=timeLeft<15;ts.classList.toggle("low",low);tb.classList.toggle("low",low);
   } else {el("sTime").textContent=mode==="lab"?"∞":"--";el("timefill").style.transform="scaleX(1)";ts.classList.remove("low");tb.classList.remove("low");}
   ft.classList.toggle("show",mode==="play"&&!timerInView&&!introOpen);
-  if(mode==="play"){el("fTime").textContent=timeLeft.toFixed(1);el("fFill").style.transform=`scaleX(${timeLeft/timeTotal})`;ft.classList.toggle("low",timeLeft<10);}
+  if(mode==="play"){el("fTime").textContent=timeLeft.toFixed(1);el("fFill").style.transform=`scaleX(${timeLeft/timeTotal})`;ft.classList.toggle("low",timeLeft<15);}
   requestAnimationFrame(frame);
 }
 let timerInView=true;
@@ -525,11 +570,11 @@ if("IntersectionObserver" in window)new IntersectionObserver(es=>{timerInView=es
 
 // ---------- welcome walkthrough ----------
 const STEPS=[
-  {t:"Two colours, one path", b:`<p>Many experiments need two lasers travelling exactly together: a pump and a probe, or two beams that must meet in the same tiny spot of a crystal.</p><p>A dichroic mirror makes that possible. It lets red light straight through and reflects green, so both can leave along the same line.</p>`},
-  {t:"Overlap, not centring", b:`<p>The red beam is your reference. It's already set and you can't move it.</p><p>Your job is to bring the green beam on top of it. It isn't enough to cross at one point: the beams have to overlap both near and far, so they're the same line in space.</p>`},
-  {t:"The thumbscrews", b:`<p>The green beam bounces off a steering mirror, then off the dichroic. Each mount has a horizontal and a vertical screw.</p><table><tr><td>Steering mirror</td><td><kbd>A</kbd> <kbd>D</kbd> · <kbd>S</kbd> <kbd>W</kbd></td></tr><tr><td>Dichroic</td><td><kbd>J</kbd> <kbd>L</kbd> · <kbd>K</kbd> <kbd>I</kbd></td></tr></table><p class="aside">Hold to turn, tap for a small step, hold <kbd>Shift</kbd> for fine turns. Tilting the dichroic nudges the red beam very slightly too, as it does on a real bench.</p>`},
-  {t:"Reading the cameras", b:`<p>Two beam cameras watch the combined beam, one near and one far. Where red and green overlap, the light adds up to yellow.</p><p>The overlap meter multiplies how well they match at each camera. Hold it above 90% for a second to lock. Zoom the cameras when you get close.</p>`},
-  {t:"Walking it in", b:`<p>It's the same trick as in Sanrekhan:</p><ol><li>Use the steering mirror to overlap the beams on camera 1.</li><li>Use the dichroic to overlap them on camera 2.</li><li>Repeat. Each pass gets closer.</li></ol><p class="aside">Levels shrink the beams and shorten the clock. From level 3 the red reference starts to wander, so you'll have to keep up with it.</p>`},
+  {t:"Light into a 4 µm core", b:`<p>A single-mode fibre carries light in a glass core about 4 µm across, roughly a twentieth of a human hair. A lens focuses the laser down to a spot that size, and the spot has to land right on the core.</p><p>Getting light in at all is easy to miss. Getting most of it in is what takes practice.</p>`},
+  {t:"Three things to get right", b:`<p><b>Position.</b> The focused spot has to sit on the core, within a micron or two.</p><p><b>Angle.</b> The light has to arrive straight down the fibre's axis. That angle is set by where the beam crosses the lens, so it should go through the lens's centre.</p><p><b>Focus.</b> The fibre tip has to sit at the lens's focal point. Too close or too far and the spot is bigger than the core.</p>`},
+  {t:"The screws", b:`<table><tr><td>Mirror 1 · horizontal / vertical</td><td><kbd>A</kbd> <kbd>D</kbd> · <kbd>S</kbd> <kbd>W</kbd></td></tr><tr><td>Mirror 2 · horizontal / vertical</td><td><kbd>J</kbd> <kbd>L</kbd> · <kbd>K</kbd> <kbd>I</kbd></td></tr><tr><td>Fibre focus</td><td><kbd>F</kbd> <kbd>R</kbd></td></tr></table><p class="aside">Holding a mirror screw speeds up the longer you hold it, which is handy for finding the fibre. Hold <kbd>Shift</kbd> or turn on fine control for the last few microns.</p>`},
+  {t:"Finding the core", b:`<p>The end-face view shows the spot glowing on the white ceramic ferrule. Steer it onto the glass in the middle, then zoom in.</p><p>Once the light is in the core you can't see it any more. From then on the power meter is your guide. Watch the trace and the peak reading.</p>`},
+  {t:"Walking the beam", b:`<p>Mirror 2 is the quick way to peak the power, but it can't fix the angle on its own. For that, walk the beam:</p><ol><li>Nudge mirror 1 a little. The power drops.</li><li>Win it back with mirror 2.</li><li>If the new peak is higher, keep going the same way. If it's lower, go the other way.</li></ol><p class="aside">Touch up the focus as you go. Lock by holding the power above the green line. Later levels raise the bar, and from level 4 the mount slowly drifts.</p>`},
 ];
 let step=0;
 const inSteps=el("inSteps");inSteps.innerHTML=STEPS.map(()=>"<i></i>").join("");

@@ -12,6 +12,10 @@ It's a single self-contained `index.html` with no build step and no dependencies
 
 `sanyojan.html` is about overlapping two lasers on a dichroic mirror. The red 633 nm beam passes straight through and is the fixed reference. The green 532 nm beam reflects off a steering mirror and then the dichroic, and you steer it with both mounts (steering mirror: A/D, S/W; dichroic: J/L, K/I) until it lies on top of the red beam at a near and a far camera. Where the spots overlap they add to yellow. The score is the Gaussian mode overlap at both cameras; hold it above 90% for a second to lock. Tilting the dichroic also shifts the transmitted red beam slightly, as a real glass substrate does. From level 3 the red reference drifts.
 
+## Tantu (तंतु), the fibre coupling game
+
+`tantu.html` is about launching a laser into a single-mode fibre. Two mirrors steer the beam into an 11 mm lens that focuses it onto a fibre with a 2.2 µm mode radius, and a power meter reads what comes out the far end. Coupling depends on three things at once: where the focused spot sits on the core, the beam's angle (set by where it crosses the lens), and focus. Mirror 1: A/D, S/W; mirror 2: J/L, K/I; fibre focus: F/R. An end-face view helps you find the core; after that only the power meter and its 12-second trace guide you, and the angle has to be fixed by walking the beam with both mirrors. Lock by holding the power above the level's target.
+
 ## Tomography lesson
 
 `tomography.html` is a learning page rather than a game. It walks through two-photon polarisation state tomography in six sections: prepare an entangled state (or a hidden mystery state), choose analyser settings, collect simulated coincidence counts with shot noise and accidentals, then reconstruct the density matrix by linear inversion and by maximum likelihood, and compare fidelity, purity and concurrence with the true state.
