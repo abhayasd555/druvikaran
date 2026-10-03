@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Druvikaran · Polarisation game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<style>
+:root{
+  --table:#e3e7eb; --hole:#c9d0d7; --panel:#f6f7f8; --panel-2:#eceff2;
+  --ink:#1c2632; --muted:#5d6b79; --line:#cdd4db;
+  --laser:#e03131; --laser-soft:rgba(224,49,49,.18);
+  --target:#6741d9; --target-soft:rgba(103,65,217,.16);
+  --ok:#2b8a3e; --warn:#e8590c;
+  --sphere-hi:#ffffff; --sphere-lo:#cfd8e1; --grid:#8796a6;
+  --fiber:#f59f00;
+  --display:"Chakra Petch", "Bahnschrift", "DIN Alternate", system-ui, sans-serif;
+  --body:"Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --deva:"Tiro Devanagari Hindi", "Noto Serif Devanagari", "Mangal", serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --table:#1a222b; --hole:#232d38; --panel:#202a35; --panel-2:#26313d;
+    --ink:#e2e8ef; --muted:#93a1b0; --line:#34414f;
+    --laser:#ff6b6b; --laser-soft:rgba(255,107,107,.2);
+    --target:#9d85ff; --target-soft:rgba(157,133,255,.2);
+    --ok:#51cf66; --warn:#ff922b;
+    --sphere-hi:#3a4a5b; --sphere-lo:#18212b; --grid:#6f8193;
+    --fiber:#fcc419;
+  }
+}
+:root[data-theme="dark"]{
+  --table:#1a222b; --hole:#232d38; --panel:#202a35; --panel-2:#26313d;
+  --ink:#e2e8ef; --muted:#93a1b0; --line:#34414f;
+  --laser:#ff6b6b; --laser-soft:rgba(255,107,107,.2);
+  --target:#9d85ff; --target-soft:rgba(157,133,255,.2);
+  --ok:#51cf66; --warn:#ff922b;
+  --sphere-hi:#3a4a5b; --sphere-lo:#18212b; --grid:#6f8193;
+  --fiber:#fcc419;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{
+  margin:0;color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;
+  background-color:var(--table);
+  background-image:radial-gradient(circle at 12px 12px,var(--hole) 3.2px,transparent 3.7px);
+  background-size:25px 25px;
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 18px 28px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 28px;justify-content:space-between;margin-bottom:14px}
+.brand h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,46px);letter-spacing:.01em;line-height:1;margin:0}
+.brand .deva{font-family:var(--deva);font-size:clamp(18px,2.6vw,24px);color:var(--muted);margin-left:2px}
+.brand p{margin:6px 0 0;color:var(--muted);font-size:14px;max-width:46ch}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 12px;min-width:76px}
+.stat span{display:block;font-size:12px;color:var(--muted)}
+.stat b{font-family:var(--display);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat.timer b{font-size:26px}
+.stat.timer.low b{color:var(--warn)}
+
+.bench{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px 2px;margin-bottom:14px;overflow-x:auto}
+.bench svg{display:block;width:100%;min-width:560px;height:auto}
+
+.main{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px}
+@media (max-width:860px){.main{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.card h2{font-family:var(--display);font-weight:600;font-size:17px;margin:0 0 2px}
+.card .sub{color:var(--muted);font-size:13px;margin:0 0 10px}
+
+.sphere-card{position:relative;display:flex;flex-direction:column}
+.sphere-box{position:relative;width:100%;aspect-ratio:1/1;max-height:620px;touch-action:none;cursor:grab}
+.sphere-box:active{cursor:grabbing}
+#sphere{position:absolute;inset:0;width:100%;height:100%}
+.timebar{height:6px;border-radius:3px;background:var(--panel-2);overflow:hidden;margin-top:8px}
+.timebar i{display:block;height:100%;width:100%;background:var(--ink);transform-origin:left;transition:background .3s}
+.timebar.low i{background:var(--warn)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;background:var(--c)}
+
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;pointer-events:none}
+.overlay .box{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px 22px;max-width:420px;box-shadow:0 18px 40px -18px rgba(0,0,0,.45)}
+.overlay h3{font-family:var(--display);font-size:24px;margin:0 0 6px}
+.overlay p{margin:0 0 12px;color:var(--muted)}
+.overlay ul{margin:0 0 14px;padding-left:18px;color:var(--muted);font-size:14px}
+.overlay .row{display:flex;gap:8px;flex-wrap:wrap}
+.hidden{display:none!important}
+.toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:var(--ok);color:#fff;font-family:var(--display);font-weight:600;padding:6px 14px;border-radius:20px;font-size:15px;pointer-events:none;opacity:0;transition:opacity .25s}
+.toast.show{opacity:1}
+
+button{font:inherit;color:inherit}
+.btn{font-family:var(--display);font-weight:600;font-size:15px;padding:9px 16px;border-radius:6px;border:1px solid var(--line);background:var(--panel-2);cursor:pointer}
+.btn.primary{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.btn:focus-visible,.rot:focus-visible,.chip:focus-visible{outline:2px solid var(--target);outline-offset:2px}
+.btn:hover{filter:brightness(1.06)}
+
+.side{display:flex;flex-direction:column;gap:14px}
+.meter{display:grid;grid-template-columns:132px 1fr;gap:14px;align-items:center}
+@media (max-width:420px){.meter{grid-template-columns:1fr}}
+#ellipse{width:132px;height:132px;background:var(--panel-2);border-radius:8px}
+.readout{font-variant-numeric:tabular-nums;font-size:14px;width:100%;border-collapse:collapse}
+.readout th{font-weight:500;color:var(--muted);text-align:left;padding:2px 6px 2px 0}
+.readout td{font-family:var(--display);font-weight:500;text-align:right;padding:2px 0 2px 8px}
+.readout thead th{font-size:12px}
+.readout thead th:not(:first-child){text-align:right}
+.readout .cur{color:var(--laser)} .readout .tgt{color:var(--target)}
+.prox{margin-top:10px}
+.prox .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.prox .lbl b{font-family:var(--display);color:var(--ink);font-weight:600}
+.bar{height:8px;background:var(--panel-2);border-radius:4px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;width:0;background:var(--target);transition:width .08s linear}
+.bar.lock i{background:var(--ok)}
+
+.paddles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.paddle{background:var(--panel-2);border-radius:8px;padding:10px 8px;text-align:center;border:1px solid transparent}
+.paddle.active{border-color:var(--laser)}
+.paddle h3{font-family:var(--display);font-size:15px;font-weight:600;margin:0}
+.paddle .wp{color:var(--muted);font-size:12px}
+.paddle svg{width:76px;height:76px;display:block;margin:6px auto 2px}
+.paddle .ang{font-family:var(--display);font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+.rots{display:flex;gap:6px;justify-content:center;margin-top:6px}
+.rot{width:46px;height:42px;border-radius:6px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-size:20px;line-height:1;user-select:none;-webkit-user-select:none;touch-action:none}
+.rot:active,.rot.on{background:var(--ink);color:var(--panel)}
+.keys{font-size:12px;color:var(--muted);margin-top:6px}
+.keys kbd{font-family:var(--display);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--panel)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.chip{font-size:13px;padding:6px 10px;border-radius:16px;border:1px solid var(--line);background:var(--panel);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+footer{margin-top:16px;color:var(--muted);font-size:13px;max-width:80ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Druvikaran <span class="deva">ध्रुवीकरण</span></h1>
+      <p>Turn the three paddles of the fibre polarisation controller until the light lands on the target on the Poincaré sphere.</p>
+    </div>
+    <div class="stats" aria-live="polite">
+      <div class="stat"><span>Level</span><b id="sLevel">1</b></div>
+      <div class="stat"><span>Score</span><b id="sScore">0</b></div>
+      <div class="stat"><span>Best</span><b id="sBest">0</b></div>
+      <div class="stat timer" id="timerStat"><span>Time</span><b id="sTime">--</b></div>
+    </div>
+  </header>
+
+  <div class="bench" aria-label="Optical bench schematic">
+    <svg id="bench" viewBox="0 0 760 150" role="img" aria-label="Laser, fibre paddle polarisation controller and polarimeter"></svg>
+  </div>
+
+  <div class="main">
+    <section class="card sphere-card">
+      <h2>Polarimeter · Poincaré sphere</h2>
+      <p class="sub">Drag the sphere to look around. Hold the light inside the target ring until it locks.</p>
+      <div class="sphere-box" id="sphereBox">
+        <canvas id="sphere"></canvas>
+        <div class="toast" id="toast">Locked</div>
+        <div class="overlay" id="overlay">
+          <div class="box">
+            <h3 id="ovTitle">Align the polarisation</h3>
+            <p id="ovText">Each round the fibre scrambles the input polarisation and a new target appears. Rotate the λ/4, λ/2 and λ/4 paddles to steer the red point into the violet ring before time runs out.</p>
+            <ul id="ovList">
+              <li>Hold a rotate button (or key) to turn a paddle; tap for a small step.</li>
+              <li>Keys: <b>Q/A</b> paddle 1, <b>W/S</b> paddle 2, <b>E/D</b> paddle 3. Hold <b>Shift</b> for fine control.</li>
+              <li>Each level shortens the clock and shrinks the target ring.</li>
+            </ul>
+            <div class="row">
+              <button class="btn primary" id="btnStart">Start game</button>
+              <button class="btn" id="btnLab">Free practice</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="timebar" id="timebar"><i id="timefill"></i></div>
+      <div class="legend">
+        <span style="--c:var(--laser)">Output polarisation</span>
+        <span style="--c:var(--target)">Target</span>
+      </div>
+    </section>
+
+    <div class="side">
+      <section class="card">
+        <h2>Readout</h2>
+        <p class="sub">Polarisation ellipse and normalised Stokes parameters.</p>
+        <div class="meter">
+          <canvas id="ellipse" width="264" height="264" aria-label="Polarisation ellipse"></canvas>
+          <table class="readout">
+            <thead><tr><th></th><th class="cur">Output</th><th class="tgt">Target</th></tr></thead>
+            <tbody>
+              <tr><th>S₁</th><td class="cur" id="r1">–</td><td class="tgt" id="t1">–</td></tr>
+              <tr><th>S₂</th><td class="cur" id="r2">–</td><td class="tgt" id="t2">–</td></tr>
+              <tr><th>S₃</th><td class="cur" id="r3">–</td><td class="tgt" id="t3">–</td></tr>
+              <tr><th>Azimuth ψ</th><td class="cur" id="rpsi">–</td><td class="tgt" id="tpsi">–</td></tr>
+              <tr><th>Ellipticity χ</th><td class="cur" id="rchi">–</td><td class="tgt" id="tchi">–</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="prox">
+          <div class="lbl"><span>Distance on sphere</span><b id="dist">–</b></div>
+          <div class="lbl"><span>Fidelity</span><b id="fid">–</b></div>
+          <div class="bar" id="lockbar"><i id="lockfill"></i></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Paddle controller</h2>
+        <p class="sub">Paddle angle sets the waveplate's fast axis around the fibre.</p>
+        <div class="paddles" id="paddles"></div>
+        <div class="toolbar">
+          <button class="chip" id="chipFine" aria-pressed="false">Fine control</button>
+          <button class="chip" id="chipTrail" aria-pressed="true">Show trail</button>
+          <button class="chip" id="chipView">Reset view</button>
+          <button class="chip hidden" id="chipNew">New target</button>
+          <button class="chip" id="chipEnd">End game</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>Model: each paddle is a fixed-retardance waveplate (λ/4, λ/2, λ/4) whose fast axis sits at angle θ around the fibre. On the Poincaré sphere it rotates the Stokes vector by its retardance about the axis (cos 2θ, sin 2θ, 0) in the equatorial plane. The S₃ &gt; 0 hemisphere is labelled right-circular.</footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+const D2R = Math.PI/180, R2D = 180/Math.PI;
+const PADDLES = [
+  {name:"Paddle 1", wp:"λ/4 · 90°", ret:Math.PI/2, keys:["q","a"]},
+  {name:"Paddle 2", wp:"λ/2 · 180°", ret:Math.PI,   keys:["w","s"]},
+  {name:"Paddle 3", wp:"λ/4 · 90°", ret:Math.PI/2, keys:["e","d"]},
+];
+const RATE = 42, FINE_RATE = 7, HOLD_DELAY = 170, LOCK_TIME = 0.8;
+
+// ---------- state ----------
+let theta = [0,0,0];
+let sIn = [1,0,0], target = [0,0,1];
+let mode = "idle"; // idle | play | lab | over
+let level = 1, score = 0, best = 0, timeLeft = 0, timeTotal = 1, tol = 8;
+let lockT = 0, pause = 0, fine = false, showTrail = true, shiftDown = false;
+let trail = [];
+const press = [null,null,null]; // {d, t0}
+const view = {yaw:-0.62, pitch:0.42};
+
+try { best = parseInt(localStorage.getItem("druvikaran-best")||"0",10)||0; } catch(e){}
+
+// ---------- maths ----------
+const dot = (a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const norm = v=>{const n=Math.hypot(v[0],v[1],v[2])||1;return [v[0]/n,v[1]/n,v[2]/n];};
+function rotate(s,n,d){
+  const c=Math.cos(d), si=Math.sin(d), k=dot(n,s);
+  const cr=[n[1]*s[2]-n[2]*s[1], n[2]*s[0]-n[0]*s[2], n[0]*s[1]-n[1]*s[0]];
+  return [0,1,2].map(i=>s[i]*c+cr[i]*si+n[i]*k*(1-c));
+}
+function output(th=theta){
+  let s=sIn;
+  for(let i=0;i<3;i++){const a=2*th[i]*D2R; s=rotate(s,[Math.cos(a),Math.sin(a),0],PADDLES[i].ret);}
+  return norm(s);
+}
+function randUnit(){const z=2*Math.random()-1, p=2*Math.PI*Math.random(), r=Math.sqrt(1-z*z);return [r*Math.cos(p),r*Math.sin(p),z];}
+const angDeg=(a,b)=>Math.acos(Math.max(-1,Math.min(1,dot(a,b))))*R2D;
+const wrap=x=>((x+90)%180+180)%180-90;
+
+// ---------- rounds ----------
+function levelParams(l){return {time:Math.max(22,60-5*(l-1)), tol:Math.max(2.5,8-0.9*(l-1))};}
+function newRound(keepState){
+  if(!keepState){ sIn=randUnit(); theta=[0,1,2].map(()=>Math.random()*180-90); }
+  const cur=output();
+  let t, guard=0;
+  do { t=randUnit(); guard++; } while(angDeg(t,cur)<70 && guard<200);
+  target=t; trail=[cur]; lockT=0;
+  if(mode==="play"){ const p=levelParams(level); timeTotal=timeLeft=p.time; tol=p.tol; }
+  else if(mode==="lab"){ tol=5; }
+  updateStats();
+}
+function startGame(){ mode="play"; level=1; score=0; hideOverlay(); newRound(false); setLabUI(false); }
+function startLab(){ mode="lab"; hideOverlay(); newRound(false); setLabUI(true); updateStats(); }
+function endGame(reason){
+  const wasPlay = mode==="play";
+  mode="over";
+  if(wasPlay && score>best){ best=score; try{localStorage.setItem("druvikaran-best",String(best));}catch(e){} }
+  updateStats();
+  showOverlay(reason==="time"?"Time's up":"Game ended",
+    wasPlay?`You cleared ${level-1} level${level-1===1?"":"s"} and scored ${score}.${score>=best&&score>0?" That's your best yet.":""}`:"Practice session closed.",
+    false,"Play again");
+}
+function success(){
+  if(mode==="play"){
+    const gained=Math.round(100*level+timeLeft*10*level);
+    score+=gained; level++;
+    toast(`Locked · +${gained}`);
+  } else toast("Locked");
+  pause=1.2;
+}
+function setLabUI(lab){ el("chipNew").classList.toggle("hidden",!lab); }
+
+// ---------- DOM ----------
+const el=id=>document.getElementById(id);
+const fmt=(v,d=3)=>(v>=0?"+":"−")+Math.abs(v).toFixed(d);
+function updateStats(){
+  el("sLevel").textContent = mode==="lab"?"–":level;
+  el("sScore").textContent = mode==="lab"?"–":score;
+  el("sBest").textContent = best;
+}
+function showOverlay(title,text,showList,btn){
+  el("ovTitle").textContent=title; el("ovText").textContent=text;
+  el("ovList").classList.toggle("hidden",!showList);
+  el("btnStart").textContent=btn||"Start game";
+  el("overlay").classList.remove("hidden");
+  el("btnStart").focus({preventScroll:true});
+}
+function hideOverlay(){ el("overlay").classList.add("hidden"); }
+let toastTimer;
+function toast(t){const e=el("toast");e.textContent=t;e.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.classList.remove("show"),1100);}
+
+// paddle cards
+const padWrap=el("paddles");
+PADDLES.forEach((p,i)=>{
+  const d=document.createElement("div"); d.className="paddle"; d.id="pad"+i;
+  d.innerHTML=`<h3>${p.name}</h3><div class="wp">${p.wp} retarder</div>
+  <svg viewBox="-40 -40 80 80" aria-hidden="true">
+    <circle r="34" fill="none" stroke="var(--line)" stroke-width="2"/>
+    ${[-90,-45,0,45,90].map(a=>{const r=a*D2R;return `<line x1="${Math.sin(r)*30}" y1="${-Math.cos(r)*30}" x2="${Math.sin(r)*35}" y2="${-Math.cos(r)*35}" stroke="var(--muted)" stroke-width="${a===0?2.4:1.4}"/>`}).join("")}
+    <g id="needle${i}"><rect x="-4" y="-29" width="8" height="58" rx="3" fill="var(--ink)" opacity=".85"/><circle r="4" fill="var(--fiber)"/></g>
+  </svg>
+  <div class="ang" id="ang${i}">0.0°</div>
+  <div class="rots">
+    <button class="rot" data-i="${i}" data-d="-1" aria-label="Rotate ${p.name} anticlockwise">⟲</button>
+    <button class="rot" data-i="${i}" data-d="1" aria-label="Rotate ${p.name} clockwise">⟳</button>
+  </div>
+  <div class="keys"><kbd>${p.keys[0].toUpperCase()}</kbd> ⟳ &nbsp;<kbd>${p.keys[1].toUpperCase()}</kbd> ⟲</div>`;
+  padWrap.appendChild(d);
+});
+
+function canControl(){return mode==="play"||mode==="lab";}
+function stepNow(i,d){ theta[i]=wrap(theta[i]+d*(fine||shiftDown?0.4:1.5)); }
+function startPress(i,d){ if(!canControl()) return; if(press[i]&&press[i].d===d) return; press[i]={d,t0:performance.now()}; stepNow(i,d); }
+function endPress(i){ press[i]=null; }
+
+document.querySelectorAll(".rot").forEach(b=>{
+  const i=+b.dataset.i, d=+b.dataset.d;
+  b.addEventListener("pointerdown",e=>{e.preventDefault();b.setPointerCapture(e.pointerId);b.classList.add("on");startPress(i,d);});
+  const up=()=>{b.classList.remove("on");if(press[i]&&press[i].d===d)endPress(i);};
+  b.addEventListener("pointerup",up); b.addEventListener("pointercancel",up); b.addEventListener("lostpointercapture",up);
+  b.addEventListener("contextmenu",e=>e.preventDefault());
+  b.addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();e.stopPropagation();if(canControl())stepNow(i,d);}});
+});
+const keyMap={};
+PADDLES.forEach((p,i)=>{keyMap[p.keys[0]]=[i,1];keyMap[p.keys[1]]=[i,-1];});
+window.addEventListener("keydown",e=>{
+  if(e.key==="Shift") shiftDown=true;
+  const k=keyMap[e.key.toLowerCase()];
+  if(k && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); if(!e.repeat) startPress(k[0],k[1]); }
+});
+window.addEventListener("keyup",e=>{
+  if(e.key==="Shift") shiftDown=false;
+  const k=keyMap[e.key.toLowerCase()];
+  if(k && press[k[0]] && press[k[0]].d===k[1]) endPress(k[0]);
+});
+window.addEventListener("blur",()=>{press.fill(null);shiftDown=false;});
+
+el("btnStart").onclick=startGame;
+el("btnLab").onclick=startLab;
+el("chipFine").onclick=e=>{fine=!fine;e.currentTarget.setAttribute("aria-pressed",fine);};
+el("chipTrail").onclick=e=>{showTrail=!showTrail;e.currentTarget.setAttribute("aria-pressed",showTrail);};
+el("chipView").onclick=()=>{view.yaw=-0.62;view.pitch=0.42;};
+el("chipNew").onclick=()=>{if(mode==="lab"){newRound(true);}};
+el("chipEnd").onclick=()=>{if(mode==="play"||mode==="lab") endGame("user");};
+
+// sphere drag
+const box=el("sphereBox");
+let drag=null;
+box.addEventListener("pointerdown",e=>{if(e.target.closest(".box"))return;drag={x:e.clientX,y:e.clientY};box.setPointerCapture(e.pointerId);});
+box.addEventListener("pointermove",e=>{if(!drag)return;view.yaw+= (e.clientX-drag.x)*0.008;view.pitch=Math.max(-1.45,Math.min(1.45,view.pitch+(e.clientY-drag.y)*0.008));drag={x:e.clientX,y:e.clientY};});
+const dEnd=()=>drag=null; box.addEventListener("pointerup",dEnd); box.addEventListener("pointercancel",dEnd);
+
+// ---------- bench schematic ----------
+const bench=el("bench");
+const PX=[300,410,520], FY=78, PR=46;
+bench.innerHTML=`
+  <rect x="40" y="128" width="660" height="8" rx="3" fill="var(--panel-2)"/>
+  <rect x="14" y="52" width="104" height="52" rx="6" fill="var(--panel-2)" stroke="var(--line)"/>
+  <circle cx="34" cy="78" r="6" fill="var(--laser)"><animate attributeName="opacity" values="1;.55;1" dur="2.4s" repeatCount="indefinite"/></circle>
+  <text x="48" y="74" font-family="var(--display)" font-size="14" font-weight="600" fill="var(--ink)">Laser</text>
+  <text x="48" y="91" font-family="var(--body)" font-size="11" fill="var(--muted)">1550 nm</text>
+  <path id="fib" d="M118 78 C 160 78, 170 78, 200 78 L 620 78" fill="none" stroke="var(--fiber)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M200 78 C 214 60, 226 96, 240 78" fill="none" stroke="var(--fiber)" stroke-width="3" opacity=".7"/>
+  <text x="168" y="56" font-family="var(--body)" font-size="11" fill="var(--muted)" text-anchor="middle">fibre birefringence</text>
+  <text x="168" y="69" font-family="var(--body)" font-size="11" fill="var(--muted)" text-anchor="middle">(random each round)</text>
+  ${PX.map((x,i)=>`
+    <line x1="${x}" y1="${FY+PR}" x2="${x}" y2="130" stroke="var(--muted)" stroke-width="3"/>
+    <g id="bp${i}">
+      <ellipse id="be${i}" cx="${x}" cy="${FY}" rx="${PR}" ry="${PR}" fill="var(--panel-2)" stroke="var(--ink)" stroke-width="1.6" fill-opacity=".85"/>
+      <ellipse id="bc${i}" cx="${x}" cy="${FY}" rx="${PR*0.55}" ry="${PR*0.55}" fill="none" stroke="var(--fiber)" stroke-width="2"/>
+      <ellipse id="bd${i}" cx="${x}" cy="${FY}" rx="${PR*0.48}" ry="${PR*0.48}" fill="none" stroke="var(--fiber)" stroke-width="2"/>
+    </g>
+    <text x="${x}" y="20" text-anchor="middle" font-family="var(--display)" font-size="13" font-weight="600" fill="var(--ink)">${PADDLES[i].wp.split(" ")[0]}</text>
+    <text id="bt${i}" x="${x}" y="146" text-anchor="middle" font-family="var(--display)" font-size="12" fill="var(--muted)">0°</text>`).join("")}
+  <rect x="620" y="44" width="126" height="68" rx="6" fill="var(--panel-2)" stroke="var(--line)"/>
+  <text x="634" y="68" font-family="var(--display)" font-size="14" font-weight="600" fill="var(--ink)">Polarimeter</text>
+  <circle cx="650" cy="90" r="12" fill="none" stroke="var(--grid)"/>
+  <circle id="bdot" cx="650" cy="90" r="3.5" fill="var(--laser)"/>
+  <text x="670" y="94" font-family="var(--body)" font-size="11" fill="var(--muted)">to sphere</text>
+  <circle r="4" fill="var(--laser)" opacity=".9"><animateMotion dur="2.2s" repeatCount="indefinite"><mpath href="#fib"/></animateMotion></circle>`;
+function drawBench(s){
+  for(let i=0;i<3;i++){
+    const ry=Math.max(2,PR*Math.abs(Math.cos(theta[i]*D2R)));
+    el("be"+i).setAttribute("ry",ry);
+    el("bc"+i).setAttribute("ry",ry*0.55);
+    el("bd"+i).setAttribute("ry",ry*0.48);
+    el("bt"+i).textContent=(theta[i]>=0?"+":"−")+Math.abs(theta[i]).toFixed(1)+"°";
+  }
+  el("bdot").setAttribute("cx",650+s[0]*9); el("bdot").setAttribute("cy",90-s[2]*9);
+}
+
+// ---------- drawing ----------
+const cv=el("sphere"), ctx=cv.getContext("2d");
+const ecv=el("ellipse"), ectx=ecv.getContext("2d");
+let W=0,H=0,DPR=1;
+function resize(){
+  DPR=Math.min(2,window.devicePixelRatio||1);
+  const r=cv.getBoundingClientRect(); W=r.width; H=r.height;
+  cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
+}
+new ResizeObserver(resize).observe(box); resize();
+
+let C={};
+function readColors(){const cs=getComputedStyle(document.documentElement);["laser","laser-soft","target","target-soft","ink","muted","grid","sphere-hi","sphere-lo","ok","panel","line"].forEach(k=>C[k]=cs.getPropertyValue("--"+k).trim());}
+readColors();
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",readColors);}catch(e){}
+new MutationObserver(readColors).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+function proj(v,cx,cy,R){
+  const c1=Math.cos(view.yaw),s1=Math.sin(view.yaw),c2=Math.cos(view.pitch),s2=Math.sin(view.pitch);
+  const x1=v[0]*c1-v[1]*s1, y1=v[0]*s1+v[1]*c1, z1=v[2];
+  const y2=y1*c2-z1*s2, z2=y1*s2+z1*c2;
+  return {x:cx+x1*R, y:cy-z2*R, front:y2<=0.0001};
+}
+function curve(pts,cx,cy,R,color,wF,wB,dashBack){
+  const P=pts.map(p=>proj(p,cx,cy,R));
+  for(let pass=0;pass<2;pass++){
+    const wantFront=pass===1;
+    ctx.beginPath(); let open=false;
+    for(let i=0;i<P.length;i++){
+      const p=P[i];
+      if(p.front===wantFront){ if(!open){ctx.moveTo(p.x,p.y);open=true;} else ctx.lineTo(p.x,p.y);} else open=false;
+    }
+    ctx.strokeStyle=color; ctx.lineWidth=wantFront?wF:wB; ctx.globalAlpha=wantFront?1:0.35;
+    ctx.setLineDash(!wantFront&&dashBack?[4,5]:[]); ctx.stroke();
+  }
+  ctx.globalAlpha=1; ctx.setLineDash([]);
+}
+function greatCircle(a,b,n=120){const o=[];for(let i=0;i<=n;i++){const t=i/n*2*Math.PI;o.push([0,1,2].map(k=>a[k]*Math.cos(t)+b[k]*Math.sin(t)));}return o;}
+function ring(t,r,n=90){
+  const ref=Math.abs(t[2])<0.9?[0,0,1]:[1,0,0];
+  const u=norm([t[1]*ref[2]-t[2]*ref[1],t[2]*ref[0]-t[0]*ref[2],t[0]*ref[1]-t[1]*ref[0]]);
+  const w=[t[1]*u[2]-t[2]*u[1],t[2]*u[0]-t[0]*u[2],t[0]*u[1]-t[1]*u[0]];
+  const o=[];for(let i=0;i<=n;i++){const p=i/n*2*Math.PI;o.push([0,1,2].map(k=>t[k]*Math.cos(r)+(u[k]*Math.cos(p)+w[k]*Math.sin(p))*Math.sin(r)));}return o;
+}
+function dotAt(v,cx,cy,R,color,rad,halo){
+  const p=proj(v,cx,cy,R);
+  ctx.globalAlpha=p.front?1:0.4;
+  if(halo){ctx.beginPath();ctx.arc(p.x,p.y,rad*2.4,0,7);ctx.fillStyle=halo;ctx.fill();}
+  ctx.beginPath();ctx.arc(p.x,p.y,p.front?rad:rad*0.75,0,7);ctx.fillStyle=color;ctx.fill();
+  if(p.front){ctx.lineWidth=1.5;ctx.strokeStyle=C.panel;ctx.stroke();}
+  ctx.globalAlpha=1; return p;
+}
+function drawSphere(s,tNow){
+  ctx.setTransform(DPR,0,0,DPR,0,0); ctx.clearRect(0,0,W,H);
+  const cx=W/2, cy=H/2, R=Math.min(W,H)*0.37;
+  const g=ctx.createRadialGradient(cx-R*0.35,cy-R*0.4,R*0.1,cx,cy,R*1.05);
+  g.addColorStop(0,C["sphere-hi"]); g.addColorStop(1,C["sphere-lo"]);
+  ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.fillStyle=g;ctx.fill();
+  ctx.lineWidth=1.5;ctx.strokeStyle=C.grid;ctx.globalAlpha=.7;ctx.stroke();ctx.globalAlpha=1;
+  // latitude/longitude grid
+  for(const lat of [-60,-30,30,60]){const z=Math.sin(lat*D2R),r=Math.cos(lat*D2R);const pts=[];for(let i=0;i<=96;i++){const p=i/96*2*Math.PI;pts.push([r*Math.cos(p),r*Math.sin(p),z]);}curve(pts,cx,cy,R,C.grid,0.6,0.5,false);}
+  for(const lon of [45,135]){const a=lon*D2R;curve(greatCircle([Math.cos(a),Math.sin(a),0],[0,0,1]),cx,cy,R,C.grid,0.6,0.5,false);}
+  curve(greatCircle([1,0,0],[0,1,0]),cx,cy,R,C.ink,1.4,1,true);
+  curve(greatCircle([1,0,0],[0,0,1]),cx,cy,R,C.grid,1.1,0.8,true);
+  curve(greatCircle([0,1,0],[0,0,1]),cx,cy,R,C.grid,1.1,0.8,true);
+  // axes
+  const axes=[[[1,0,0],"H","S₁"],[[-1,0,0],"V",""],[[0,1,0],"D","S₂"],[[0,-1,0],"A",""],[[0,0,1],"R","S₃"],[[0,0,-1],"L",""]];
+  for(const [v,lab,sl] of axes){
+    const a=proj([0,0,0],cx,cy,R), b=proj(v.map(x=>x*1.22),cx,cy,R), on=proj(v,cx,cy,R);
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=C.muted;ctx.lineWidth=1;ctx.globalAlpha=on.front?.8:.3;ctx.setLineDash(on.front?[]:[3,4]);ctx.stroke();ctx.setLineDash([]);
+    ctx.beginPath();ctx.arc(on.x,on.y,3,0,7);ctx.fillStyle=C.muted;ctx.fill();
+    const l=proj(v.map(x=>x*1.32),cx,cy,R);
+    ctx.globalAlpha=on.front?1:.45;ctx.fillStyle=C.ink;ctx.font=`600 ${Math.max(13,R*0.075)}px ${getComputedStyle(document.body).getPropertyValue("--display")||"sans-serif"}`;
+    ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(lab,l.x,l.y);
+    if(sl){ctx.font=`500 ${Math.max(11,R*0.055)}px sans-serif`;ctx.fillStyle=C.muted;ctx.fillText(sl,l.x,l.y+Math.max(14,R*0.075));}
+    ctx.globalAlpha=1;
+  }
+  // target
+  if(mode!=="idle"){
+    const pulse=1+0.12*Math.sin(tNow*0.005);
+    curve(ring(target,tol*D2R),cx,cy,R,C.target,2.2,1.4,true);
+    curve(ring(target,tol*D2R*1.9*pulse),cx,cy,R,C["target-soft"],1.4,1,false);
+    dotAt(target,cx,cy,R,C.target,5,null);
+  }
+  // trail
+  if(showTrail && trail.length>1){
+    const P=trail.map(p=>proj(p,cx,cy,R));
+    for(let i=1;i<P.length;i++){
+      const a=P[i-1],b=P[i];
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle=C.laser;ctx.lineWidth=b.front?2:1;ctx.globalAlpha=(b.front?.75:.25)*(0.15+0.85*i/P.length);ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+  }
+  // output vector
+  const o=proj([0,0,0],cx,cy,R), p=proj(s,cx,cy,R);
+  ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(p.x,p.y);ctx.strokeStyle=C.laser;ctx.lineWidth=2;ctx.globalAlpha=p.front?.9:.4;ctx.stroke();ctx.globalAlpha=1;
+  dotAt(s,cx,cy,R,C.laser,7,C["laser-soft"]);
+}
+function drawEllipse(s){
+  const w=ecv.width,h=ecv.height,cx=w/2,cy=h/2,A=w*0.38;
+  ectx.clearRect(0,0,w,h);
+  ectx.strokeStyle=C.line;ectx.lineWidth=1.5;
+  ectx.beginPath();ectx.moveTo(cx-A*1.2,cy);ectx.lineTo(cx+A*1.2,cy);ectx.moveTo(cx,cy-A*1.2);ectx.lineTo(cx,cy+A*1.2);ectx.stroke();
+  const one=(v,color,width,dash,arrow)=>{
+    const psi=0.5*Math.atan2(v[1],v[0]), chi=0.5*Math.asin(Math.max(-1,Math.min(1,v[2])));
+    const a=Math.cos(chi), b=Math.sin(chi);
+    const P=t=>{const x=a*Math.cos(t), y=b*Math.sin(t);return [cx+A*(x*Math.cos(psi)-y*Math.sin(psi)), cy-A*(x*Math.sin(psi)+y*Math.cos(psi))];};
+    ectx.beginPath();for(let i=0;i<=100;i++){const q=P(i/100*2*Math.PI);i?ectx.lineTo(q[0],q[1]):ectx.moveTo(q[0],q[1]);}
+    ectx.strokeStyle=color;ectx.lineWidth=width;ectx.setLineDash(dash);ectx.stroke();ectx.setLineDash([]);
+    if(arrow && Math.abs(b)>0.06){
+      const t0=0.35, p0=P(t0), p1=P(t0+0.05), ang=Math.atan2(p1[1]-p0[1],p1[0]-p0[0]);
+      ectx.beginPath();ectx.moveTo(p1[0],p1[1]);
+      ectx.lineTo(p1[0]-14*Math.cos(ang-0.45),p1[1]-14*Math.sin(ang-0.45));
+      ectx.lineTo(p1[0]-14*Math.cos(ang+0.45),p1[1]-14*Math.sin(ang+0.45));ectx.closePath();
+      ectx.fillStyle=color;ectx.fill();
+    }
+  };
+  if(mode!=="idle") one(target,C.target,3,[8,7],false);
+  one(s,C.laser,4.5,[],true);
+}
+function readouts(s){
+  const set=(id,v)=>el(id).textContent=v;
+  const psi=v=>(0.5*Math.atan2(v[1],v[0])*R2D).toFixed(1)+"°";
+  const chi=v=>(0.5*Math.asin(Math.max(-1,Math.min(1,v[2])))*R2D).toFixed(1)+"°";
+  set("r1",fmt(s[0]));set("r2",fmt(s[1]));set("r3",fmt(s[2]));set("rpsi",psi(s));set("rchi",chi(s));
+  if(mode==="idle"){["t1","t2","t3","tpsi","tchi"].forEach(i=>set(i,"–"));set("dist","–");set("fid","–");return;}
+  set("t1",fmt(target[0]));set("t2",fmt(target[1]));set("t3",fmt(target[2]));set("tpsi",psi(target));set("tchi",chi(target));
+  const d=angDeg(s,target); set("dist",d.toFixed(1)+"° (ring "+tol.toFixed(1)+"°)");
+  set("fid",((1+dot(s,target))/2*100).toFixed(2)+"%");
+}
+
+// ---------- loop ----------
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  // paddles
+  for(let i=0;i<3;i++){
+    const p=press[i];
+    if(p && now-p.t0>HOLD_DELAY && canControl() && pause<=0){
+      const held=(now-p.t0-HOLD_DELAY)/1000;
+      const rate=(fine||shiftDown)?FINE_RATE:RATE*Math.min(1.8,0.6+held*0.8);
+      theta[i]=wrap(theta[i]+p.d*rate*dt);
+    }
+    el("needle"+i).setAttribute("transform",`rotate(${theta[i]})`);
+    el("ang"+i).textContent=(theta[i]>=0?"+":"−")+Math.abs(theta[i]).toFixed(1)+"°";
+    el("pad"+i).classList.toggle("active",!!p);
+  }
+  const s=output();
+  if(canControl()){
+    const lastT=trail[trail.length-1];
+    if(!lastT||angDeg(lastT,s)>0.6){trail.push(s); if(trail.length>500) trail.shift();}
+    if(pause>0){
+      pause-=dt;
+      if(pause<=0){ newRound(mode==="lab"); }
+    } else {
+      const d=angDeg(s,target);
+      if(d<tol){ lockT+=dt; if(lockT>=LOCK_TIME){ lockT=LOCK_TIME; success(); } }
+      else lockT=Math.max(0,lockT-dt*2);
+      if(mode==="play"){ timeLeft-=dt; if(timeLeft<=0){ timeLeft=0; endGame("time"); } }
+    }
+  }
+  // lock / proximity bar
+  const lb=el("lockbar"), lf=el("lockfill");
+  if(mode==="idle"){lf.style.width="0";}
+  else if(lockT>0){lb.classList.add("lock");lf.style.width=(lockT/LOCK_TIME*100)+"%";}
+  else {lb.classList.remove("lock");const d=angDeg(s,target);lf.style.width=Math.max(0,100*(1-d/180))+"%";}
+  // timer
+  const ts=el("timerStat"), tb=el("timebar");
+  if(mode==="play"||(mode==="over"&&timeTotal>1&&timeLeft===0)){
+    el("sTime").textContent=timeLeft.toFixed(1);
+    el("timefill").style.transform=`scaleX(${timeLeft/timeTotal})`;
+    const low=timeLeft<8; ts.classList.toggle("low",low); tb.classList.toggle("low",low);
+  } else { el("sTime").textContent=mode==="lab"?"∞":"--"; el("timefill").style.transform="scaleX(1)"; ts.classList.remove("low"); tb.classList.remove("low"); }
+  drawSphere(s,now); drawEllipse(s); readouts(s); drawBench(s);
+  requestAnimationFrame(frame);
+}
+updateStats();
+sIn=randUnit(); theta=[12,-30,47];
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

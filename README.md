@@ -1,0 +1,31 @@
+# Druvikaran (ध्रुवीकरण)
+
+A browser game about polarisation. Light from a laser travels through a fibre into a three-paddle fibre polarisation controller (λ/4, λ/2, λ/4) and then a polarimeter, which plots the output on a Poincaré sphere. Rotate the paddles to steer the output onto the target before time runs out.
+
+It's a single self-contained `index.html` with no build step and no dependencies. Open it in a browser, or serve it with GitHub Pages.
+
+## How to play
+
+Each round, the fibre scrambles the input polarisation at random and a new target appears on the sphere. Hold the output (red) inside the target ring (violet) for 0.8 s to lock it. Every level shortens the clock and shrinks the ring. Free practice mode has no timer.
+
+| Paddle | Waveplate | Keys |
+|---|---|---|
+| 1 | λ/4 | Q / A |
+| 2 | λ/2 | W / S |
+| 3 | λ/4 | E / D |
+
+Hold a button or key to rotate a paddle, or tap it for a small step. Hold Shift (or turn on "Fine control") for slow rotation. Drag the sphere to change the view.
+
+## The trick
+
+A paddle at angle θ rotates the Stokes vector about the equatorial axis (cos 2θ, sin 2θ, 0). A λ/4 paddle turns it by 90° and the λ/2 paddle by 180°. Read the target's azimuth ψ from the readout, then:
+
+1. Set paddle 3 to the target's ψ. The target now lies on the great circle through the poles that paddle 3 maps linear light onto.
+2. Turn paddle 1 until the output reaches that circle, which happens when the output ψ equals the target ψ (or differs by 90°). This step depends on paddle 1 alone.
+3. Turn paddle 2 to slide the output along the circle onto the target. It moves at 4× the paddle angle, so use fine control.
+
+Setting all three paddles to the same angle makes the controller act as the identity, which shows you the raw input state.
+
+## Model
+
+Each paddle is an ideal fixed-retardance waveplate with its fast axis at θ ∈ (−90°, 90°] around the fibre. The output is the input Stokes vector rotated by paddle 1, then paddle 2, then paddle 3. The S₃ > 0 hemisphere is labelled right-circular. Real paddles have limited travel (about ±117° on common controllers), and fibre after the controller adds its own birefringence. Neither is modelled here.
