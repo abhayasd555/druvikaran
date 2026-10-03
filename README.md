@@ -16,6 +16,12 @@ It's a single self-contained `index.html` with no build step and no dependencies
 
 `tantu.html` is about launching a laser into a single-mode fibre. Two mirrors steer the beam into an 11 mm lens that focuses it onto a fibre with a 2.2 µm mode radius, and a power meter reads what comes out the far end. Coupling depends on three things at once: where the focused spot sits on the core, the beam's angle (set by where it crosses the lens), and focus. Mirror 1: A/D, S/W; mirror 2: J/L, K/I; fibre focus: F/R. An end-face view helps you find the core; after that only the power meter and its 12-second trace guide you, and the angle has to be fixed by walking the beam with both mirrors. Lock by holding the power above the level's target.
 
+## Vyatikaran (व्यतिकरण), the interference lab
+
+`vyatikaran.html` is an untimed interference bench with six experiments: single slit, Young's double slit, a diffraction grating, and Michelson, Mach–Zehnder and Sagnac interferometers. Everything is adjustable: laser pointing, mirror tilts, a delay stage with a piezo, slit sizes, polarisers and wave plates, and the screen's distance (drag it along the rail or type it in millimetres). Slits use exact Fresnel diffraction, so the pattern changes from near field to far field as the screen moves; interferometers add two Gaussian beams with their real offsets, tilts, curvatures, path lengths, polarisations and the source's coherence length.
+
+The screen updates live with an intensity profile, visibility, contrast and measured against predicted fringe period, and interferometers have a delay scan. Sources include HeNe, green, violet and 810 nm lasers and a white LED. After aligning with a laser you can swap in heralded single photons (810 nm, 3 or 10 nm filter): detections build the pattern one by one, visibility is fitted with an uncertainty, and a heralded g⁽²⁾(0) measurement shows they are single photons. A Help tab diagnoses what's wrong with the current setup, says what to move and by how much, offers one-click fixes, and keeps a self-ticking checklist of alignment steps.
+
 ## Tomography lesson
 
 `tomography.html` is a learning page rather than a game. It walks through two-photon polarisation state tomography in six sections: prepare an entangled state (or a hidden mystery state), choose analyser settings, collect simulated coincidence counts with shot noise and accidentals, then reconstruct the density matrix by linear inversion and by maximum likelihood, and compare fidelity, purity and concurrence with the true state.

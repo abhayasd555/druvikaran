@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vyatikaran · Interference lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<style>
+:root{
+  --table:#f2eee5; --panel:#faf8f3; --panel-2:#ebe6da;
+  --ink:#1d1b18; --muted:#6e685c; --line:#dcd5c6; --rule:#1d1b18;
+  --laser:#d8281e; --ok:#3b6e45; --warn:#b5541c; --bad:#a3271c; --accent:#24508a;
+  --scrim:rgba(242,238,229,.86);
+  --display:"Newsreader", "Iowan Old Style", Georgia, serif;
+  --body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --deva:"Tiro Devanagari Hindi", "Noto Serif Devanagari", "Mangal", serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --table:#161513; --panel:#1d1c19; --panel-2:#272520;
+    --ink:#ebe5d8; --muted:#9b9485; --line:#35322c; --rule:#ebe5d8;
+    --laser:#f0483c; --ok:#83b28d; --warn:#e2925a; --bad:#f07468; --accent:#82a6d8;
+    --scrim:rgba(22,21,19,.86);
+  }
+}
+:root[data-theme="dark"]{
+  --table:#161513; --panel:#1d1c19; --panel-2:#272520;
+  --ink:#ebe5d8; --muted:#9b9485; --line:#35322c; --rule:#ebe5d8;
+  --laser:#f0483c; --ok:#83b28d; --warn:#e2925a; --bad:#f07468; --accent:#82a6d8;
+  --scrim:rgba(22,21,19,.86);
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;background:var(--table);-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+.hidden{display:none!important}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px 40px}
+
+.portals{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 0;margin-bottom:26px;border-bottom:1px solid var(--line);font-size:13.5px}
+.portals .home{font-family:var(--display);font-size:18px;text-decoration:none;color:inherit}
+.portals .links{display:flex;gap:16px;flex-wrap:wrap}
+.portals .links a{text-decoration:none;color:var(--muted);padding-bottom:2px;border-bottom:1px solid transparent}
+.portals .links a:hover{color:var(--ink)}
+.portals .links a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
+
+header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 32px;justify-content:space-between;padding-bottom:18px;border-bottom:1px solid var(--rule)}
+.brand h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,5.4vw,52px);letter-spacing:-.015em;line-height:1;margin:0}
+.brand .deva{font-family:var(--deva);font-size:clamp(17px,2.4vw,22px);color:var(--muted);margin-left:6px}
+.brand p{margin:10px 0 0;color:var(--muted);font-size:14.5px;max-width:58ch}
+.linkbtn{background:none;border:0;padding:0;color:var(--ink);font-size:14px;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;cursor:pointer}
+.linkbtn:hover{text-decoration-color:var(--ink)}
+.srcbar{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.srcbar .lbl{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+@media (max-width:700px){.srcbar{align-items:flex-start}}
+
+.exps{display:flex;gap:0;flex-wrap:wrap;margin:18px 0 18px;border-bottom:1px solid var(--line)}
+.exps button{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:10px 14px;cursor:pointer;color:var(--muted);font-size:14.5px}
+.exps button:hover{color:var(--ink)}
+.exps button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.exps button .k{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px;align-items:start}
+@media (max-width:980px){.grid{grid-template-columns:1fr}}
+.col{display:flex;flex-direction:column;gap:20px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:18px 20px}
+.card h2{font-family:var(--display);font-weight:500;font-size:21px;margin:0 0 2px;line-height:1.2}
+.card .sub{color:var(--muted);font-size:13.5px;margin:0 0 12px}
+.eyebrow{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.bench svg{display:block;width:100%;height:auto;max-height:330px;touch-action:none}
+.bench svg [data-g]{cursor:pointer}
+.bench svg [data-g]:hover>*{stroke-width:1.8}
+.bench svg .drag{cursor:ew-resize}
+.bench .note{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+
+/* controls */
+.group{border-top:1px solid var(--line);padding:14px 0 6px;transition:background .6s}
+.group:first-of-type{border-top:0;padding-top:4px}
+.group.flash{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.group h3{font-family:var(--display);font-weight:500;font-size:17px;margin:0 0 6px}
+.ctl{margin:8px 0 10px}
+.ctl .top{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;color:var(--muted)}
+.ctl .top label{flex:1}
+.num{width:96px;text-align:right;font-family:var(--mono);font-size:13px;padding:3px 6px;border:1px solid var(--line);border-radius:2px;background:var(--panel);color:var(--ink)}
+.unit{font-family:var(--mono);font-size:12px;color:var(--muted);min-width:34px}
+.ctl .bot{display:flex;align-items:center;gap:6px;margin-top:4px}
+.ctl input[type=range]{flex:1;accent-color:var(--ink);min-width:60px}
+.nudge{border:1px solid var(--line);background:transparent;border-radius:2px;padding:2px 6px;font-family:var(--mono);font-size:11.5px;cursor:pointer;color:var(--muted);white-space:nowrap}
+.nudge:hover{border-color:var(--ink);color:var(--ink)}
+@media (max-width:440px){.ctl .bot .nudge:first-child,.ctl .bot .nudge:last-child{display:none}}
+select{font-size:14px;padding:5px 8px;border:1px solid var(--line);border-radius:2px;background:var(--panel)}
+.check{display:inline-flex;gap:8px;align-items:center;font-size:13.5px;color:var(--ink);cursor:pointer}
+.check input{accent-color:var(--ink)}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:6px 12px;font-size:13.5px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+
+.btn{font-weight:500;font-size:14px;padding:8px 14px;border-radius:2px;border:1px solid var(--rule);background:transparent;cursor:pointer}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.btn.primary:hover{background:var(--ink);opacity:.88}
+.btn.small{font-size:12.5px;padding:4px 10px}
+.btn.quiet{border-color:transparent;color:var(--muted);padding-left:4px;padding-right:4px}
+.btn.quiet:hover{background:none;color:var(--ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn:focus-visible,.nudge:focus-visible,.exps button:focus-visible,.tabs button:focus-visible,.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* right panel */
+.tabs{display:flex;border-bottom:1px solid var(--line);margin:-4px -20px 16px;padding:0 12px;overflow-x:auto}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:10px 12px;cursor:pointer;color:var(--muted);font-size:14px;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tabs .badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--warn);color:var(--panel);font-size:11px;line-height:18px;text-align:center;font-family:var(--mono)}
+.tabs .badge.ok{background:var(--ok)}
+.screenwrap{position:relative}
+#cvScreen{display:block;width:100%;aspect-ratio:1/1;background:#000;border-radius:2px}
+.scrlabel{position:absolute;left:10px;top:8px;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.7);pointer-events:none}
+.viewbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 0;font-size:13px;color:var(--muted)}
+.plot{margin-top:16px}
+.plot .t{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.plot canvas{display:block;width:100%;height:210px}
+.readings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--rule);margin-top:16px}
+@media (max-width:520px){.readings{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rd{padding:10px 12px 12px 0;border-bottom:1px solid var(--line)}
+.rd span{display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.rd b{display:block;font-family:var(--mono);font-weight:400;font-size:19px;line-height:1.3;font-variant-numeric:tabular-nums}
+.rd small{display:block;font-size:12px;color:var(--muted)}
+table.orders{border-collapse:collapse;width:100%;font-size:13.5px;margin-top:12px}
+table.orders th{font-weight:400;color:var(--muted);text-align:left;font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:6px 8px 6px 0;border-bottom:1px solid var(--rule)}
+table.orders td{font-family:var(--mono);font-size:13px;padding:6px 8px 6px 0;border-bottom:1px solid var(--line)}
+
+.msg{font-size:14px;color:var(--muted);border:1px dashed var(--line);padding:14px 16px;border-radius:2px}
+.counters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--rule);margin-top:14px}
+@media (max-width:520px){.counters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.gtable{border-collapse:collapse;width:100%;font-size:13.5px;margin-top:8px}
+.gtable td{padding:6px 0;border-bottom:1px solid var(--line)}
+.gtable td:last-child{text-align:right;font-family:var(--mono)}
+.prose p{margin:0 0 10px;font-size:14.5px;max-width:64ch}
+.prose p.aside{color:var(--muted);font-size:13.5px}
+
+/* help */
+.diag{list-style:none;margin:0;padding:0}
+.diag li{display:grid;grid-template-columns:18px 1fr;gap:4px 10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.diag .dot{width:10px;height:10px;border-radius:50%;margin-top:6px;background:var(--ok)}
+.diag li.warn .dot{background:var(--warn)} .diag li.bad .dot{background:var(--bad)} .diag li.info .dot{background:var(--accent)}
+.diag b{font-weight:500}
+.diag p{margin:2px 0 0;font-size:14px;color:var(--muted)}
+.diag .act{grid-column:2;display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.steps-list{list-style:none;margin:8px 0 0;padding:0;counter-reset:s}
+.steps-list li{position:relative;padding:8px 0 8px 32px;border-bottom:1px solid var(--line);font-size:14px;counter-increment:s}
+.steps-list li::before{content:counter(s);position:absolute;left:0;top:8px;width:22px;height:22px;border:1px solid var(--line);border-radius:50%;font-family:var(--mono);font-size:11.5px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.steps-list li.done::before{content:"✓";background:var(--ok);border-color:var(--ok);color:var(--panel)}
+.steps-list li.done{color:var(--muted)}
+footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer p{margin:0 0 8px;max-width:90ch}
+
+/* walkthrough */
+.intro{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--scrim);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);animation:fade .35s ease-out}
+.sheet{background:var(--panel);border:1px solid var(--rule);border-radius:2px;width:100%;max-width:560px;max-height:calc(100dvh - 32px);overflow:auto;padding:30px 32px 24px;box-shadow:0 30px 70px -40px rgba(0,0,0,.5);animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+.sheet .count{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.sheet h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,34px);line-height:1.1;letter-spacing:-.01em;margin:10px 0 14px}
+.sheet .body{min-height:180px}
+.sheet .body.swap{animation:swap .3s ease-out}
+.sheet p{margin:0 0 12px;font-size:15.5px;line-height:1.6}
+.sheet p.aside{color:var(--muted);font-size:14px}
+.steps{display:flex;gap:6px;margin:22px 0 18px}
+.steps i{flex:1;height:2px;background:var(--line);transition:background .3s}
+.steps i.done{background:var(--ink)}
+.sheet .nav{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+@media (max-width:480px){.sheet{padding:24px 22px 20px}.sheet .nav{flex-direction:column-reverse;align-items:stretch}.sheet .nav .row>.btn{flex:1}.sheet .nav #inBack{align-self:flex-start}}
+@keyframes fade{from{opacity:0}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes swap{from{opacity:0;transform:translateX(10px)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="intro hidden" id="intro" role="dialog" aria-modal="true" aria-labelledby="inTitle">
+  <div class="sheet">
+    <div class="count" id="inCount"></div>
+    <h2 id="inTitle"></h2>
+    <div class="body" id="inBody"></div>
+    <div class="steps" id="inSteps" aria-hidden="true"></div>
+    <div class="nav">
+      <button class="btn quiet" id="inBack">Back</button>
+      <div class="row" id="inNav"></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <nav class="portals" aria-label="Portals">
+    <a class="home" href="index.html">Druvikaran</a>
+    <div class="links">
+      <a href="index.html">Polarisation game</a>
+      <a href="sanrekhan.html">Alignment game</a>
+      <a href="sanyojan.html">Combining game</a>
+      <a href="tantu.html">Fibre coupling game</a>
+      <a href="vyatikaran.html" aria-current="page">Interference lab</a>
+      <a href="tomography.html">Tomography lesson</a>
+    </div>
+  </nav>
+  <header>
+    <div class="brand">
+      <h1>Vyatikaran<span class="deva">व्यतिकरण</span></h1>
+      <p>An interference bench. Build slits, gratings and interferometers, align them with a laser, put the screen where you like, and measure the fringes. Then swap the laser for single photons. No clock: take your time. <button class="linkbtn" id="btnNotes">How it works</button></p>
+    </div>
+    <div class="srcbar">
+      <span class="lbl">Source</span>
+      <div class="seg" id="srcSeg"><button data-s="laser" aria-pressed="true">Laser</button><button data-s="photon" aria-pressed="false">Single photons</button></div>
+      <select id="laserSel" aria-label="Laser"></select>
+    </div>
+  </header>
+
+  <div class="exps" role="tablist" id="exps"></div>
+
+  <section class="card bench" style="margin-bottom:20px">
+        <span class="eyebrow">Bench, top view</span>
+        <h2 id="benchTitle"></h2>
+        <p class="sub" id="benchSub"></p>
+        <svg id="bench" viewBox="0 0 760 310" role="img" aria-label="Optical bench"></svg>
+        <p class="note">Click a part to jump to its controls. Drag the screen along its rail. Not to scale except where distances are written.</p>
+  </section>
+  <div class="grid">
+    <div class="col">
+      <section class="card">
+        <span class="eyebrow">Adjustments</span>
+        <h2>Controls</h2>
+        <p class="sub">Type a value, drag a slider, or use the step buttons. Arrow keys work on a focused slider.</p>
+        <div id="controls"></div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card" id="panel">
+        <div class="tabs" role="tablist" id="tabs">
+          <button data-t="observe" aria-selected="true">Screen &amp; plots</button>
+          <button data-t="scan" aria-selected="false">Delay scan</button>
+          <button data-t="photons" aria-selected="false">Single photons</button>
+          <button data-t="help" aria-selected="false">Help<span class="badge" id="helpBadge">0</span></button>
+        </div>
+
+        <div data-p="observe">
+          <div class="screenwrap"><canvas id="cvScreen" aria-label="The screen"></canvas><div class="scrlabel" id="scrLabel"></div></div>
+          <div class="viewbar">
+            <span id="viewText"></span>
+            <span class="row"><label for="viewSel">View width</label><select id="viewSel"></select></span>
+          </div>
+          <div class="plot">
+            <div class="t"><span id="plotTitle">Intensity across the screen</span><span id="plotNote"></span></div>
+            <canvas id="cvProfile" aria-label="Intensity profile across the screen"></canvas>
+          </div>
+          <div class="readings" id="readings"></div>
+          <div id="extraReadings"></div>
+        </div>
+
+        <div data-p="scan" class="hidden">
+          <div id="scanBody"></div>
+        </div>
+
+        <div data-p="photons" class="hidden">
+          <div id="photonBody"></div>
+        </div>
+
+        <div data-p="help" class="hidden">
+          <span class="eyebrow">What's wrong, and what to do</span>
+          <ul class="diag" id="diag"></ul>
+          <h2 style="margin-top:22px">Alignment steps</h2>
+          <p class="sub">These tick themselves as you go.</p>
+          <ol class="steps-list" id="stepsList"></ol>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <p>Model. Slits use exact paraxial Fresnel diffraction of a Gaussian laser beam (0.5 mm radius) through 3 mm tall slits, so the pattern changes properly from near field to far field as you move the screen. Gratings send copies of the beam into each order at the true angle, with the efficiency of an ideal amplitude grating. Interferometers add two Gaussian beams with their real offsets, tilts, curvatures, path lengths and polarisations; fringe visibility falls with path difference as exp(−(ΔP/L<sub>c</sub>)²). A mirror tilt of α turns a beam by 2α. The white LED is summed over 15 wavelengths.</p>
+    <p>Single photons are heralded pairs from down-conversion, fibre-coupled into the same Gaussian mode as the laser, so they follow the same pattern: each detection is drawn at random from it. Coherence length is λ²/Δλ. Detectors have 60% efficiency; the camera has a few dark counts.</p>
+  </footer>
+</div>
+<script>
+(() => {
+"use strict";
+// ================= physics engine =================
+// lengths in mm unless a name says otherwise
+const W0=0.5;                       // laser 1/e² field radius at the bench (mm)
+const SRC_DIST=300;                 // laser to first element (mm)
+const ETA_DET=0.6;                  // single-photon detection efficiency
+
+// ---------- sources ----------
+const LASERS={
+  hene:{name:"HeNe laser",nm:633,Lc:200,note:"coherence length about 20 cm"},
+  dpss:{name:"Green DPSS laser",nm:532,Lc:20,note:"coherence length about 2 cm"},
+  d405:{name:"Violet diode laser",nm:405,Lc:0.3,note:"coherence length about 0.3 mm"},
+  d810:{name:"810 nm diode laser",nm:810,Lc:2,note:"same wavelength as the photons; infrared, so the camera shows it in grey"},
+  led:{name:"White LED",nm:560,Lc:0.003,note:"broadband: fringes only within about a micron of equal paths",broad:true},
+};
+function sourceInfo(src){
+  if(src.type==="photon"){
+    const lam=810, bw=src.bw;
+    return {photon:true,name:`Heralded single photons, ${lam} nm, ${bw} nm filter`,ir:true,
+      Lc:(lam*lam/bw)*1e-6, spectrum:[{lam:lam*1e-6,w:1,nm:lam}]};
+  }
+  const L=LASERS[src.laser];
+  if(L.broad){
+    const sp=[];for(let i=0;i<15;i++){const nm=440+i*220/14;sp.push({lam:nm*1e-6,nm,w:Math.exp(-Math.pow((nm-560)/70,2))});}
+    const s=sp.reduce((a,b)=>a+b.w,0);sp.forEach(p=>p.w/=s);
+    return {photon:false,name:L.name,ir:false,Lc:L.Lc,broad:true,spectrum:sp};
+  }
+  return {photon:false,name:L.name,ir:L.nm>700,Lc:L.Lc,spectrum:[{lam:L.nm*1e-6,w:1,nm:L.nm}]};
+}
+// fringe coherence for a path difference dP (mm); broadband sources get it from the spectrum sum instead
+const gammaOf=(info,dP)=>Math.exp(-Math.pow(dP/info.Lc,2));
+
+// ---------- maths helpers ----------
+function fresnelCS(x){
+  const ax=Math.abs(x); let C,S;
+  if(ax<2.5){
+    const z=Math.PI*x*x/2; let term=ax; C=0; S=0;
+    for(let m=0;m<80;m++){
+      const v=term/(2*m+1);
+      if(m%2===0) C+=((m/2)%2===0?1:-1)*v; else S+=(((m-1)/2)%2===0?1:-1)*v;
+      term*=z/(m+1); if(term<1e-17&&m>4)break;
+    }
+  } else {
+    const px=Math.PI*ax, p2=px*ax;            // π x, π x²
+    const f=(1/px)*(1-3/(p2*p2)+105/Math.pow(p2,4));
+    const g=(1/(px*p2))*(1-15/(p2*p2));
+    const s=Math.sin(p2/2), c=Math.cos(p2/2);
+    C=0.5+f*s-g*c; S=0.5-f*c-g*s;
+  }
+  return x<0?[-C,-S]:[C,S];
+}
+const erf=x=>{const t=1/(1+0.3275911*Math.abs(x));const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return x>=0?y:-y;};
+function poisson(m){if(m<=0)return 0;if(m<40){const L=Math.exp(-m);let k=0,p=1;do{k++;p*=Math.random();}while(p>L);return k-1;}
+  let u=0;while(!u)u=Math.random();return Math.max(0,Math.round(m+Math.sqrt(m)*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*Math.random())));}
+function nmToRGB(nm){
+  let r=0,g=0,b=0;
+  if(nm<440){r=-(nm-440)/60;b=1;}else if(nm<490){g=(nm-440)/50;b=1;}else if(nm<510){g=1;b=-(nm-510)/20;}
+  else if(nm<580){r=(nm-510)/70;g=1;}else if(nm<645){r=1;g=-(nm-645)/65;}else{r=1;}
+  let f=1;if(nm<420)f=0.3+0.7*(nm-380)/40;else if(nm>700)f=0.3+0.7*(780-nm)/80;
+  return [r*f,g*f,b*f];
+}
+const pol=(deg)=>[Math.cos(deg*Math.PI/180),Math.sin(deg*Math.PI/180)];
+const dot2=(a,b)=>a[0]*b[0]+a[1]*b[1];
+
+// ---------- building the optical model for each experiment ----------
+// Every model gives a field description at the screen plane (x, y in mm, centred on the straight-through axis).
+function buildModel(exp,st,src){
+  const info=sourceInfo(src);
+  const m={exp,info,kind:null};
+  const rad=v=>v/1000;   // mrad → rad
+  if(exp==="single"||exp==="double"){
+    const L=Math.max(1,st.L), x0=rad(st.px)*SRC_DIST, y0=rad(st.py)*SRC_DIST, th=rad(st.px);
+    const slits=exp==="single"?[{c:0,a:st.a}]:[{c:-st.d/2,a:st.a},{c:st.d/2,a:st.a}];
+    const H=3; // slit height (mm)
+    slits.forEach((s,i)=>{s.amp=Math.exp(-Math.pow((s.c-x0)/W0,2));
+      let J=[1,0]; const p=i===0?st.pol1:st.pol2;
+      if(exp==="double"&&p!=null){const u=pol(p);const k=dot2(J,u);J=[u[0]*k,u[1]*k];}
+      s.J=J;});
+    const ana=exp==="double"&&st.ana!=null?pol(st.ana):null;
+    if(ana)slits.forEach(s=>{const k=dot2(s.J,ana);s.J=[ana[0]*k,ana[1]*k];});
+    const Ty=0.5*(erf(Math.SQRT2*(H/2-y0)/W0)+erf(Math.SQRT2*(H/2+y0)/W0));
+    Object.assign(m,{kind:"slit",L,x0,y0,shift:L*th,yc:y0+L*rad(st.py),wy:W0,Ty,slits,
+      NF:Math.pow(exp==="single"?st.a/2:st.d/2+st.a/2,2)/(info.spectrum[0].lam*L)});
+    if(exp==="double"){
+      const I1=slits[0].amp**2,I2=slits[1].amp**2;
+      m.balanceV=2*Math.sqrt(I1*I2)/(I1+I2);
+      const n1=Math.hypot(...slits[0].J),n2=Math.hypot(...slits[1].J);
+      m.polV=n1&&n2?Math.abs(dot2(slits[0].J,slits[1].J))/(n1*n2):0;
+      m.predPeriod=info.spectrum[0].lam*L/st.d;
+    } else {m.firstMin=info.spectrum[0].lam*L/st.a;}
+    m.beamOnSlits=slits.reduce((s,q)=>s+q.amp*q.amp,0)/slits.length;
+    return m;
+  }
+  if(exp==="grating"){
+    const L=Math.max(1,st.L), dper=1/st.lines, f=st.frac, thIn=rad(st.px), yc=rad(st.py)*(SRC_DIST+L);
+    const spots=[];
+    info.spectrum.forEach((sp,k)=>{
+      for(let mo=-12;mo<=12;mo++){
+        const s=Math.sin(thIn)+mo*sp.lam/dper; if(Math.abs(s)>=0.999)continue;
+        const thm=Math.asin(s), sinc=mo===0?1:Math.sin(Math.PI*mo*f)/(Math.PI*mo*f), eff=f*f*sinc*sinc;
+        if(eff<1e-4)continue;
+        const wx=W0*Math.cos(thIn)/Math.pow(Math.cos(thm),2);
+        spots.push({m:mo,k,x:L*Math.tan(thm),y:yc,wx,wy:W0,amp:eff*sp.w*(W0/wx),eff,th:thm});
+      }
+    });
+    Object.assign(m,{kind:"grating",L,spots,dper});
+    return m;
+  }
+  // ----- two-beam interferometers -----
+  const k0=info.spectrum[0].lam;
+  let b1,b2,phi0=0,sign=1,dP=0,ports=1,extra={};
+  const pt={x:rad(st.px),y:rad(st.py)};
+  if(exp==="michelson"){
+    const L1=150, L2=150+st.s+st.piezo/1000, Ls=st.Ls;
+    const lens=st.lens, vs=65, fl=25;
+    const R=Li=>lens?vs+2*Li+Ls:Infinity, w=Li=>lens?W0*(vs+2*Li+Ls)/fl:W0;
+    const com=d=>({x:pt.x*(SRC_DIST+d),y:pt.y*(SRC_DIST+d)});
+    const c1=com(L1+Ls),c2=com(L2+Ls);
+    b1={x:c1.x+2*rad(st.t1x)*(L1+Ls),y:c1.y+2*rad(st.t1y)*(L1+Ls),ax:pt.x+2*rad(st.t1x),ay:pt.y+2*rad(st.t1y),P:2*L1,R:R(L1),w:w(L1),a:0.5*W0/w(L1),J:[1,0]};
+    b2={x:c2.x,y:c2.y,ax:pt.x,ay:pt.y,P:2*L2,R:R(L2),w:w(L2),a:0.5*W0/w(L2),J:st.qwp!=null?pol(2*st.qwp):[1,0]};
+    extra={armDiff:L2-L1};
+  } else if(exp==="mz"){
+    const DA=100, LA=400, LB=400+st.s+st.piezo/1000, Ls=st.Ls;
+    const c=pt.x*(SRC_DIST+LA+Ls), cy=pt.y*(SRC_DIST+LA+Ls);
+    b1={x:c+2*rad(st.tAx)*(DA+Ls),y:cy+2*rad(st.tAy)*(DA+Ls),ax:pt.x+2*rad(st.tAx),ay:pt.y+2*rad(st.tAy),P:LA,R:Infinity,w:W0,a:0.5,J:[1,0]};
+    b2={x:c+2*rad(st.tBx)*Ls,y:cy+2*rad(st.tBy)*Ls,ax:pt.x+2*rad(st.tBx),ay:pt.y+2*rad(st.tBy),P:LB,R:Infinity,w:W0,a:0.5,J:st.hwp!=null?pol(2*st.hwp):[1,0]};
+    ports=2; extra={armDiff:LB-LA, atBS2:Math.hypot(2*st.tAx*DA/1000,2*st.tAy*DA/1000)};
+  } else { // sagnac
+    const Ls=st.Ls, fibre=st.loop==="fibre", t=fibre?{x:0,y:0}:{x:rad(st.t2x),y:rad(st.t2y)};
+    const bs={x:rad(st.bsx),y:rad(st.bsy)}, cx=pt.x*(SRC_DIST+600+Ls)+2*bs.x*Ls, cy=pt.y*(SRC_DIST+600+Ls)+2*bs.y*Ls;
+    const ax=pt.x+2*bs.x, ay=pt.y+2*bs.y;
+    b1={x:cx+2*t.x*(300+Ls),y:cy+2*t.y*(300+Ls),ax:ax+2*t.x,ay:ay+2*t.y,P:600,R:Infinity,w:W0,a:0.5,J:[1,0]};
+    b2={x:cx-2*t.x*(300+Ls),y:cy-2*t.y*(300+Ls),ax:ax-2*t.x,ay:ay-2*t.y,P:600,R:Infinity,w:W0,a:0.5,J:[1,0]};
+    const NA=fibre?500*Math.PI*0.05*0.05:0.15*0.15, Om=st.omega*Math.PI/180;
+    phi0=8*Math.PI*NA*Om/(k0*1e-3*3e8);
+    sign=-1; extra={sagnacPhase:phi0,NA};
+  }
+  const ana=st.ana!=null?pol(st.ana):null;
+  if(ana)[b1,b2].forEach(b=>{const k=dot2(b.J,ana);b.J=[ana[0]*k,ana[1]*k];});
+  dP=b2.P-b1.P;
+  const n1=Math.hypot(...b1.J),n2=Math.hypot(...b2.J);
+  const relA=Math.hypot(b1.ax-b2.ax,b1.ay-b2.ay);
+  Object.assign(m,{kind:"two",beams:[b1,b2],phi0,sign,dP,ports,
+    polV:n1&&n2?Math.abs(dot2(b1.J,b2.J))/(n1*n2):0,
+    gamma:gammaOf(info,dP),
+    sep:Math.hypot(b1.x-b2.x,b1.y-b2.y), relA,
+    predPeriod:relA>1e-9?k0/relA:Infinity, lens:exp==="michelson"&&st.lens,
+    overlap:Math.exp(-Math.pow(Math.hypot(b1.x-b2.x,b1.y-b2.y),2)/(b1.w*b1.w+b2.w*b2.w))*(2*b1.w*b2.w/(b1.w*b1.w+b2.w*b2.w))},extra);
+  return m;
+}
+
+// ---------- evaluating intensity ----------
+// two-beam field at a point for one wavelength: returns [re1,im1,re2,im2]
+function beamField(b,lam,x,y){
+  const dx=x-b.x,dy=y-b.y,r2=dx*dx+dy*dy,k=2*Math.PI/lam;
+  const A=b.a*Math.exp(-r2/(b.w*b.w));
+  const ph=k*(b.ax*x+b.ay*y)+k*b.P+(isFinite(b.R)?k*r2/(2*b.R):0);
+  return [A*Math.cos(ph),A*Math.sin(ph)];
+}
+// returns per-sample {I, Ibar, F} for two-beam or slit models at (x,y), for one spectral sample
+function twoBeamAt(m,sp,x,y,signOverride){
+  const [b1,b2]=m.beams;
+  const e1=beamField(b1,sp.lam,x,y), e2=beamField(b2,sp.lam,x,y);
+  const i1=(e1[0]*e1[0]+e1[1]*e1[1])*dot2(b1.J,b1.J), i2=(e2[0]*e2[0]+e2[1]*e2[1])*dot2(b2.J,b2.J);
+  // Re(E1 E2* e^{iφ0})
+  const c=Math.cos(m.phi0),s=Math.sin(m.phi0);
+  const re=e1[0]*e2[0]+e1[1]*e2[1], im=e1[1]*e2[0]-e1[0]*e2[1];
+  const F=2*(signOverride??m.sign)*m.gamma*dot2(b1.J,b2.J)*(re*c-im*s);
+  return {Ibar:i1+i2,F};
+}
+function slitRow(m,sp,xs){
+  // returns arrays Ibar, F along x for one wavelength
+  const n=xs.length, Ib=new Float64Array(n), F=new Float64Array(n), sc=Math.sqrt(2/(sp.lam*m.L));
+  const fields=m.slits.map(s=>{const re=new Float64Array(n),im=new Float64Array(n);
+    for(let i=0;i<n;i++){const xp=xs[i]-m.shift;const [C1,S1]=fresnelCS(sc*(s.c-s.a/2-xp)),[C2,S2]=fresnelCS(sc*(s.c+s.a/2-xp));
+      const dc=C2-C1,ds=S2-S1; // (dc + i ds)/(1+i)
+      re[i]=s.amp*(dc+ds)/2; im[i]=s.amp*(ds-dc)/2;}
+    return {re,im,J:s.J};});
+  for(let i=0;i<n;i++){
+    let ib=0;fields.forEach(f=>{ib+=(f.re[i]*f.re[i]+f.im[i]*f.im[i])*dot2(f.J,f.J);});
+    let fr=0;
+    for(let a=0;a<fields.length;a++)for(let b=a+1;b<fields.length;b++){const A=fields[a],B=fields[b];fr+=2*dot2(A.J,B.J)*(A.re[i]*B.re[i]+A.im[i]*B.im[i]);}
+    Ib[i]=ib*m.Ty; F[i]=fr*m.Ty;
+  }
+  return {Ib,F};
+}
+// one row through the pattern: x positions, total I, Ibar, F (summed over the spectrum)
+function rowProfile(m,xs,y){
+  const n=xs.length,I=new Float64Array(n),Ib=new Float64Array(n),F=new Float64Array(n);
+  if(m.kind==="slit"){
+    const gy=Math.exp(-2*Math.pow((y-m.yc)/m.wy,2));
+    m.info.spectrum.forEach(sp=>{const r=slitRow(m,sp,xs);for(let i=0;i<n;i++){Ib[i]+=sp.w*r.Ib[i]*gy;F[i]+=sp.w*r.F[i]*gy;}});
+  } else if(m.kind==="grating"){
+    for(let i=0;i<n;i++)m.spots.forEach(s=>{Ib[i]+=s.amp*Math.exp(-2*(Math.pow((xs[i]-s.x)/s.wx,2)+Math.pow((y-s.y)/s.wy,2)));});
+  } else {
+    m.info.spectrum.forEach(sp=>{for(let i=0;i<n;i++){const r=twoBeamAt(m,sp,xs[i],y);Ib[i]+=sp.w*r.Ibar;F[i]+=sp.w*r.F;}});
+  }
+  for(let i=0;i<n;i++)I[i]=Math.max(0,Ib[i]+F[i]);
+  return {I,Ib,F};
+}
+// full screen image: N×N, RGB and total intensity
+function screenImage(m,N,half){
+  const I=new Float32Array(N*N),R=new Float32Array(N*N),G=new Float32Array(N*N),B=new Float32Array(N*N);
+  const xs=Array.from({length:N},(_,i)=>-half+(i+0.5)*2*half/N);
+  const rgbs=m.info.spectrum.map(sp=>m.info.ir?[0.85,0.85,0.85]:nmToRGB(sp.nm));
+  const put=(idx,v,k)=>{I[idx]+=v;R[idx]+=v*rgbs[k][0];G[idx]+=v*rgbs[k][1];B[idx]+=v*rgbs[k][2];};
+  if(m.kind==="slit"){
+    m.info.spectrum.forEach((sp,k)=>{const r=slitRow(m,sp,xs);
+      for(let j=0;j<N;j++){const y=half-(j+0.5)*2*half/N, gy=sp.w*Math.exp(-2*Math.pow((y-m.yc)/m.wy,2));if(gy<1e-6)continue;
+        for(let i=0;i<N;i++)put(j*N+i,Math.max(0,r.Ib[i]+r.F[i])*gy,k);}});
+  } else if(m.kind==="grating"){
+    // a spot narrower than a pixel is drawn about a pixel wide, keeping its power the same
+    const pix=2*half/N;
+    m.spots.forEach(s=>{const wx=Math.max(s.wx,0.9*pix),wy=Math.max(s.wy,0.9*pix),amp=s.amp*(s.wx/wx)*(s.wy/wy);
+      for(let j=0;j<N;j++){const y=half-(j+0.5)*2*half/N, gy=Math.exp(-2*Math.pow((y-s.y)/wy,2));if(gy<1e-5)continue;
+      for(let i=0;i<N;i++){const v=amp*gy*Math.exp(-2*Math.pow((xs[i]-s.x)/wx,2));if(v>1e-7)put(j*N+i,v,s.k);}}});
+  } else {
+    m.info.spectrum.forEach((sp,k)=>{for(let j=0;j<N;j++){const y=half-(j+0.5)*2*half/N;
+      for(let i=0;i<N;i++){const r=twoBeamAt(m,sp,xs[i],y);put(j*N+i,sp.w*Math.max(0,r.Ibar+r.F),k);}}});
+  }
+  return {I,R,G,B,N,half};
+}
+// power leaving a port, as a fraction of the input (two-beam), integrated over the whole beam
+function portPower(m,signOverride){
+  const [b1,b2]=m.beams, ext=3*Math.max(b1.w,b2.w)+Math.max(Math.abs(b1.x),Math.abs(b2.x),Math.abs(b1.y),Math.abs(b2.y));
+  const n=56, h=2*ext/n; let s=0;
+  const cx=(b1.x+b2.x)/2, cy=(b1.y+b2.y)/2;
+  m.info.spectrum.forEach(sp=>{for(let j=0;j<n;j++)for(let i=0;i<n;i++){const x=cx-ext+(i+0.5)*h,y=cy-ext+(j+0.5)*h;const r=twoBeamAt(m,sp,x,y,signOverride);s+=sp.w*Math.max(0,r.Ibar+r.F);}});
+  return s*h*h/(Math.PI*W0*W0/2);
+}
+// ================= the lab =================
+const el=id=>document.getElementById(id);
+const EXPS=[
+  {id:"single",tab:"Single slit",k:"Diffraction",title:"Single-slit diffraction",sub:"A laser passes one narrow slit. Move the screen from close up, where you see the slit's shadow with ripples, out to the far field."},
+  {id:"double",tab:"Young's double slit",k:"Interference",title:"Young's double slit",sub:"Two slits, two sources of the same light. Their waves add on the screen as bright and dark fringes."},
+  {id:"grating",tab:"Grating",k:"Diffraction",title:"Diffraction grating",sub:"Hundreds of slits per millimetre send the beam into sharp orders at angles set by the wavelength."},
+  {id:"michelson",tab:"Michelson",k:"Interferometer",title:"Michelson interferometer",sub:"A beam splitter sends light down two arms and brings it back together. M1 tilts, M2 slides on a stage."},
+  {id:"mz",tab:"Mach–Zehnder",k:"Interferometer",title:"Mach–Zehnder interferometer",sub:"Two beam splitters, two separate arms, two outputs that share the light between them."},
+  {id:"sagnac",tab:"Sagnac",k:"Interferometer",title:"Sagnac interferometer",sub:"Two beams go round the same loop in opposite directions. It balances itself, and it can feel rotation."},
+];
+const DEF={
+  single:{px:0.25,py:0.12,a:0.1,L:600},
+  double:{px:0.35,py:0.08,a:0.05,d:0.25,L:900,pol1:null,pol2:null,ana:null},
+  grating:{px:0.3,py:0.1,lines:300,frac:0.5,L:300},
+  michelson:{px:0,py:0,t1x:0.35,t1y:-0.22,s:1.2,piezo:0,Ls:400,lens:false,qwp:null,ana:null},
+  mz:{px:0,py:0,tAx:0.25,tAy:0.12,tBx:-0.18,tBy:0.2,s:0.8,piezo:0,Ls:400,hwp:null,ana:null},
+  sagnac:{px:0,py:0,t2x:0.18,t2y:-0.12,bsx:0,bsy:0,Ls:400,loop:"free",omega:0},
+};
+const S=JSON.parse(JSON.stringify(DEF));
+const AL={};                  // aligned-with-laser flags
+const src={type:"laser",laser:"hene",bw:10,rate:2000};
+let cur="double", view="auto", dirty=true, tab="observe";
+const N=160;
+
+// ---------- controls ----------
+const R=(k,label,unit,min,max,step,nudges)=>({t:"r",k,label,unit,min,max,step,nudges});
+const SEL=(k,label,opts)=>({t:"s",k,label,opts});
+const POL=(k,label)=>({t:"p",k,label});
+const TOG=(k,label)=>({t:"c",k,label});
+const POINT=["laser","Laser pointing",[R("px","Horizontal tilt","mrad",-3,3,0.001,[0.005,0.05]),R("py","Vertical tilt","mrad",-3,3,0.001,[0.005,0.05])]];
+const TILT=(k,u)=>[R(k+"x","Horizontal",u||"mrad",-2,2,0.001,[0.001,0.02]),R(k+"y","Vertical",u||"mrad",-2,2,0.001,[0.001,0.02])];
+const CTRL={
+  single:[POINT,["slit","Slit",[SEL("a","Slit width",[[0.02,"20 µm"],[0.05,"50 µm"],[0.1,"100 µm"],[0.2,"200 µm"],[0.5,"500 µm"]])]],
+    ["screen","Screen",[R("L","Slit to screen","mm",5,3000,1,[1,50])]]],
+  double:[POINT,["slit","Double slit",[SEL("a","Each slit's width",[[0.02,"20 µm"],[0.05,"50 µm"],[0.1,"100 µm"]]),SEL("d","Slit separation",[[0.1,"0.10 mm"],[0.25,"0.25 mm"],[0.5,"0.50 mm"],[1,"1.00 mm"]])]],
+    ["pol","Polarisation",[POL("pol1","Polariser on slit 1"),POL("pol2","Polariser on slit 2"),POL("ana","Analyser before the screen")]],
+    ["screen","Screen",[R("L","Slits to screen","mm",5,3000,1,[1,50])]]],
+  grating:[POINT,["grating","Grating",[SEL("lines","Lines per millimetre",[[100,"100"],[300,"300"],[600,"600"],[1200,"1200"]]),SEL("frac","Open fraction",[[0.25,"25%"],[0.5,"50%"]])]],
+    ["screen","Screen",[R("L","Grating to screen","mm",5,2000,1,[1,50])]]],
+  michelson:[["m1","Mirror M1 · tilt",TILT("t1")],["m2","Mirror M2 · translation stage",[R("s","Stage (coarse)","mm",-10,10,0.0005,[0.001,0.1]),R("piezo","Piezo (fine)","µm",0,20,0.01,[0.01,0.2])]],
+    ["lens","Lens",[TOG("lens","Diverging lens before the beam splitter (gives circular fringes)")]],
+    ["pol","Polarisation",[POL("qwp","Quarter-wave plate in arm M2 (passed twice)"),POL("ana","Analyser at the output")]],
+    ["screen","Screen",[R("Ls","Beam splitter to screen","mm",20,1500,1,[1,50])]],POINT],
+  mz:[["ma","Mirror A · tilt",TILT("tA")],["bs2","Beam splitter 2 · tilt",TILT("tB")],["delay","Delay line in arm B",[R("s","Stage (coarse)","mm",-10,10,0.0005,[0.001,0.1]),R("piezo","Piezo (fine)","µm",0,20,0.01,[0.01,0.2])]],
+    ["pol","Polarisation",[POL("hwp","Half-wave plate in arm B"),POL("ana","Analyser at output 1")]],
+    ["screen","Screen",[R("Ls","Beam splitter 2 to screen","mm",20,1500,1,[1,50])]],POINT],
+  sagnac:[["m2","Loop mirror M2 · tilt",TILT("t2")],["bs","Beam splitter · tilt",TILT("bs")],
+    ["loop","Loop and rotation",[SEL("loop","Loop",[["free","Free-space square, 150 mm sides"],["fibre","Fibre coil, 500 turns, 10 cm across"]]),R("omega","Rotation rate","°/s",-200,200,0.01,[0.01,1])]],
+    ["screen","Screen",[R("Ls","Beam splitter to screen","mm",20,1500,1,[1,50])]],POINT],
+};
+const decs=step=>{const s=String(step);return s.includes(".")?s.split(".")[1].length:0;};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function buildControls(){
+  const host=el("controls"), st=S[cur];
+  host.innerHTML=CTRL[cur].map(([g,title,items])=>`<div class="group" data-group="${g}"><h3>${title}</h3>${items.map(it=>{
+    const id="c_"+it.k;
+    if(it.t==="r"){const n=it.nudges;return `<div class="ctl"><div class="top"><label for="${id}">${it.label}</label><input class="num" type="number" id="${id}n" step="${it.step}" min="${it.min}" max="${it.max}" aria-label="${it.label}"><span class="unit">${it.unit}</span></div>
+      <div class="bot"><button class="nudge" data-k="${it.k}" data-d="${-n[1]}">−${n[1]}</button><button class="nudge" data-k="${it.k}" data-d="${-n[0]}">−${n[0]}</button><input type="range" id="${id}" min="${it.min}" max="${it.max}" step="${it.step}"><button class="nudge" data-k="${it.k}" data-d="${n[0]}">+${n[0]}</button><button class="nudge" data-k="${it.k}" data-d="${n[1]}">+${n[1]}</button></div></div>`;}
+    if(it.t==="s")return `<div class="ctl"><div class="top"><label for="${id}">${it.label}</label><select id="${id}">${it.opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("")}</select></div></div>`;
+    if(it.t==="c")return `<div class="ctl"><label class="check"><input type="checkbox" id="${id}"> ${it.label}</label></div>`;
+    return `<div class="ctl"><div class="top"><label class="check"><input type="checkbox" id="${id}c"> ${it.label}</label><input class="num" type="number" id="${id}n" step="0.5" min="0" max="180" aria-label="${it.label} angle"><span class="unit">°</span></div>
+      <div class="bot"><input type="range" id="${id}" min="0" max="180" step="0.5"></div></div>`;
+  }).join("")}</div>`).join("");
+  CTRL[cur].forEach(([,,items])=>items.forEach(it=>{
+    const id="c_"+it.k;
+    const set=v=>{S[cur][it.k]=v;markDirty();syncControls();};
+    if(it.t==="r"){
+      el(id).addEventListener("input",e=>set(+e.target.value));
+      el(id+"n").addEventListener("change",e=>{const v=parseFloat(e.target.value);if(!isNaN(v))set(clamp(v,it.min,it.max));else syncControls();});
+    } else if(it.t==="s"){
+      el(id).addEventListener("change",e=>{const o=it.opts.find(o=>String(o[0])===e.target.value);set(o?o[0]:e.target.value);});
+    } else if(it.t==="c"){
+      el(id).addEventListener("change",e=>set(e.target.checked));
+    } else {
+      el(id+"c").addEventListener("change",e=>set(e.target.checked?(S[cur]["_"+it.k]??45):null));
+      const ang=v=>{S[cur]["_"+it.k]=v;if(S[cur][it.k]!=null)set(v);else syncControls();};
+      el(id).addEventListener("input",e=>ang(+e.target.value));
+      el(id+"n").addEventListener("change",e=>{const v=parseFloat(e.target.value);if(!isNaN(v))ang(clamp(v,0,180));});
+    }
+  }));
+  host.querySelectorAll(".nudge").forEach(b=>b.onclick=()=>{
+    const it=CTRL[cur].flatMap(g=>g[2]).find(i=>i.k===b.dataset.k);
+    const v=+(S[cur][it.k]+(+b.dataset.d)).toFixed(6);S[cur][it.k]=clamp(v,it.min,it.max);markDirty();syncControls();});
+  syncControls();
+}
+function syncControls(){
+  const st=S[cur];
+  CTRL[cur].forEach(([,,items])=>items.forEach(it=>{
+    const id="c_"+it.k;
+    if(it.t==="r"){el(id).value=st[it.k];const n=el(id+"n");if(document.activeElement!==n)n.value=(+st[it.k]).toFixed(decs(it.step));}
+    else if(it.t==="s")el(id).value=String(st[it.k]);
+    else if(it.t==="c")el(id).checked=!!st[it.k];
+    else{const on=st[it.k]!=null, a=on?st[it.k]:(st["_"+it.k]??45);el(id+"c").checked=on;el(id).value=a;el(id).disabled=!on;el(id+"n").value=a;el(id+"n").disabled=!on;}
+  }));
+  if(cur==="sagnac"){const f=S.sagnac.loop==="fibre";["t2x","t2y"].forEach(k=>{el("c_"+k).disabled=f;el("c_"+k+"n").disabled=f;});}
+}
+function focusGroup(g){
+  const n=document.querySelector(`.group[data-group="${g}"]`);if(!n)return;
+  n.scrollIntoView({behavior:"smooth",block:"center"});n.classList.add("flash");setTimeout(()=>n.classList.remove("flash"),900);
+}
+function markDirty(){dirty=true;}
+
+// ---------- bench drawings ----------
+function beamColour(){const info=sourceInfo(src);if(info.ir)return "#9b6ad0";if(info.broad)return "#c9a227";const [r,g,b]=nmToRGB(info.spectrum[0].nm);return `rgb(${Math.round(r*220)},${Math.round(g*200)},${Math.round(b*220)})`;}
+const T=(x,y,t,o={})=>`<text x="${x}" y="${y}" font-family="${o.f||"var(--display)"}" font-size="${o.s||14}" fill="${o.c||"var(--ink)"}" text-anchor="${o.a||"start"}"${o.id?` id="${o.id}"`:""}${o.it?' font-style="italic"':""}>${t}</text>`;
+const MIR=(x,y,o,g,thick=true)=>{const d=o==="/"?[x-12,y+12,x+12,y-12]:o==="\\"?[x-12,y-12,x+12,y+12]:o==="-"?[x-14,y,x+14,y]:[x,y-14,x,y+14];
+  return `<g${g?` data-g="${g}"`:""}><line x1="${d[0]}" y1="${d[1]}" x2="${d[2]}" y2="${d[3]}" stroke="var(--ink)" stroke-width="${thick?4:2}" stroke-linecap="round"/><rect x="${Math.min(d[0],d[2])-6}" y="${Math.min(d[1],d[3])-6}" width="${Math.abs(d[2]-d[0])+12}" height="${Math.abs(d[3]-d[1])+12}" fill="transparent"/></g>`;};
+const BS=(x,y,o,g)=>`<g${g?` data-g="${g}"`:""}><rect x="${x-11}" y="${y-11}" width="22" height="22" fill="var(--panel)" stroke="var(--ink)"/><line x1="${o==="/"?x-11:x-11}" y1="${o==="/"?y+11:y-11}" x2="${x+11}" y2="${o==="/"?y-11:y+11}" stroke="var(--ink)" stroke-width="1.6"/></g>`;
+const LBOX=(x,y,w,h,label,g="laser")=>`<g data-g="${g}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1" fill="var(--panel)" stroke="var(--ink)"/><circle cx="${x+14}" cy="${y+h/2}" r="4.5" fill="${beamColour()}"/>${T(x+26,y+h/2+5,label,{s:14})}</g>`;
+const LINE=(pts,c,dash)=>`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="${c}" stroke-width="1.6"${dash?` stroke-dasharray="${dash}"`:""} stroke-linejoin="round"/>`;
+const PLATE=(x,y,vert,label,g)=>`<g data-g="${g}"><rect x="${vert?x-10:x-3}" y="${vert?y-3:y-10}" width="${vert?20:6}" height="${vert?6:20}" fill="var(--accent)" opacity=".55"/>${T(x,y-16,label,{s:11,f:"var(--mono)",c:"var(--muted)",a:"middle"})}</g>`;
+const SCREEN=(x,y1,y2,label)=>`<g id="scr" class="drag"><rect x="${x-4}" y="${y1}" width="8" height="${y2-y1}" fill="var(--panel-2)" stroke="var(--ink)"/><rect x="${x-14}" y="${y1-4}" width="28" height="${y2-y1+8}" fill="transparent"/>${T(x,y1-10,"Screen",{a:"middle",s:13})}${T(x,y2+16,label,{a:"middle",s:11,f:"var(--mono)",c:"var(--muted)"})}</g>`;
+let RAIL=null;
+function benchSVG(){
+  const st=S[cur], bc=beamColour(), dash=src.type==="photon"?"5 4":null, svg=el("bench");
+  const srcLabel=src.type==="photon"?"Photon source":"Laser";
+  let h="";
+  if(cur==="single"||cur==="double"||cur==="grating"){
+    svg.setAttribute("viewBox","0 0 760 210");
+    const k=530/3000, x0=210, sx=x0+st.L*k*(cur==="grating"?1.5:1), y=100;
+    RAIL={x0,k:k*(cur==="grating"?1.5:1),key:"L",min:5,max:cur==="grating"?2000:3000,axis:"x"};
+    h+=`<line x1="${x0}" y1="176" x2="742" y2="176" stroke="var(--line)" stroke-width="3"/>`;
+    for(let mm=0;mm<=(cur==="grating"?2000:3000);mm+=500){const x=x0+mm*RAIL.k;h+=`<line x1="${x}" y1="171" x2="${x}" y2="181" stroke="var(--muted)"/>`+T(x,196,(mm/1000).toFixed(1)+" m",{a:"middle",s:10.5,f:"var(--mono)",c:"var(--muted)"});}
+    h+=LBOX(14,y-20,112,40,srcLabel);
+    h+=LINE([[126,y],[x0,y]],bc,dash);
+    // the beam fanning out after the aperture
+    const spread=cur==="grating"?60:Math.min(60,8+st.L*0.012);
+    h+=`<polygon points="${x0},${y-4} ${sx},${y-spread} ${sx},${y+spread} ${x0},${y+4}" fill="${bc}" opacity=".13"/>`;
+    h+=LINE([[x0,y],[sx,y+st.px*12]],bc,dash);
+    if(cur==="grating"){h+=`<g data-g="grating"><rect x="${x0-3}" y="${y-34}" width="6" height="68" fill="var(--panel)" stroke="var(--ink)"/>${Array.from({length:16},(_,i)=>`<line x1="${x0-3}" y1="${y-32+i*4.2}" x2="${x0+3}" y2="${y-32+i*4.2}" stroke="var(--ink)" stroke-width=".7"/>`).join("")}</g>`+T(x0,y-44,`Grating · ${st.lines}/mm`,{a:"middle",s:13});}
+    else{const gaps=cur==="single"?[0]:[-1,1];h+=`<g data-g="slit"><rect x="${x0-3}" y="${y-36}" width="6" height="72" fill="var(--ink)"/>${gaps.map(g=>`<rect x="${x0-3.5}" y="${y+g*6-2}" width="7" height="4" fill="var(--panel)"/>`).join("")}<rect x="${x0-10}" y="${y-40}" width="20" height="80" fill="transparent"/></g>`;
+      h+=T(x0,y-46,cur==="single"?`Slit · ${Math.round(st.a*1000)} µm`:`Slits · ${Math.round(st.a*1000)} µm, ${st.d} mm apart`,{a:"middle",s:13});
+      if(cur==="double"){if(st.pol1!=null||st.pol2!=null)h+=PLATE(x0+16,y,false,"pol.","pol");if(st.ana!=null)h+=PLATE(x0+40,y,false,"ana.","pol");}}
+    h+=T(168,y+38,`${SRC_DIST} mm`,{a:"middle",s:10.5,f:"var(--mono)",c:"var(--muted)"});
+    h+=SCREEN(sx,y-44,y+44,`${Math.round(st.L)} mm`);
+  } else if(cur==="michelson"){
+    svg.setAttribute("viewBox","0 0 760 310");
+    const bx=200,by=190, m1y=85, m2x=95-clamp(st.s,-10,10)*3, k=540/1500, sx=bx+st.Ls*k;
+    RAIL={x0:bx,k,key:"Ls",min:20,max:1500,axis:"x"};
+    h+=`<line x1="${bx}" y1="230" x2="742" y2="230" stroke="var(--line)" stroke-width="3"/>`;
+    for(let mm=0;mm<=1500;mm+=250){const x=bx+mm*k;h+=`<line x1="${x}" y1="225" x2="${x}" y2="235" stroke="var(--muted)"/>`+T(x,250,mm+" mm",{a:"middle",s:10.5,f:"var(--mono)",c:"var(--muted)"});}
+    h+=`<g data-g="laser"><rect x="${bx-60}" y="266" width="120" height="36" rx="1" fill="var(--panel)" stroke="var(--ink)"/><circle cx="${bx-46}" cy="284" r="4.5" fill="${bc}"/>${T(bx-34,289,srcLabel,{s:14})}</g>`;
+    h+=LINE([[bx,266],[bx,m1y]],bc,dash)+LINE([[bx,by],[m2x,by]],bc,dash)+LINE([[bx,by],[sx,by]],bc,dash);
+    if(st.lens)h+=`<g data-g="lens"><path d="M${bx-16} 232 q 16 6 32 0 q -16 6 -32 0" fill="none" stroke="var(--ink)"/><ellipse cx="${bx}" cy="232" rx="16" ry="4" fill="var(--panel)" stroke="var(--ink)"/></g>`+T(bx+22,236,"lens",{s:11,f:"var(--mono)",c:"var(--muted)"});
+    h+=BS(bx,by,"\\","")+T(bx+16,by+26,"BS",{s:12,f:"var(--mono)",c:"var(--muted)"});
+    h+=MIR(bx,m1y,"-","m1")+T(bx,m1y-14,"M1 · tilt",{a:"middle"});
+    h+=`<line x1="20" y1="${by+20}" x2="140" y2="${by+20}" stroke="var(--line)" stroke-width="3" data-g="m2"/>`+MIR(m2x,by,"|","m2")+T(m2x,by-22,"M2 · stage",{a:"middle"});
+    if(st.qwp!=null)h+=PLATE(150,by,false,"λ/4","pol");
+    if(st.ana!=null)h+=PLATE(bx+40,by,false,"ana.","pol");
+    h+=T(bx+8,(by+m1y)/2,"150 mm",{s:10.5,f:"var(--mono)",c:"var(--muted)"});
+    h+=T((bx+m2x)/2,by+14,`${(150+st.s).toFixed(3)} mm`,{a:"middle",s:10.5,f:"var(--mono)",c:"var(--muted)"});
+    h+=SCREEN(sx,by-34,by+34,`${Math.round(st.Ls)} mm`);
+  } else if(cur==="mz"){
+    svg.setAttribute("viewBox","0 0 760 310");
+    const b1=[170,240], mb=[420,240], ma=[170,95], b2=[420,95], k=320/1500, sx=b2[0]+st.Ls*k;
+    RAIL={x0:b2[0],k,key:"Ls",min:20,max:1500,axis:"x"};
+    h+=`<line x1="${b2[0]}" y1="140" x2="742" y2="140" stroke="var(--line)" stroke-width="3"/>`;
+    for(let mm=0;mm<=1500;mm+=500){const x=b2[0]+mm*k;h+=`<line x1="${x}" y1="135" x2="${x}" y2="145" stroke="var(--muted)"/>`+T(x,160,mm+" mm",{a:"middle",s:10.5,f:"var(--mono)",c:"var(--muted)"});}
+    h+=LBOX(14,220,112,40,srcLabel);
+    h+=LINE([[126,240],b1,mb,b2],bc,dash)+LINE([b1,ma,b2],bc,dash)+LINE([b2,[sx,95]],bc,dash)+LINE([b2,[420,40]],bc,dash);
+    h+=BS(...b1,"/","")+T(b1[0]-18,b1[1]+28,"BS1",{s:12,f:"var(--mono)",c:"var(--muted)"});
+    h+=MIR(...ma,"/","ma")+T(ma[0]-16,ma[1]-14,"Mirror A",{a:"end"});
+    h+=MIR(...mb,"/","delay")+`<g data-g="delay"><line x1="${mb[0]-30}" y1="${mb[1]+26}" x2="${mb[0]+30}" y2="${mb[1]+26}" stroke="var(--line)" stroke-width="3"/></g>`+T(mb[0]+18,mb[1]+5,`Mirror B · delay ${st.s>=0?"+":"−"}${Math.abs(st.s).toFixed(3)} mm`,{s:13});
+    h+=BS(...b2,"/","bs2")+T(b2[0]+16,b2[1]+28,"BS2 · tilt",{s:12,f:"var(--mono)",c:"var(--muted)"});
+    h+=`<g><rect x="402" y="16" width="36" height="24" rx="1" fill="var(--panel)" stroke="var(--ink)"/>${T(420,33,"D2",{a:"middle",s:12,f:"var(--mono)"})}</g>`+T(446,33,"output 2",{s:11,f:"var(--mono)",c:"var(--muted)"});
+    if(st.hwp!=null)h+=PLATE(300,240,false,"λ/2","pol");
+    if(st.ana!=null)h+=PLATE(456,95,false,"ana.","pol");
+    h+=SCREEN(sx,61,129,`${Math.round(st.Ls)} mm`);
+    h+=T(295,262,"arm B, 400 mm",{a:"middle",s:10.5,f:"var(--mono)",c:"var(--muted)"})+T(150,170,"arm A",{a:"end",s:10.5,f:"var(--mono)",c:"var(--muted)"});
+  } else {
+    svg.setAttribute("viewBox","0 0 760 310");
+    const bs=[560,230], m1=[300,230], m2=[300,70], m3=[560,70], k=180/1500, sx=bs[0]+st.Ls*k, fib=st.loop==="fibre";
+    RAIL={x0:bs[0],k,key:"Ls",min:20,max:1500,axis:"x"};
+    h+=`<g data-g="loop"><circle cx="430" cy="150" r="128" fill="none" stroke="var(--line)" stroke-dasharray="4 5"/>${T(430,296,`turntable · ${st.omega.toFixed(2)} °/s`,{a:"middle",s:11,f:"var(--mono)",c:"var(--muted)"})}</g>`;
+    h+=`<line x1="${bs[0]+14}" y1="258" x2="742" y2="258" stroke="var(--line)" stroke-width="3"/>`;
+    h+=`<g data-g="laser"><rect x="${bs[0]-130}" y="266" width="142" height="34" rx="1" fill="var(--panel)" stroke="var(--ink)"/><circle cx="${bs[0]-116}" cy="283" r="4.5" fill="${bc}"/>${T(bs[0]-104,288,srcLabel,{s:13})}</g>`;
+    h+=LINE([[bs[0],266],bs],bc,dash)+LINE([bs,[sx,230]],bc,dash);
+    if(fib){h+=`<g data-g="loop">${[0,1,2,3].map(i=>`<ellipse cx="430" cy="150" rx="${70-i*4}" ry="${56-i*4}" fill="none" stroke="#e8b21e" stroke-width="2"/>`).join("")}</g>`+LINE([bs,[520,150]],bc,dash)+T(430,150,"fibre coil",{a:"middle",s:13});}
+    else{h+=LINE([bs,m1,m2,m3,bs],bc,dash);h+=`<polyline points="${bs[0]-4},${bs[1]-4} ${m1[0]+4},${m1[1]-4} ${m2[0]+4},${m2[1]+4} ${m3[0]-4},${m3[1]+4} ${bs[0]-4},${bs[1]-4}" fill="none" stroke="${bc}" stroke-width="1" stroke-dasharray="3 4" opacity=".7"/>`;
+      h+=MIR(...m1,"\\","")+T(m1[0]-16,m1[1]+20,"M1",{a:"end",s:12,f:"var(--mono)",c:"var(--muted)"});
+      h+=MIR(...m2,"/","m2")+T(m2[0]-16,m2[1]-8,"M2 · tilt",{a:"end"});
+      h+=MIR(...m3,"\\","")+T(m3[0]+16,m3[1]-8,"M3",{s:12,f:"var(--mono)",c:"var(--muted)"});
+      h+=T(430,226,"150 mm",{a:"middle",s:10.5,f:"var(--mono)",c:"var(--muted)"});}
+    h+=BS(...bs,"\\","bs")+T(bs[0]+16,bs[1]-16,"BS",{s:12,f:"var(--mono)",c:"var(--muted)"});
+    h+=SCREEN(sx,196,252,`${Math.round(st.Ls)} mm`);
+  }
+  svg.innerHTML=h;
+  svg.querySelectorAll("[data-g]").forEach(n=>n.addEventListener("click",()=>focusGroup(n.dataset.g)));
+}
+// dragging the screen
+(()=>{const svg=el("bench");let drag=false;
+  const pos=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());};
+  svg.addEventListener("pointerdown",e=>{if(!e.target.closest("#scr"))return;drag=true;svg.setPointerCapture(e.pointerId);e.preventDefault();});
+  svg.addEventListener("pointermove",e=>{if(!drag||!RAIL)return;const p=pos(e);S[cur][RAIL.key]=Math.round(clamp((p.x-RAIL.x0)/RAIL.k,RAIL.min,RAIL.max));markDirty();syncControls();});
+  const end=()=>{drag=false;};svg.addEventListener("pointerup",end);svg.addEventListener("pointercancel",end);})();
+
+// ---------- computing what the screen shows ----------
+let M=null, IMG=null, PROF=null, XS=null, YROW=0, HALF=5, CDF=null, FRAC=0, RD={};
+const VIEWS=[["auto","Auto"],[0.5,"0.5 mm"],[1,"1 mm"],[2,"2 mm"],[5,"5 mm"],[10,"10 mm"],[20,"20 mm"],[50,"50 mm"],[100,"100 mm"],[200,"200 mm"],[500,"500 mm"],[1000,"1 m"]];
+function niceUp(v){const p=Math.pow(10,Math.floor(Math.log10(v)));for(const k of [1,1.5,2,2.5,3,4,5,6,8,10])if(k*p>=v)return k*p;return 10*p;}
+function autoHalf(m){
+  const lam=m.info.spectrum[Math.floor(m.info.spectrum.length/2)].lam;
+  if(m.kind==="slit"){
+    if(m.exp==="single")return niceUp(Math.max(2.4*lam*m.L/S.single.a,2.6*W0)+Math.abs(m.shift));
+    return niceUp(Math.max(1.15*lam*m.L/S.double.a,7*lam*m.L/S.double.d,2.6*W0)+Math.abs(m.shift));
+  }
+  if(m.kind==="grating"){const xs=m.spots.filter(s=>Math.abs(s.m)<=1&&Math.abs(s.x)<600).map(s=>Math.abs(s.x)+2*s.wx);return niceUp(Math.max(3*W0,...xs)*1.1);}
+  const [b1,b2]=m.beams;return niceUp(Math.max(2.4*Math.max(b1.w,b2.w),Math.max(Math.abs(b1.x),Math.abs(b2.x),Math.abs(b1.y),Math.abs(b2.y))+2*Math.max(b1.w,b2.w)));
+}
+function recompute(){
+  M=buildModel(cur,S[cur],src);
+  HALF=view==="auto"?autoHalf(M):view/2;
+  IMG=screenImage(M,N,HALF);
+  YROW=M.kind==="slit"?M.yc:M.kind==="grating"?(M.spots[0]?.y??0):(M.beams[0].y+M.beams[1].y)/2;
+  XS=Array.from({length:440},(_,i)=>-HALF+(i+0.5)*2*HALF/440);
+  PROF=rowProfile(M,XS,YROW);
+  // photon sampling table
+  CDF=new Float64Array(N*N+1);let s=0;for(let i=0;i<N*N;i++){s+=IMG.I[i];CDF[i+1]=s;}
+  const pix=2*HALF/N;FRAC=s*pix*pix/(Math.PI*W0*W0/2);
+  if(src.type==="photon")clearPhotons();
+  measure();
+  if(src.type==="laser"&&isAligned())AL[cur]=true;
+  benchSVG();renderHelp();renderPhotonPanel();
+  if(tab==="scan")renderScanPanel();
+}
+// window around the pattern centre, used for visibility
+function windowIdx(){
+  let xc=0,hw=HALF;
+  if(M.kind==="slit")xc=M.shift;
+  if(M.kind==="two"){xc=(M.beams[0].x+M.beams[1].x)/2;}
+  const per=M.predPeriod;
+  if(M.kind==="two"&&M.lens)hw=Math.min(HALF,0.35*Math.min(M.beams[0].w,M.beams[1].w));
+  else if(isFinite(per)&&per<HALF)hw=Math.max(per*1.05,2*HALF/440*6);
+  else if(M.kind==="two")hw=Math.min(HALF,0.6*Math.min(M.beams[0].w,M.beams[1].w));
+  const idx=[];XS.forEach((x,i)=>{if(Math.abs(x-xc)<=hw)idx.push(i);});
+  return idx.length>2?idx:XS.map((_,i)=>i);
+}
+function measure(){
+  RD={};
+  const I=PROF.I, idx=windowIdx();
+  if(M.kind==="two"||M.exp==="double"){
+    // visibility from the fringe term itself, so a sloping envelope doesn't count as fringes
+    let ibm=0;idx.forEach(i=>{ibm=Math.max(ibm,PROF.Ib[i]);});
+    let V=0;idx.forEach(i=>{if(PROF.Ib[i]>0.3*ibm)V=Math.max(V,Math.abs(PROF.F[i])/PROF.Ib[i]);});
+    RD.V=Math.min(1,V);RD.contrast=RD.V<1-1e-4?(1+RD.V)/(1-RD.V):Infinity;
+    // measured period: average spacing of maxima near the centre (peaks refined by a parabola)
+    const top=Math.max(...I), pk=[];
+    for(let i=1;i<I.length-1;i++)if(I[i]>I[i-1]&&I[i]>=I[i+1]&&I[i]>0.15*top){const a=I[i-1],b=I[i],c=I[i+1],d=a-2*b+c;pk.push(XS[i]+(d?0.5*(a-c)/d:0)*(XS[1]-XS[0]));}
+    RD.measPeriod=pk.length>=3?(pk[pk.length-1]-pk[0])/(pk.length-1):null;
+  }
+  if(M.exp==="single"){
+    let c=0;for(let i=1;i<I.length;i++)if(I[i]>I[c])c=i;
+    let j=c;while(j<I.length-1&&!(I[j]<I[j-1]&&I[j]<=I[j+1]))j++;
+    if(j<I.length-1){const a=I[j-1],b=I[j],q=I[j+1],d=a-2*b+q;RD.firstMin=XS[j]+(d?0.5*(a-q)/d:0)*(XS[1]-XS[0])-XS[c];}else RD.firstMin=null;
+  }
+}
+function isAligned(){
+  if(M.kind==="slit"&&M.exp==="single")return M.beamOnSlits>0.85;
+  if(M.kind==="slit")return RD.V>0.85;
+  if(M.kind==="grating")return Math.abs(S.grating.px)<0.05;
+  return RD.V>0.8;
+}
+
+// ---------- drawing the screen ----------
+const scr=el("cvScreen"), off=document.createElement("canvas");off.width=N;off.height=N;
+let counts=new Uint32Array(N*N), nDet=0, expT=0, running=true, G2={H:0,A:0,B:0,AB:0};
+function clearPhotons(){counts=new Uint32Array(N*N);nDet=0;expT=0;G2={H:0,A:0,B:0,AB:0};}
+function drawScreen(){
+  const DPR=Math.min(2,devicePixelRatio||1),r=scr.getBoundingClientRect(),W=Math.round(r.width*DPR);
+  if(scr.width!==W){scr.width=W;scr.height=W;}
+  const ctx=off.getContext("2d"),im=ctx.createImageData(N,N),d=im.data;
+  if(src.type==="laser"){
+    let mx=0;for(let i=0;i<N*N;i++)mx=Math.max(mx,IMG.I[i]);const e=mx>0?1/mx:0;
+    // brighten by intensity only, so a colour keeps its hue at every brightness
+    for(let i=0;i<N*N;i++){const l=clamp(IMG.I[i]*e,0,1),k=l>0?Math.pow(l,1/2.2)/l*e:0;d[i*4]=Math.round(255*clamp(IMG.R[i]*k,0,1));d[i*4+1]=Math.round(255*clamp(IMG.G[i]*k,0,1));d[i*4+2]=Math.round(255*clamp(IMG.B[i]*k,0,1));d[i*4+3]=255;}
+  } else {
+    let mx=1;for(let i=0;i<N*N;i++)mx=Math.max(mx,counts[i]);
+    for(let i=0;i<N*N;i++){const v=Math.sqrt(counts[i]/mx);d[i*4]=Math.round(255*v);d[i*4+1]=Math.round(240*v);d[i*4+2]=Math.round(220*v);d[i*4+3]=255;}
+  }
+  ctx.putImageData(im,0,0);
+  const c=scr.getContext("2d");c.imageSmoothingEnabled=src.type==="laser";c.drawImage(off,0,0,W,W);
+  // crosshair, profile line, scale bar
+  c.strokeStyle="rgba(255,255,255,.14)";c.lineWidth=1;c.beginPath();c.moveTo(W/2,0);c.lineTo(W/2,W);c.moveTo(0,W/2);c.lineTo(W,W/2);c.stroke();
+  const yr=W/2-YROW/HALF*W/2, tk=10*DPR;c.strokeStyle="rgba(255,210,120,.8)";c.lineWidth=2*DPR;c.beginPath();c.moveTo(0,yr);c.lineTo(tk,yr);c.moveTo(W-tk,yr);c.lineTo(W,yr);c.stroke();c.lineWidth=1;
+  const bar=niceUp(HALF/2.5)/1.0, bp=bar/HALF*W/2;c.fillStyle="rgba(255,255,255,.8)";c.fillRect(12*DPR,W-14*DPR,bp,2*DPR);
+  c.font=`${11*DPR}px ${getComputedStyle(document.body).getPropertyValue("--mono")}`;c.fillText(fmtLen(bar),12*DPR,W-20*DPR);
+  const dist=cur==="single"||cur==="double"||cur==="grating"?`${Math.round(S[cur].L)} mm from the ${cur==="grating"?"grating":"slits"}`:`${Math.round(S[cur].Ls)} mm from the beam splitter`;
+  el("scrLabel").textContent=src.type==="photon"?`Single-photon camera · ${nDet.toLocaleString()} detections`:`${M.info.ir?"Camera (infrared, shown in grey)":"Screen"} · ${dist}`;
+  el("viewText").textContent=`${fmtLen(2*HALF)} across · the plot below follows the row marked at the edges`;
+}
+function fmtLen(mm){if(mm<0)return "−"+fmtLen(-mm);if(mm===0)return "0";if(mm>=1000)return +(mm/1000).toPrecision(3)+" m";if(mm>=1)return +mm.toPrecision(3)+" mm";if(mm>=1e-3)return +(mm*1000).toPrecision(3)+" µm";return +(mm*1e6).toPrecision(3)+" nm";}
+
+// ---------- profile plot ----------
+const prof=el("cvProfile");
+function photonRow(){
+  // histogram of detections in a band of rows around the profile line
+  const row=Math.round((HALF-YROW)/(2*HALF)*N-0.5), band=Math.max(2,Math.round(N*0.04));
+  const h=new Float64Array(N);
+  for(let j=Math.max(0,row-band);j<=Math.min(N-1,row+band);j++)for(let i=0;i<N;i++)h[i]+=counts[j*N+i];
+  return h;
+}
+function fitPhotons(h){
+  // fit h ≈ a·Ibar + b·F, using the model's own two terms along the same row
+  const xs=Array.from({length:N},(_,i)=>-HALF+(i+0.5)*2*HALF/N), p=rowProfile(M,xs,YROW);
+  let s11=0,s12=0,s22=0,t1=0,t2=0,n=0;
+  const win=windowIdx(), lo=XS[win[0]], hi=XS[win[win.length-1]];
+  for(let i=0;i<N;i++){if(xs[i]<lo||xs[i]>hi)continue;const w=1/Math.max(1,h[i]);s11+=w*p.Ib[i]*p.Ib[i];s12+=w*p.Ib[i]*p.F[i];s22+=w*p.F[i]*p.F[i];t1+=w*p.Ib[i]*h[i];t2+=w*p.F[i]*h[i];n+=h[i];}
+  const det=s11*s22-s12*s12;if(Math.abs(det)<1e-30||n<20)return null;
+  const a=(t1*s22-t2*s12)/det,b=(s11*t2-s12*t1)/det;
+  const varb=s11/det, vara=s22/det;
+  const fit=xs.map((_,i)=>a*p.Ib[i]+b*p.F[i]);
+  let mx=-Infinity,mn=Infinity;for(let i=0;i<N;i++){if(xs[i]<lo||xs[i]>hi)continue;mx=Math.max(mx,fit[i]);mn=Math.min(mn,fit[i]);}
+  const V=mx+mn>0?clamp((mx-mn)/(mx+mn),0,1):0, r=b/a, sr=Math.abs(r)*Math.sqrt(varb/(b*b||1)+vara/(a*a||1));
+  return {V,sV:Math.min(1,V*sr/Math.max(Math.abs(r),1e-9)),fit,xs};
+}
+let FIT=null;
+function drawProfile(){
+  const DPR=Math.min(2,devicePixelRatio||1),r=prof.getBoundingClientRect(),W=r.width,H=r.height;
+  if(prof.width!==Math.round(W*DPR)){prof.width=Math.round(W*DPR);prof.height=Math.round(H*DPR);}
+  const c=prof.getContext("2d");c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,W,H);
+  const cs=getComputedStyle(document.documentElement),ink=cs.getPropertyValue("--ink").trim(),mut=cs.getPropertyValue("--muted").trim(),line=cs.getPropertyValue("--line").trim(),acc=cs.getPropertyValue("--accent").trim();
+  const L=40,Rr=8,Tp=8,B=26,pw=W-L-Rr,ph=H-Tp-B, X=x=>L+(x+HALF)/(2*HALF)*pw, Y=v=>Tp+ph*(1-v);
+  c.strokeStyle=line;c.lineWidth=1;c.font=`11px ${cs.getPropertyValue("--mono")}`;c.fillStyle=mut;
+  for(const v of [0,0.5,1]){c.beginPath();c.moveTo(L,Y(v));c.lineTo(W-Rr,Y(v));c.stroke();c.textAlign="right";c.fillText(v.toFixed(1),L-6,Y(v)+4);}
+  const step=niceUp(HALF/2.5);c.textAlign="center";
+  for(let x=-Math.floor(HALF/step)*step;x<=HALF+1e-9;x+=step){c.beginPath();c.moveTo(X(x),Tp+ph);c.lineTo(X(x),Tp+ph+4);c.stroke();c.fillText(fmtLen(Math.abs(x)<1e-12?0:x).replace(" ",""),X(x),H-8);}
+  c.textAlign="left";
+  if(src.type==="laser"){
+    const I=PROF.I,mx=Math.max(1e-30,...I,...(M.kind==="two"||M.exp==="double"?PROF.Ib:[]));
+    if(M.kind==="two"||M.exp==="double"){c.setLineDash([4,4]);c.strokeStyle=mut;c.lineWidth=1.2;c.beginPath();PROF.Ib.forEach((v,i)=>{const y=Y(v/mx);i?c.lineTo(X(XS[i]),y):c.moveTo(X(XS[i]),y);});c.stroke();c.setLineDash([]);}
+    c.strokeStyle=ink;c.lineWidth=2;c.lineJoin="round";c.beginPath();I.forEach((v,i)=>{const y=Y(v/mx);i?c.lineTo(X(XS[i]),y):c.moveTo(X(XS[i]),y);});c.stroke();
+    el("plotNote").textContent=M.kind==="two"||M.exp==="double"?"solid: total · dashed: no interference":"";
+  } else {
+    const h=photonRow(),mx=Math.max(1,...h),bw=pw/N;
+    c.fillStyle=acc;c.globalAlpha=.55;for(let i=0;i<N;i++){const v=h[i]/mx;c.fillRect(L+i*bw,Y(v),Math.max(1,bw-0.5),ph*v);}c.globalAlpha=1;
+    FIT=(M.kind==="two"||M.exp==="double")&&nDet>50?fitPhotons(h):null;
+    if(FIT){c.strokeStyle=ink;c.lineWidth=2;c.beginPath();FIT.fit.forEach((v,i)=>{const y=Y(clamp(v/mx,0,1.2));i?c.lineTo(X(FIT.xs[i]),y):c.moveTo(X(FIT.xs[i]),y);});c.stroke();}
+    el("plotNote").textContent=`bars: photon counts in the band · ${FIT?"line: fit":"collecting…"}`;
+  }
+  el("plotTitle").textContent=src.type==="photon"?"Detections across the screen":"Intensity across the screen";
+}
+
+// ---------- readings ----------
+const f2=(v,d=3)=>v==null||!isFinite(v)?"–":(+v).toFixed(d);
+function tile(label,val,small){return `<div class="rd"><span>${label}</span><b>${val}</b>${small?`<small>${small}</small>`:""}</div>`;}
+function renderReadings(){
+  let h="",extra="";
+  const lam=M.info.spectrum[Math.floor(M.info.spectrum.length/2)].lam, photon=src.type==="photon";
+  const Vtxt=()=>photon?(FIT?`${FIT.V.toFixed(3)} ± ${FIT.sV.toFixed(3)}`:"collecting"):f2(RD.V);
+  const Ctxt=()=>{const V=photon?(FIT?FIT.V:null):RD.V;if(V==null)return "–";const c=photon?(1+V)/Math.max(1e-6,1-V):RD.contrast;return isFinite(c)&&c<1e4?c.toFixed(c<10?2:0)+" : 1":"> 10⁴ : 1";};
+  if(M.exp==="single"){
+    h+=tile("First dark fringe",RD.firstMin!=null?fmtLen(Math.abs(RD.firstMin)):"–",`predicted λL/a = ${fmtLen(M.firstMin)}`);
+    h+=tile("Central maximum",fmtLen(2*M.firstMin),"full width, far field");
+    h+=tile("Fresnel number",M.NF.toFixed(2),M.NF<0.3?"far field":M.NF<3?"in between":"near field: shadow of the slit");
+    h+=tile("Light on the slit",(100*M.beamOnSlits).toFixed(0)+"%","of the beam's peak");
+    h+=tile("Power on view",(100*FRAC).toFixed(1)+"%","of the laser");
+    h+=tile("Wavelength",M.info.broad?"white":Math.round(lam*1e6)+" nm",M.info.name);
+  } else if(M.exp==="double"){
+    h+=tile("Visibility",Vtxt(),"(I<sub>max</sub> − I<sub>min</sub>)/(I<sub>max</sub> + I<sub>min</sub>)");
+    h+=tile("Contrast",Ctxt(),"I<sub>max</sub> : I<sub>min</sub>");
+    h+=tile("Fringe period",RD.measPeriod?fmtLen(RD.measPeriod):"–",`predicted λL/d = ${fmtLen(M.predPeriod)}`);
+    h+=tile("Fringes per envelope",Math.max(0,Math.round(2*S.double.d/S.double.a)-1),"bright fringes inside the central lobe");
+    h+=tile("Slit balance",M.balanceV.toFixed(3),"best visibility the lighting allows");
+    h+=tile("Fresnel number",M.NF.toFixed(2),M.NF<0.3?"far field":"not far field yet");
+  } else if(M.kind==="grating"){
+    const sp0=M.info.spectrum[Math.floor(M.info.spectrum.length/2)];
+    const vis=M.spots.filter(s=>s.k===Math.floor(M.info.spectrum.length/2)&&Math.abs(s.x)<=HALF);
+    h+=tile("Orders on view",vis.length,`of ${M.spots.filter(s=>s.k===Math.floor(M.info.spectrum.length/2)).length} that exist`);
+    h+=tile("Grating period",fmtLen(M.dper),`${S.grating.lines} lines/mm`);
+    h+=tile("Max order",Math.floor(M.dper/sp0.lam),"|m| ≤ d/λ");
+    extra=`<table class="orders"><thead><tr><th>Order</th><th>Angle</th><th>On screen</th><th>Efficiency</th><th>λ from position</th></tr></thead><tbody>${
+      M.spots.filter(s=>s.k===Math.floor(M.info.spectrum.length/2)).map(s=>`<tr><td>${s.m>0?"+":""}${s.m}</td><td>${(s.th*180/Math.PI).toFixed(2)}°</td><td>${s.x>=0?"+":"−"}${fmtLen(Math.abs(s.x))}</td><td>${(100*s.eff).toFixed(1)}%</td><td>${s.m?Math.round(Math.abs(M.dper*Math.sin(Math.atan(s.x/M.L))/s.m)*1e6)+" nm":"–"}</td></tr>`).join("")}</tbody></table>
+      <p class="sub" style="margin-top:8px">λ is worked out from where each spot lands: λ = d·sin(atan(x/L))/m. ${Math.abs(S.grating.px)>0.01?"The beam isn't at normal incidence, so the + and − orders give slightly different answers.":""}</p>`;
+  } else {
+    const P1=portPower(M), Pin=1;
+    h+=tile("Visibility",Vtxt(),"(I<sub>max</sub> − I<sub>min</sub>)/(I<sub>max</sub> + I<sub>min</sub>)");
+    h+=tile("Contrast",Ctxt(),"I<sub>max</sub> : I<sub>min</sub>");
+    h+=tile("Fringe period",M.lens?"rings":isFinite(M.predPeriod)?fmtLen(M.predPeriod):"∞",M.lens?"circular fringes":`beams cross at ${(M.relA*1000).toFixed(3)} mrad`);
+    h+=tile("Spot separation",fmtLen(M.sep),`beam radius ${fmtLen(M.beams[0].w)}`);
+    h+=tile("Path difference",cur==="sagnac"?"0 (shared loop)":fmtLen(Math.abs(M.dP)),cur==="sagnac"?`Sagnac phase ${M.sagnacPhase.toFixed(3)} rad`:`coherence length ${M.info.Lc>=1?fmtLen(M.info.Lc):fmtLen(M.info.Lc)}`);
+    h+=tile(cur==="sagnac"?"Output / back to laser":cur==="mz"?"Output 1 / output 2":"Output power",
+      cur==="michelson"?(100*P1).toFixed(1)+"%":`${(100*P1).toFixed(1)}% / ${(100*Math.max(0,Pin-P1)).toFixed(1)}%`,"of the input, whole beam");
+  }
+  el("readings").innerHTML=h;el("extraReadings").innerHTML=extra;
+}
+
+// ---------- delay scan ----------
+let SCAN=null;
+function renderScanPanel(){
+  const b=el("scanBody");
+  if(M.kind!=="two"){b.innerHTML=`<div class="msg">A delay scan needs two separate paths, so it's for the Michelson, Mach–Zehnder and Sagnac. For the slits and grating, use the screen and the plot.</div>`;return;}
+  const sag=cur==="sagnac";
+  const opts=sag?[[1,"±1 °/s"],[10,"±10 °/s"],[100,"±100 °/s"],[1000,"±1000 °/s"]]:[[0.001,"±1 µm"],[0.005,"±5 µm"],[0.05,"±50 µm"],[0.5,"±0.5 mm"],[5,"±5 mm"]];
+  b.innerHTML=`<span class="eyebrow">${sag?"Rotation scan":"Delay scan"}</span><h2>${sag?"Output against rotation rate":"Output against path difference"}</h2>
+    <p class="sub">${sag?"Sweeps the turntable's rotation rate and records the light leaving the output port.":`Sweeps ${cur==="michelson"?"mirror M2":"the delay line"} and records the whole beam on a photodiode${src.type==="photon"?" (here, a single-photon counter, 50 ms per point)":""}. Fringes only show while the paths are within a coherence length.`}</p>
+    <div class="row"><label for="scanRange">Range</label><select id="scanRange">${opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("")}</select><button class="btn primary small" id="btnScan">Run scan</button><button class="btn small hidden" id="btnPeak">${sag?"":"Go to the centre of the fringes"}</button></div>
+    <div class="plot"><div class="t"><span id="scanTitle">–</span><span id="scanNote"></span></div><canvas id="cvScan" aria-label="Scan result"></canvas></div>
+    <div class="readings" id="scanRead"></div>`;
+  if(SCAN&&SCAN.exp===cur){el("scanRange").value=String(SCAN.range);}else{el("scanRange").value=String(opts[1][0]);}
+  el("btnScan").onclick=runScan;
+  el("btnPeak").onclick=()=>{if(!SCAN||SCAN.center==null)return;const st=S[cur];const per=cur==="michelson"?2:1;st.s=+(st.s+(SCAN.center-SCAN.base)/per).toFixed(6);st.piezo=0;markDirty();syncControls();SCAN=null;renderScanPanel();};
+  drawScan();
+}
+function runScan(){
+  const range=+el("scanRange").value, sag=cur==="sagnac", n=sag?240:400, st=S[cur], base=sag?st.omega:M.dP;
+  const xs=[],y1=[],y2=[];
+  const coarse=m=>{const [b1,b2]=m.beams,ext=3*Math.max(b1.w,b2.w)+Math.max(Math.abs(b1.x),Math.abs(b2.x),Math.abs(b1.y),Math.abs(b2.y)),g=28,hh=2*ext/g,cx=(b1.x+b2.x)/2,cy=(b1.y+b2.y)/2;let s=0;
+    m.info.spectrum.forEach(sp=>{for(let j=0;j<g;j++)for(let i=0;i<g;i++){const r=twoBeamAt(m,sp,cx-ext+(i+0.5)*hh,cy-ext+(j+0.5)*hh);s+=sp.w*Math.max(0,r.Ibar+r.F);}});return s*hh*hh/(Math.PI*W0*W0/2);};
+  for(let i=0;i<n;i++){
+    const d=-range+2*range*i/(n-1), t={...st};
+    if(sag)t.omega=st.omega+d;else{const per=cur==="michelson"?2:1;t.s=st.s+d/per;}
+    const m=buildModel(cur,t,src);let p=coarse(m);
+    let q=Math.max(0,1-p);
+    if(src.type==="photon"){const k=src.rate*ETA_DET*0.05;p=poisson(k*p);q=poisson(k*q);}
+    xs.push(sag?t.omega:base+d);y1.push(p);y2.push(q);
+  }
+  // where the fringes are strongest: running max−min over about one fringe
+  let center=null;
+  let uniform=false;
+  if(!sag){
+    // modulation in a sliding window about a fringe wide; the packet's centre is where it peaks
+    const lam=M.info.spectrum[Math.floor(M.info.spectrum.length/2)].lam, w=Math.max(3,Math.round(1.2*lam/(2*range/(n-1))));
+    let best=-1,worst=Infinity;
+    for(let i=w;i<n-w;i++){let a=-Infinity,b=Infinity;for(let j=i-w;j<=i+w;j++){a=Math.max(a,y1[j]);b=Math.min(b,y1[j]);}const v=a-b;worst=Math.min(worst,v);if(v>best*1.0001){best=v;center=xs[i];}}
+    const mx=Math.max(...y1),mn=Math.min(...y1);
+    if(mx-mn<0.08*(mx+mn))center=null;
+    else if(w*2<n&&worst>0.7*best){uniform=true;center=null;}
+  }
+  SCAN={exp:cur,range,xs,y1,y2,base,center,sag,uniform,photon:src.type==="photon"};
+  drawScan();
+  el("btnPeak").classList.toggle("hidden",sag||center==null);
+}
+function drawScan(){
+  const cv=el("cvScan");if(!cv)return;
+  const DPR=Math.min(2,devicePixelRatio||1),r=cv.getBoundingClientRect(),W=r.width,H=r.height;
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  const c=cv.getContext("2d");c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,W,H);
+  const cs=getComputedStyle(document.documentElement),ink=cs.getPropertyValue("--ink").trim(),mut=cs.getPropertyValue("--muted").trim(),line=cs.getPropertyValue("--line").trim();
+  c.font=`11px ${cs.getPropertyValue("--mono")}`;
+  if(!SCAN||SCAN.exp!==cur){c.fillStyle=mut;c.fillText("Press Run scan.",12,24);el("scanTitle").textContent="";el("scanRead").innerHTML="";return;}
+  const {xs,y1,y2,sag,photon}=SCAN, L=48,Rr=8,Tp=8,B=26,pw=W-L-Rr,ph=H-Tp-B, x0=xs[0],x1=xs[xs.length-1];
+  const ymax=Math.max(1e-9,...y1,...(cur==="michelson"?[]:y2));
+  const X=x=>L+(x-x0)/(x1-x0)*pw, Y=v=>Tp+ph*(1-v/ymax);
+  c.strokeStyle=line;c.fillStyle=mut;
+  for(const f of [0,0.5,1]){c.beginPath();c.moveTo(L,Y(f*ymax));c.lineTo(W-Rr,Y(f*ymax));c.stroke();c.textAlign="right";c.fillText(photon?Math.round(f*ymax):(f*ymax).toFixed(2),L-6,Y(f*ymax)+4);}
+  c.textAlign="center";
+  for(let i=0;i<=4;i++){const x=x0+(x1-x0)*i/4;c.fillText(sag?x.toFixed(Math.abs(x1-x0)<5?2:0):fmtLen(x).replace(" ",""),X(x),H-8);}
+  const plotL=(ys,col,wd,dash)=>{c.strokeStyle=col;c.lineWidth=wd;c.setLineDash(dash||[]);c.beginPath();ys.forEach((v,i)=>{i?c.lineTo(X(xs[i]),Y(v)):c.moveTo(X(xs[i]),Y(v));});c.stroke();c.setLineDash([]);};
+  if(cur!=="michelson")plotL(y2,mut,1.4,[4,4]);
+  plotL(y1,ink,photon?1.2:1.8);
+  el("scanTitle").textContent=sag?"x: rotation rate (°/s) · y: output":`x: path difference · y: ${photon?"counts per 50 ms":"power / input"}`;
+  el("scanNote").textContent=cur==="michelson"?"":cur==="mz"?"solid: output 1 · dashed: output 2":"solid: output · dashed: back to laser";
+  const mx=Math.max(...y1),mn=Math.min(...y1);
+  el("scanRead").innerHTML=tile("Fringe visibility",mx>0?((mx-mn)/(mx+mn)).toFixed(3):"–","over the whole scan")+
+    tile(sag?"Half-fringe at":"Fringes centred at",sag?`${(180/Math.PI*(M.info.spectrum[0].lam*1e-3*3e8)/(8*M.NA)).toFixed(2)} °/s`:SCAN.center!=null?fmtLen(SCAN.center):SCAN.uniform?"everywhere":"none found",sag?"rotation for a π phase shift":SCAN.uniform?"the coherence length is much longer than this scan":"path difference")+
+    tile(sag?"Earth's rotation":"Coherence length",sag?"0.0042 °/s":fmtLen(M.info.Lc),sag?`gives ${(8*Math.PI*M.NA*(0.0042*Math.PI/180)/(M.info.spectrum[0].lam*1e-3*3e8)).toExponential(2)} rad here`:M.info.name);
+}
+
+// ---------- single photons ----------
+const logRate=v=>Math.round(100*Math.pow(10,v/100*2.7));
+const invRate=r=>100*Math.log10(r/100)/2.7;
+function renderPhotonPanel(){
+  const b=el("photonBody");
+  if(src.type==="laser"){
+    const ok=AL[cur];
+    b.innerHTML=`<span class="eyebrow">Swap the source</span><h2>From a laser to single photons</h2>
+      <div class="prose"><p>Single photons are far too faint to align by eye, so you line everything up with the laser first. Then the laser comes out and a heralded single-photon source goes in, into the same fibre and the same beam path.</p>
+      <p>The photons come from down-conversion at 810 nm, filtered to a few nanometres. That gives them a coherence length of only tens of microns, so interferometer arms have to be matched much more closely than with a laser.</p>
+      <p class="aside">${ok?"This setup has been aligned with the laser. You're ready.":"This setup hasn't been aligned with the laser yet. You can still swap, but you may see nothing."}</p></div>
+      <div class="row"><button class="btn primary" id="btnSwap">Swap in single photons</button></div>`;
+    el("btnSwap").onclick=()=>setSource("photon");
+    return;
+  }
+  const info=sourceInfo(src);
+  b.innerHTML=`<span class="eyebrow">Heralded single photons</span><h2>One photon at a time</h2>
+    <div class="prose"><p>Each dot on the camera is one photon, heralded by its twin. Any single photon lands at one place, seemingly at random, yet thousands of them build up the same fringes as the laser. Each photon went both ways.</p></div>
+    <div class="ctl"><div class="top"><label for="rate">Herald rate</label><b class="num" style="border:0" id="rateOut"></b><span class="unit">/s</span></div><div class="bot"><input type="range" id="rate" min="0" max="100" step="1"></div></div>
+    <div class="ctl"><div class="top"><label for="bwSel">Filter bandwidth</label><select id="bwSel"><option value="3">3 nm</option><option value="10">10 nm</option></select></div></div>
+    <div class="row"><button class="btn small" id="btnRun"></button><button class="btn small" id="btnClear">Clear the camera</button><button class="btn small" id="btnBack">Swap back to the laser</button></div>
+    <div class="counters" id="pcount"></div>
+    <h2 style="margin-top:22px">Is it really one photon at a time?</h2>
+    <div class="prose"><p>Put a 50:50 beam splitter in front of two detectors and count how often both click together with the herald. A laser gives g⁽²⁾(0) = 1. A true single photon can only go one way, so g⁽²⁾(0) ≈ 0.</p></div>
+    <table class="gtable" id="gtab"></table>`;
+  el("rate").value=invRate(src.rate);el("bwSel").value=String(src.bw);
+  el("rate").oninput=e=>{src.rate=logRate(+e.target.value);updatePhotonCounters();};
+  el("bwSel").onchange=e=>{src.bw=+e.target.value;markDirty();};
+  el("btnRun").onclick=()=>{running=!running;updatePhotonCounters();};
+  el("btnClear").onclick=()=>{clearPhotons();updatePhotonCounters();};
+  el("btnBack").onclick=()=>setSource("laser");
+  updatePhotonCounters();
+}
+function updatePhotonCounters(){
+  if(src.type!=="photon"||!el("pcount"))return;
+  el("rateOut").textContent=src.rate.toLocaleString();
+  el("btnRun").textContent=running?"Pause":"Resume";
+  const info=sourceInfo(src), camRate=src.rate*ETA_DET*FRAC;
+  let h=tile("On the camera",nDet.toLocaleString(),`in ${expT.toFixed(1)} s`)+tile("Camera rate",Math.round(camRate).toLocaleString()+" /s",`${(100*FRAC).toFixed(1)}% of photons reach the view`)+tile("Coherence length",fmtLen(info.Lc),`λ²/Δλ, ${src.bw} nm filter`);
+  if(M.kind==="two"){const P1=portPower(M);h+=tile(cur==="sagnac"?"Output port":cur==="mz"?"Detector D1":"Output detector",Math.round(src.rate*ETA_DET*P1).toLocaleString()+" /s","whole beam");
+    if(cur!=="michelson")h+=tile(cur==="sagnac"?"Back to the source":"Detector D2",Math.round(src.rate*ETA_DET*Math.max(0,1-P1)).toLocaleString()+" /s","");}
+  if(FIT)h+=tile("Visibility from counts",`${FIT.V.toFixed(3)} ± ${FIT.sV.toFixed(3)}`,"fit to the model's fringe shape");
+  el("pcount").innerHTML=h;
+  const g=G2.A&&G2.B?G2.H*G2.AB/(G2.A*G2.B):null, sg=g!=null&&G2.AB>0?g/Math.sqrt(G2.AB):null;
+  el("gtab").innerHTML=`<tr><td>Heralds</td><td>${G2.H.toLocaleString()}</td></tr><tr><td>Herald + detector A</td><td>${G2.A.toLocaleString()}</td></tr><tr><td>Herald + detector B</td><td>${G2.B.toLocaleString()}</td></tr><tr><td>Herald + A + B together</td><td>${G2.AB.toLocaleString()}</td></tr>
+    <tr><td><b>g⁽²⁾(0) = N<sub>H</sub>·N<sub>HAB</sub> / (N<sub>HA</sub>·N<sub>HB</sub>)</b></td><td><b>${g==null?"collecting":g.toFixed(3)+(sg?` ± ${sg.toFixed(3)}`:"")}</b></td></tr>`;
+}
+function photonStep(dt){
+  if(src.type!=="photon"||!running||!CDF)return;
+  expT+=dt;
+  const tot=CDF[N*N], n=poisson(src.rate*ETA_DET*FRAC*dt), dark=poisson(20*dt);
+  for(let k=0;k<n;k++){const u=Math.random()*tot;let lo=0,hi=N*N;while(lo<hi){const mid=(lo+hi)>>1;if(CDF[mid+1]<u)lo=mid+1;else hi=mid;}counts[lo]++;}
+  for(let k=0;k<dark;k++)counts[Math.floor(Math.random()*N*N)]++;
+  nDet+=n+dark;
+  const pm=src.rate/1e5;
+  G2.H+=poisson(src.rate*dt);G2.A+=poisson(src.rate*dt*ETA_DET*0.5);G2.B+=poisson(src.rate*dt*ETA_DET*0.5);G2.AB+=poisson(src.rate*dt*pm*ETA_DET*ETA_DET*0.5);
+}
+function setSource(t){
+  src.type=t;el("srcSeg").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.s===t));
+  el("laserSel").classList.toggle("hidden",t!=="laser");
+  clearPhotons();running=true;markDirty();
+  if(t==="photon")selectTab("photons");
+}
+
+// ---------- help ----------
+function diagnose(){
+  const out=[], st=S[cur], m=M, photon=src.type==="photon", pix=2*HALF/N;
+  const add=(lvl,title,text,fixes=[])=>out.push({lvl,title,text,fixes});
+  const fix=(label,fn)=>({label,fn});
+  if(photon&&!AL[cur])add("warn","You haven't aligned this with the laser yet","Photons are far too faint to align by eye. Swap back to the laser, get clear fringes, then bring the photons back.",[fix("Swap back to the laser",()=>setSource("laser"))]);
+  if(m.kind==="slit"){
+    const x0=m.x0, y0=m.y0;
+    if(Math.abs(x0)>0.08)add(Math.abs(x0)>0.3?"bad":"warn",`The beam is ${fmtLen(Math.abs(x0))} ${x0>0?"right":"left"} of the ${m.exp==="single"?"slit":"slits' centre"}`,
+      `Turn the laser's horizontal tilt from ${st.px.toFixed(3)} towards 0 mrad. Each 0.1 mrad moves the beam ${fmtLen(0.1e-3*SRC_DIST)} at the ${m.exp==="single"?"slit":"slits"}, ${SRC_DIST} mm from the laser.`,[fix("Centre the beam",()=>{st.px=0;})]);
+    if(Math.abs(y0)>0.4)add("warn",`The beam is ${fmtLen(Math.abs(y0))} ${y0>0?"above":"below"} the middle of the slit`,"Bring the vertical tilt towards 0 so the beam sits in the middle of the 3 mm tall slit.",[fix("Level the beam",()=>{st.py=0;})]);
+    if(m.exp==="double"&&m.balanceV<0.97)add("warn","The two slits aren't equally lit",`One slit gets more light than the other, which caps the visibility at ${m.balanceV.toFixed(2)}. Centre the beam between the slits.`,[fix("Centre the beam",()=>{st.px=0;})]);
+    if(m.NF>0.5){const a=m.exp==="single"?st.a:st.d+st.a, Lf=Math.ceil(a*a/4/m.info.spectrum[0].lam/0.25/50)*50;
+      add("info",`The screen is in the near field (Fresnel number ${m.NF.toFixed(1)})`,`At ${Math.round(st.L)} mm you're still seeing a blurred shadow of the ${m.exp==="single"?"slit":"slits"}, not the far-field pattern. The pattern settles into its far-field shape beyond about ${Lf} mm.`,[fix(`Move the screen to ${Math.min(3000,Lf)} mm`,()=>{st.L=Math.min(3000,Lf);})]);}
+    if(m.exp==="double"){
+      const blocked=m.slits.findIndex(q=>Math.hypot(...q.J)<0.05);
+      if(blocked>=0)add("bad",`Slit ${blocked+1} is dark`,`The laser is horizontally polarised, so ${st.ana!=null?"the analyser or ":""}a polariser at or near 90° blocks that slit and there's only one path left. For a which-path experiment, put the slit polarisers at +45° and −45° (135°) instead.`,[fix("Polarisers at +45° and −45°",()=>{st.pol1=45;st.pol2=135;st.ana=null;})]);
+      else if(st.pol1!=null&&st.pol2!=null&&m.polV<0.05&&st.ana==null)add("bad","No fringes: the polarisers tell you which slit the light came through","With the two slits' polarisations at right angles, the paths are distinguishable, so there's nothing to interfere. Put an analyser before the screen halfway between them (0° or 90° for slits at ±45°) to erase the which-path information. The fringes come back at half the brightness.",[fix("Insert an analyser to erase it",()=>{st.ana=((st.pol1+st.pol2)/2)%180;})]);
+      else if(m.polV<0.05&&(st.pol1!=null||st.pol2!=null||st.ana!=null))add("bad","No fringes: the polarisation optics make the paths distinguishable","Check the analyser angle against the two slit polarisers.",[fix("Remove the polarisers",()=>{st.pol1=null;st.pol2=null;st.ana=null;})]);
+      else if(m.polV<0.95&&(st.pol1!=null||st.pol2!=null))add("info",`Polarisation lowers the visibility to at most ${m.polV.toFixed(2)}`,"The slits' polarisations overlap only partly, so the light from the two slits only partly interferes.");
+    }
+  }
+  if(m.kind==="grating"){
+    if(Math.abs(st.px)>0.05)add("info",`The beam meets the grating ${Math.abs(st.px).toFixed(2)} mrad off normal`,"The + and − orders then sit at slightly different distances, and λ worked out from them won't quite agree. Set the horizontal tilt to 0 for measurements.",[fix("Normal incidence",()=>{st.px=0;})]);
+    const lam=m.info.spectrum[Math.floor(m.info.spectrum.length/2)].lam;
+    if(lam>M.dper)add("bad","Only the straight-through beam: the grating is too fine for this light",`With ${st.lines} lines/mm the spacing (${fmtLen(M.dper)}) is shorter than the wavelength, so no orders exist. Use fewer lines per mm.`,[fix("Use 300 lines/mm",()=>{st.lines=300;})]);
+    else if(!m.spots.some(s=>s.m===1&&Math.abs(s.x)<=HALF))add("warn","The first orders are off the edge of the view","Set the view to Auto or widen it.",[fix("Auto view",()=>{view="auto";el("viewSel").value="auto";})]);
+  }
+  if(m.kind==="two"){
+    const [b1,b2]=m.beams, w=Math.min(b1.w,b2.w);
+    if(m.sep>0.4*w){
+      const how=cur==="michelson"?`Use M1's tilt screws: at ${Math.round(st.Ls)} mm a tilt of 0.1 mrad moves its spot ${fmtLen(0.2e-3*(150+st.Ls))}. Watch the two spots on the screen merge.`:
+        cur==="mz"?"First use mirror A to bring beam A onto beam B at beam splitter 2, then use BS2's tilt to make the spots meet on the screen. Repeat; each pass gets closer.":
+        "Use M2's tilt. Because both beams use M2, tilting it moves the two spots in opposite directions, so the overlap point is easy to find.";
+      add(m.sep>2*w?"bad":"warn",`The two spots don't overlap: they're ${fmtLen(m.sep)} apart`,how,[fix("Overlap the spots",()=>{if(cur==="michelson"){st.t1x=0;st.t1y=0;}else if(cur==="mz"){st.tAx=0;st.tAy=0;st.tBx=0;st.tBy=0;}else{st.t2x=0;st.t2y=0;}})]);
+    }
+    if(cur==="mz"&&m.atBS2>0.15)add("info",`Beam A meets BS2 ${fmtLen(m.atBS2)} away from beam B`,"Overlapping the spots with BS2 alone leaves the beams crossing at an angle. Fix the overlap at BS2 with mirror A first.",[fix("Fix mirror A",()=>{st.tAx=0;st.tAy=0;})]);
+    if(!m.lens&&isFinite(m.predPeriod)&&m.predPeriod<0.4*w&&m.sep<=0.4*w)add("info",`Lots of fine fringes: the beams cross at ${(m.relA*1000).toFixed(2)} mrad`,"Make the beams parallel to spread the fringes out until the whole spot blinks bright and dark together.");
+    if(isFinite(m.predPeriod)&&m.predPeriod<3*pix&&!m.lens)add("warn","The fringes are finer than the screen can show",`Their period is ${fmtLen(m.predPeriod)} but each pixel here covers ${fmtLen(pix)}. Zoom in, or reduce the tilt.`);
+    if(cur!=="sagnac"&&m.gamma<0.6){
+      const dl=cur==="michelson"?m.dP/2:m.dP;
+      add(m.gamma<0.05?"bad":"warn",m.gamma<0.05?`No fringes: the paths differ by ${fmtLen(Math.abs(m.dP))}, more than the coherence length`:`Weak fringes: the path difference is close to the coherence length`,
+        `This source's coherence length is ${fmtLen(m.info.Lc)}. ${cur==="michelson"?`Move M2 by ${dl>0?"−":"+"}${fmtLen(Math.abs(dl))} (each mm of stage changes the path by 2 mm).`:`Move the delay line by ${dl>0?"−":"+"}${fmtLen(Math.abs(dl))}.`} If you can't find it, run a wide delay scan, or switch to the white LED, whose fringes appear only within a micron of equal paths.`,
+        [fix("Equalise the paths",()=>{st.s=0;st.piezo=0;}),fix("Open the delay scan",()=>selectTab("scan"))]);
+    }
+    if(m.polV<0.05)add("bad","No fringes: the two paths have orthogonal polarisations",`The wave plate makes the two beams' polarisations perpendicular, which marks the path each photon took. An analyser at 45° erases that information.`,[fix("Analyser at 45°",()=>{st.ana=45;}),fix("Remove the wave plate",()=>{st.qwp=null;st.hwp=null;})]);
+    else if(m.polV<0.95)add("info",`Polarisation limits the visibility to ${m.polV.toFixed(2)}`,"The two beams' polarisations only partly overlap.");
+    if(cur==="sagnac"){
+      const P1=portPower(m);
+      if(m.sep<=0.4*w&&P1<0.05)add("ok","The output port is dark, and that's correct","Both beams travel the same loop, so they arrive here exactly out of step and the light goes back towards the laser instead. Rotate the turntable to shift the phase and light appears.");
+      if(st.loop==="fibre")add("info","In the fibre coil the mirrors can't be misaligned","Both directions travel the same single-mode fibre, so the beams always overlap. The tilt screws do nothing here.");
+    }
+    if(m.lens)add("info","Circular fringes","The lens makes both beams diverge. Different arm lengths mean different curvature, so you see rings. Equal arms give a single broad fringe; each extra wavelength of path adds one ring.");
+  }
+  if(view!=="auto"&&FRAC<0.01)add("warn","Almost no light falls on the view","The pattern is outside the area you're looking at.",[fix("Auto view",()=>{view="auto";el("viewSel").value="auto";})]);
+  if(photon&&nDet<1500)add("info",`Keep collecting: ${nDet.toLocaleString()} photons so far`,"Single detections look random. The fringes emerge after a few thousand.");
+  if(!out.some(o=>o.lvl==="bad"||o.lvl==="warn"))out.unshift({lvl:"ok",title:"Nothing looks wrong",text:"The setup is aligned. Use the steps below for ideas of what to try next.",fixes:[]});
+  return out;
+}
+const STEPS={
+  single:[["Centre the laser on the slit",()=>Math.abs(M.x0)<0.05&&Math.abs(M.y0)<0.3],["Move the screen into the far field (Fresnel number below 0.3)",()=>M.NF<0.3],["Compare the first dark fringe with λL/a",()=>RD.firstMin!=null&&Math.abs(Math.abs(RD.firstMin)/M.firstMin-1)<0.08],["Try a narrower slit and watch the pattern spread",()=>S.single.a<=0.05],["Swap in single photons and collect 3000",()=>src.type==="photon"&&nDet>3000]],
+  double:[["Centre the beam between the slits",()=>M.balanceV>0.995],["Move the screen into the far field",()=>M.NF<0.3],["Get the visibility above 0.9",()=>RD.V>0.9],["Check the fringe period against λL/d",()=>RD.measPeriod&&Math.abs(RD.measPeriod/M.predPeriod-1)<0.05],["Put polarisers at +45° and −45° on the slits, then erase with an analyser at 0° or 90°",()=>S.double.pol1!=null&&S.double.pol2!=null&&Math.abs(Math.abs(S.double.pol1-S.double.pol2)-90)<1&&S.double.ana!=null&&RD.V>0.4],["Swap in single photons and see the fringes build up",()=>src.type==="photon"&&nDet>3000&&FIT&&FIT.V>0.5]],
+  grating:[["Set normal incidence",()=>Math.abs(S.grating.px)<0.01],["Get both first orders on the view",()=>M.spots.filter(s=>Math.abs(s.m)===1&&Math.abs(s.x)<=HALF).length>=2],["Read the wavelength off the first order",()=>Math.abs(S.grating.px)<0.01&&M.spots.some(s=>s.m===1&&Math.abs(s.x)<=HALF)],["Try the white LED and see a spectrum in each order",()=>src.type==="laser"&&src.laser==="led"]],
+  michelson:[["Overlap the two spots with M1",()=>M.sep<0.2*M.beams[0].w],["Make the beams parallel: one broad fringe",()=>M.relA*M.beams[0].w<M.info.spectrum[0].lam],["Bring the arms within a coherence length",()=>M.gamma>0.9],["Get the visibility above 0.9",()=>RD.V>0.9],["Find the white-light fringe with the LED",()=>src.laser==="led"&&src.type==="laser"&&RD.V>0.5],["Swap in single photons and keep the fringes",()=>src.type==="photon"&&nDet>3000&&FIT&&FIT.V>0.5]],
+  mz:[["Overlap the beams at BS2 with mirror A",()=>M.atBS2<0.05],["Overlap them on the screen with BS2",()=>M.sep<0.2*M.beams[0].w],["Equalise the arms",()=>M.gamma>0.9],["Get the visibility above 0.9",()=>RD.V>0.9],["Mark the path with the half-wave plate at 45°, then erase it",()=>S.mz.hwp!=null&&Math.abs(S.mz.hwp-45)<1&&S.mz.ana!=null&&RD.V>0.4],["Swap in single photons and watch D1 and D2 share them",()=>src.type==="photon"&&nDet>3000]],
+  sagnac:[["Overlap the two directions with M2",()=>M.sep<0.2*M.beams[0].w],["See the dark output port",()=>M.sep<0.2*M.beams[0].w&&portPower(M)<0.05],["Rotate until light appears (try the fibre coil)",()=>Math.abs(M.sagnacPhase)>1],["Swap in single photons; without rotation, none reach the camera",()=>src.type==="photon"&&expT>5]],
+};
+function renderHelp(){
+  const d=diagnose();
+  el("diag").innerHTML=d.map((o,i)=>`<li class="${o.lvl}"><span class="dot"></span><div><b>${o.title}</b><p>${o.text}</p></div>${o.fixes.length?`<div class="act">${o.fixes.map((f,j)=>`<button class="btn small" data-i="${i}" data-j="${j}">${f.label}</button>`).join("")}</div>`:""}</li>`).join("");
+  el("diag").querySelectorAll("button").forEach(b=>b.onclick=()=>{d[+b.dataset.i].fixes[+b.dataset.j].fn();markDirty();syncControls();});
+  const n=d.filter(o=>o.lvl==="bad"||o.lvl==="warn").length, bd=el("helpBadge");
+  bd.textContent=n||"✓";bd.classList.toggle("ok",!n);
+  el("stepsList").innerHTML=STEPS[cur].map(([t,f])=>{let ok=false;try{ok=!!f();}catch(e){}return `<li class="${ok?"done":""}">${t}</li>`;}).join("");
+}
+
+// ---------- tabs, source, experiments ----------
+function selectTab(t){
+  tab=t;el("tabs").querySelectorAll("button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===t));
+  document.querySelectorAll("#panel [data-p]").forEach(p=>p.classList.toggle("hidden",p.dataset.p!==t));
+  if(t==="scan")renderScanPanel();
+  if(t==="observe"){drawScreen();drawProfile();}
+}
+el("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>selectTab(b.dataset.t));
+el("exps").innerHTML=EXPS.map(e=>`<button role="tab" data-e="${e.id}" aria-selected="${e.id===cur}"><span class="k">${e.k}</span>${e.tab}</button>`).join("");
+el("exps").querySelectorAll("button").forEach(b=>b.onclick=()=>setExp(b.dataset.e));
+function setExp(e){
+  cur=e;el("exps").querySelectorAll("button").forEach(b=>b.setAttribute("aria-selected",b.dataset.e===e));
+  const x=EXPS.find(q=>q.id===e);el("benchTitle").textContent=x.title;el("benchSub").textContent=x.sub;
+  buildControls();view="auto";el("viewSel").value="auto";SCAN=null;markDirty();
+}
+el("laserSel").innerHTML=Object.entries(LASERS).map(([k,v])=>`<option value="${k}">${v.name}${v.broad?"":` · ${v.nm} nm`}</option>`).join("");
+el("laserSel").onchange=e=>{src.laser=e.target.value;markDirty();};
+el("srcSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>setSource(b.dataset.s));
+el("viewSel").innerHTML=VIEWS.map(v=>`<option value="${v[0]}">${v[1]}</option>`).join("");
+el("viewSel").onchange=e=>{view=e.target.value==="auto"?"auto":+e.target.value;markDirty();};
+
+// ---------- walkthrough ----------
+const WSTEPS=[
+  {t:"An interference bench",b:`<p>Six experiments, from a single slit to a Sagnac loop. In each one, light takes more than one path and the paths add up on a screen as fringes.</p><p class="aside">Nothing here is timed. Take as long as you like.</p>`},
+  {t:"Align it like a real bench",b:`<p>Every part that can move does: the laser's pointing, mirror tilts, a stage with a piezo, polarisers. You can drag the screen along its rail or type its distance in millimetres.</p><p>Click a part on the bench drawing to jump to its controls.</p>`},
+  {t:"Watch and measure",b:`<p>The screen shows what you'd see. Under it, a live plot traces the intensity along the dashed line, with visibility, contrast and fringe period worked out for you.</p><p>For interferometers, the delay scan sweeps one arm and plots the output against path difference.</p>`},
+  {t:"Then swap in single photons",b:`<p>Align with the laser first, then swap the source for heralded single photons. They arrive one by one as dots, and the fringes build up out of them.</p><p>The photons' coherence length is only tens of microns, so interferometer arms must be matched far more closely than with a laser. A g⁽²⁾ test shows they really are single.</p>`},
+  {t:"When it doesn't work",b:`<p>The Help tab watches the setup. If the beam misses the slits, the spots don't overlap, or the arms are too unequal for the source, it says what's wrong, where to move things, and by how much.</p><p class="aside">Most problems also have a "do it for me" button.</p>`},
+];
+let wstep=0;
+el("inSteps").innerHTML=WSTEPS.map(()=>"<i></i>").join("");
+function goW(n){
+  wstep=n;const last=n===WSTEPS.length-1;
+  el("inCount").textContent=`${n+1} of ${WSTEPS.length}`;el("inTitle").textContent=WSTEPS[n].t;
+  const b=el("inBody");b.innerHTML=WSTEPS[n].b;b.classList.remove("swap");void b.offsetWidth;b.classList.add("swap");
+  [...el("inSteps").children].forEach((x,i)=>x.classList.toggle("done",i<=n));
+  el("inBack").style.visibility=n>0?"visible":"hidden";
+  el("inNav").innerHTML=last?`<button class="btn primary" id="inGo">Open the lab</button>`:`<button class="btn primary" id="inNext">Next</button>`;
+  if(last)el("inGo").onclick=closeW;else el("inNext").onclick=()=>goW(n+1);
+  el("inNav").querySelector(".primary").focus({preventScroll:true});
+}
+el("inBack").onclick=()=>{if(wstep>0)goW(wstep-1);};
+function openW(){el("intro").classList.remove("hidden");document.body.style.overflow="hidden";goW(0);}
+function closeW(){el("intro").classList.add("hidden");document.body.style.overflow="";}
+window.addEventListener("keydown",e=>{if(el("intro").classList.contains("hidden"))return;if(e.key==="ArrowRight"&&wstep<WSTEPS.length-1){e.preventDefault();goW(wstep+1);}else if(e.key==="ArrowLeft"&&wstep>0){e.preventDefault();goW(wstep-1);}});
+el("btnNotes").onclick=openW;
+
+// ---------- loop ----------
+let last=performance.now(), slow=0;
+function frame(now){
+  const dt=Math.min(0.1,(now-last)/1000);last=now;
+  if(dirty){dirty=false;recompute();renderReadings();drawScreen();drawProfile();}
+  if(src.type==="photon"&&running){
+    photonStep(dt);slow+=dt;
+    if(slow>0.12){slow=0;if(tab==="observe"){drawScreen();drawProfile();renderReadings();}updatePhotonCounters();if(nDet%5===0)renderHelp();}
+  }
+  requestAnimationFrame(frame);
+}
+new ResizeObserver(()=>{if(M){drawScreen();drawProfile();if(tab==="scan")drawScan();}}).observe(el("panel"));
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{drawProfile();benchSVG();});}catch(e){}
+setExp("double");
+openW();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
