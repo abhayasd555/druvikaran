@@ -6,148 +6,213 @@
 <title>Druvikaran · Polarisation game</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
 <style>
 :root{
-  --table:#e3e7eb; --hole:#c9d0d7; --panel:#f6f7f8; --panel-2:#eceff2;
-  --ink:#1c2632; --muted:#5d6b79; --line:#cdd4db;
-  --laser:#e03131; --laser-soft:rgba(224,49,49,.18);
-  --target:#6741d9; --target-soft:rgba(103,65,217,.16);
-  --ok:#2b8a3e; --warn:#e8590c;
-  --sphere-hi:#ffffff; --sphere-lo:#cfd8e1; --grid:#8796a6;
-  --fiber:#f59f00;
-  --display:"Chakra Petch", "Bahnschrift", "DIN Alternate", system-ui, sans-serif;
-  --body:"Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --table:#f2eee5; --panel:#faf8f3; --panel-2:#ebe6da;
+  --ink:#1d1b18; --muted:#6e685c; --line:#dcd5c6; --rule:#1d1b18;
+  --laser:#c0392b; --laser-soft:rgba(192,57,43,.12);
+  --target:#24508a; --target-soft:rgba(36,80,138,.2);
+  --ok:#3b6e45; --warn:#b5541c;
+  --sphere-hi:#fdfcf9; --sphere-lo:#e4dfd2; --grid:#a8a194;
+  --fiber:#c99a3a;
+  --scrim:rgba(242,238,229,.86);
+  --display:"Newsreader", "Iowan Old Style", Georgia, serif;
+  --body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --deva:"Tiro Devanagari Hindi", "Noto Serif Devanagari", "Mangal", serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --table:#1a222b; --hole:#232d38; --panel:#202a35; --panel-2:#26313d;
-    --ink:#e2e8ef; --muted:#93a1b0; --line:#34414f;
-    --laser:#ff6b6b; --laser-soft:rgba(255,107,107,.2);
-    --target:#9d85ff; --target-soft:rgba(157,133,255,.2);
-    --ok:#51cf66; --warn:#ff922b;
-    --sphere-hi:#3a4a5b; --sphere-lo:#18212b; --grid:#6f8193;
-    --fiber:#fcc419;
+    --table:#161513; --panel:#1d1c19; --panel-2:#272520;
+    --ink:#ebe5d8; --muted:#9b9485; --line:#35322c; --rule:#ebe5d8;
+    --laser:#e2614f; --laser-soft:rgba(226,97,79,.16);
+    --target:#82a6d8; --target-soft:rgba(130,166,216,.22);
+    --ok:#83b28d; --warn:#e2925a;
+    --sphere-hi:#34312b; --sphere-lo:#1a1916; --grid:#6c6659;
+    --fiber:#d4a547;
+    --scrim:rgba(22,21,19,.86);
   }
 }
 :root[data-theme="dark"]{
-  --table:#1a222b; --hole:#232d38; --panel:#202a35; --panel-2:#26313d;
-  --ink:#e2e8ef; --muted:#93a1b0; --line:#34414f;
-  --laser:#ff6b6b; --laser-soft:rgba(255,107,107,.2);
-  --target:#9d85ff; --target-soft:rgba(157,133,255,.2);
-  --ok:#51cf66; --warn:#ff922b;
-  --sphere-hi:#3a4a5b; --sphere-lo:#18212b; --grid:#6f8193;
-  --fiber:#fcc419;
+  --table:#161513; --panel:#1d1c19; --panel-2:#272520;
+  --ink:#ebe5d8; --muted:#9b9485; --line:#35322c; --rule:#ebe5d8;
+  --laser:#e2614f; --laser-soft:rgba(226,97,79,.16);
+  --target:#82a6d8; --target-soft:rgba(130,166,216,.22);
+  --ok:#83b28d; --warn:#e2925a;
+  --sphere-hi:#34312b; --sphere-lo:#1a1916; --grid:#6c6659;
+  --fiber:#d4a547;
+  --scrim:rgba(22,21,19,.86);
 }
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
 body{
-  margin:0;color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;
-  background-color:var(--table);
-  background-image:radial-gradient(circle at 12px 12px,var(--hole) 3.2px,transparent 3.7px);
-  background-size:25px 25px;
+  margin:0;color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  background:var(--table);
   -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased;
 }
-.wrap{max-width:1180px;margin:0 auto;padding:18px 18px 28px}
-header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 28px;justify-content:space-between;margin-bottom:14px}
-.brand h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,46px);letter-spacing:.01em;line-height:1;margin:0}
-.brand .deva{font-family:var(--deva);font-size:clamp(18px,2.6vw,24px);color:var(--muted);margin-left:2px}
-.brand p{margin:6px 0 0;color:var(--muted);font-size:14px;max-width:46ch}
-.stats{display:flex;gap:10px;flex-wrap:wrap}
-.stat{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 12px;min-width:76px}
-.stat span{display:block;font-size:12px;color:var(--muted)}
-.stat b{font-family:var(--display);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
-.stat.timer b{font-size:26px}
-.stat.timer.low b{color:var(--warn)}
+.wrap{max-width:1140px;margin:0 auto;padding:30px 20px 40px}
 
-.bench{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px 2px;margin-bottom:14px;overflow-x:auto}
+/* masthead */
+header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px 32px;justify-content:space-between;padding-bottom:18px;border-bottom:1px solid var(--rule)}
+.brand h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,5.4vw,52px);letter-spacing:-.015em;line-height:1;margin:0}
+.brand .deva{font-family:var(--deva);font-size:clamp(17px,2.4vw,22px);color:var(--muted);margin-left:6px;letter-spacing:0}
+.brand p{margin:10px 0 0;color:var(--muted);font-size:14.5px;max-width:48ch}
+.linkbtn{background:none;border:0;padding:0;color:var(--ink);font:inherit;font-size:14px;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;cursor:pointer}
+.linkbtn:hover{text-decoration-color:var(--ink)}
+.stats{display:flex;flex-wrap:wrap}
+.stat{padding:0 18px;border-left:1px solid var(--line);min-width:72px}
+.stat:first-child{border-left:0;padding-left:0}
+.stat span{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.stat b{display:block;font-family:var(--mono);font-size:22px;font-weight:400;font-variant-numeric:tabular-nums;line-height:1.3}
+.stat.timer b{font-size:30px;line-height:1.1}
+.stat.timer.low b{color:var(--warn)}
+@media (max-width:520px){.stat{padding:0 12px;min-width:0}.stat.timer b{font-size:26px}}
+
+.bench{margin:6px 0 22px;padding:10px 0 4px;border-bottom:1px solid var(--line);overflow-x:auto}
 .bench svg{display:block;width:100%;min-width:560px;height:auto}
 
-.main{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px}
+.main{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px}
 @media (max-width:860px){.main{grid-template-columns:1fr}}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
-.card h2{font-family:var(--display);font-weight:600;font-size:17px;margin:0 0 2px}
-.card .sub{color:var(--muted);font-size:13px;margin:0 0 10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:20px}
+.card h2{font-family:var(--display);font-weight:500;font-size:22px;letter-spacing:-.005em;margin:0 0 2px;line-height:1.2}
+.card .sub{color:var(--muted);font-size:13.5px;margin:0 0 14px}
+.eyebrow{display:block;font-family:var(--body);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 
 .sphere-card{position:relative;display:flex;flex-direction:column}
 .sphere-box{position:relative;width:100%;aspect-ratio:1/1;max-height:620px;touch-action:none;cursor:grab}
 .sphere-box:active{cursor:grabbing}
 #sphere{position:absolute;inset:0;width:100%;height:100%}
-.timebar{height:6px;border-radius:3px;background:var(--panel-2);overflow:hidden;margin-top:8px}
+.timebar{height:2px;background:var(--line);overflow:hidden;margin-top:10px}
 .timebar i{display:block;height:100%;width:100%;background:var(--ink);transform-origin:left;transition:background .3s}
 .timebar.low i{background:var(--warn)}
-.float-timer{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));z-index:50;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 12px 8px;min-width:86px;box-shadow:0 4px 14px rgba(0,0,0,.18);opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .2s,transform .2s}
+.float-timer{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));z-index:50;background:var(--panel);border:1px solid var(--rule);border-radius:2px;padding:7px 14px 9px;min-width:92px;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .2s,transform .2s}
 .float-timer.show{opacity:1;transform:none}
-.float-timer span{display:block;font-size:12px;color:var(--muted)}
-.float-timer b{display:block;font-family:var(--display);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.float-timer span{display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.float-timer b{display:block;font-family:var(--mono);font-size:24px;font-weight:400;font-variant-numeric:tabular-nums;line-height:1.15}
 .float-timer.low b{color:var(--warn)}
-.float-timer .bar{display:block;height:4px;border-radius:2px;background:var(--panel-2);overflow:hidden;margin-top:4px}
-.float-timer .bar i{display:block;height:100%;background:var(--ink);transform-origin:left}
+.float-timer .bar{display:block;height:2px;border-radius:0;background:var(--line);overflow:hidden;margin-top:5px}
+.float-timer .bar i{display:block;height:100%;width:100%;background:var(--ink);transform-origin:left}
 .float-timer.low .bar i{background:var(--warn)}
-.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
-.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;background:var(--c)}
+.legend{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw-dot{width:9px;height:9px;border-radius:50%;background:var(--laser);display:inline-block}
+.sw-ring{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--target);display:inline-block}
 
 .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;pointer-events:none}
-.overlay .box{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px 22px;max-width:420px;box-shadow:0 18px 40px -18px rgba(0,0,0,.45)}
-.overlay h3{font-family:var(--display);font-size:24px;margin:0 0 6px}
-.overlay p{margin:0 0 12px;color:var(--muted)}
-.overlay ul{margin:0 0 14px;padding-left:18px;color:var(--muted);font-size:14px}
-.overlay .row{display:flex;gap:8px;flex-wrap:wrap}
+.overlay .box{pointer-events:auto;background:var(--panel);border:1px solid var(--rule);border-radius:2px;padding:22px 24px;max-width:380px}
+.overlay h3{font-family:var(--display);font-weight:400;font-size:28px;margin:0 0 6px;line-height:1.15}
+.overlay p{margin:0 0 16px;color:var(--muted)}
+.overlay .row,.intro .row{display:flex;gap:10px;flex-wrap:wrap}
 .hidden{display:none!important}
-.toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:var(--ok);color:#fff;font-family:var(--display);font-weight:600;padding:6px 14px;border-radius:20px;font-size:15px;pointer-events:none;opacity:0;transition:opacity .25s}
-.toast.show{opacity:1}
+.toast{position:absolute;left:50%;top:12px;transform:translate(-50%,-4px);background:var(--ink);color:var(--panel);font-family:var(--body);font-weight:500;font-size:13px;letter-spacing:.03em;padding:6px 12px;border-radius:2px;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
 
 button{font:inherit;color:inherit}
-.btn{font-family:var(--display);font-weight:600;font-size:15px;padding:9px 16px;border-radius:6px;border:1px solid var(--line);background:var(--panel-2);cursor:pointer}
+.btn{font-family:var(--body);font-weight:500;font-size:14px;padding:10px 18px;border-radius:2px;border:1px solid var(--rule);background:transparent;cursor:pointer;transition:background .15s,color .15s}
+.btn:hover{background:var(--panel-2)}
 .btn.primary{background:var(--ink);color:var(--panel);border-color:var(--ink)}
-.btn:focus-visible,.rot:focus-visible,.chip:focus-visible{outline:2px solid var(--target);outline-offset:2px}
-.btn:hover{filter:brightness(1.06)}
+.btn.primary:hover{background:var(--ink);opacity:.88}
+.btn.quiet{border-color:transparent;color:var(--muted);padding-left:4px;padding-right:4px}
+.btn.quiet:hover{background:none;color:var(--ink)}
+.btn:focus-visible,.rot:focus-visible,.chip:focus-visible,.linkbtn:focus-visible{outline:2px solid var(--target);outline-offset:2px}
 
-.side{display:flex;flex-direction:column;gap:14px}
-.meter{display:grid;grid-template-columns:132px 1fr;gap:14px;align-items:center}
+.side{display:flex;flex-direction:column;gap:20px}
+.meter{display:grid;grid-template-columns:132px 1fr;gap:18px;align-items:center}
 @media (max-width:420px){.meter{grid-template-columns:1fr}}
-#ellipse{width:132px;height:132px;background:var(--panel-2);border-radius:8px}
+#ellipse{width:132px;height:132px;background:var(--table);border:1px solid var(--line)}
 .readout{font-variant-numeric:tabular-nums;font-size:14px;width:100%;border-collapse:collapse}
-.readout th{font-weight:500;color:var(--muted);text-align:left;padding:2px 6px 2px 0}
-.readout td{font-family:var(--display);font-weight:500;text-align:right;padding:2px 0 2px 8px}
-.readout thead th{font-size:12px}
+.readout th{font-weight:400;color:var(--muted);text-align:left;padding:3px 6px 3px 0}
+.readout td{font-family:var(--mono);font-size:13.5px;text-align:right;padding:3px 0 3px 8px}
+.readout tbody tr{border-top:1px solid var(--line)}
+.readout thead th{font-size:11px;letter-spacing:.09em;text-transform:uppercase;padding-bottom:6px}
 .readout thead th:not(:first-child){text-align:right}
 .readout .cur{color:var(--laser)} .readout .tgt{color:var(--target)}
-.prox{margin-top:10px}
-.prox .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
-.prox .lbl b{font-family:var(--display);color:var(--ink);font-weight:600}
-.bar{height:8px;background:var(--panel-2);border-radius:4px;overflow:hidden;margin-top:4px}
+.prox{margin-top:16px}
+.prox .lbl{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);padding:2px 0}
+.prox .lbl b{font-family:var(--mono);font-weight:400;color:var(--ink)}
+.bar{height:3px;background:var(--line);overflow:hidden;margin-top:8px}
 .bar i{display:block;height:100%;width:0;background:var(--target);transition:width .08s linear}
 .bar.lock i{background:var(--ok)}
 
-.paddles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.paddle{background:var(--panel-2);border-radius:8px;padding:10px 8px;text-align:center;border:1px solid transparent}
-.paddle.active{border-color:var(--laser)}
-.paddle h3{font-family:var(--display);font-size:15px;font-weight:600;margin:0}
+.paddles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.paddle{padding:4px 8px 6px;text-align:center;border-left:1px solid var(--line)}
+.paddle:first-child{border-left:0}
+.paddle h3{font-family:var(--display);font-size:17px;font-weight:500;margin:0;white-space:nowrap;transition:color .15s}
+@media (max-width:400px){.paddle{padding:4px 4px 6px}.paddle h3{font-size:15px}.paddle .ang{font-size:15px}.rot{width:38px}}
+.paddle.active h3{color:var(--laser)}
 .paddle .wp{color:var(--muted);font-size:12px}
-.paddle svg{width:76px;height:76px;display:block;margin:6px auto 2px}
-.paddle .ang{font-family:var(--display);font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
-.rots{display:flex;gap:6px;justify-content:center;margin-top:6px}
-.rot{width:46px;height:42px;border-radius:6px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-size:20px;line-height:1;user-select:none;-webkit-user-select:none;touch-action:none}
-.rot:active,.rot.on{background:var(--ink);color:var(--panel)}
-.keys{font-size:12px;color:var(--muted);margin-top:6px}
-.keys kbd{font-family:var(--display);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--panel)}
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
-.chip{font-size:13px;padding:6px 10px;border-radius:16px;border:1px solid var(--line);background:var(--panel);cursor:pointer}
+.paddle svg{width:76px;height:76px;display:block;margin:8px auto 4px}
+.paddle .ang{font-family:var(--mono);font-size:17px;font-variant-numeric:tabular-nums}
+.rots{display:flex;gap:6px;justify-content:center;margin-top:8px}
+.rot{width:44px;height:40px;border-radius:2px;border:1px solid var(--line);background:transparent;cursor:pointer;font-size:19px;line-height:1;user-select:none;-webkit-user-select:none;touch-action:none;transition:background .1s,border-color .1s}
+.rot:hover{border-color:var(--ink)}
+.rot:active,.rot.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.keys{font-size:12px;color:var(--muted);margin-top:8px}
+kbd{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;padding:0 5px;background:var(--panel);color:var(--ink)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);align-items:center}
+.chip{font-size:13px;padding:6px 11px;border-radius:2px;border:1px solid var(--line);background:transparent;cursor:pointer}
+.chip:hover{border-color:var(--ink)}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
-footer{margin-top:16px;color:var(--muted);font-size:13px;max-width:80ch}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+#chipEnd{margin-left:auto}
+footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;max-width:80ch}
+
+/* welcome walkthrough */
+.intro{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--scrim);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);animation:fade .35s ease-out}
+.sheet{background:var(--panel);border:1px solid var(--rule);border-radius:2px;width:100%;max-width:540px;max-height:calc(100dvh - 32px);overflow:auto;padding:30px 32px 24px;box-shadow:0 30px 70px -40px rgba(0,0,0,.5);animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+.sheet .count{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.sheet h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,34px);line-height:1.1;letter-spacing:-.01em;margin:10px 0 14px}
+.sheet .body{min-height:190px}
+.sheet .body.swap{animation:swap .3s ease-out}
+.sheet p{margin:0 0 12px;font-size:15.5px;line-height:1.6}
+.sheet p.aside{color:var(--muted);font-size:14px}
+.sheet table{border-collapse:collapse;width:100%;font-size:14.5px;margin:4px 0 12px}
+.sheet td{padding:7px 0;border-top:1px solid var(--line)}
+.sheet td:last-child{text-align:right}
+.sheet ol{margin:0 0 12px;padding-left:20px;font-size:15px;line-height:1.55}
+.sheet ol li{margin-bottom:6px}
+.sheet .key-row{display:flex;gap:22px;flex-wrap:wrap;margin:6px 0 14px;font-size:14px;color:var(--muted)}
+.sheet .key-row span{display:inline-flex;align-items:center;gap:8px}
+.steps{display:flex;gap:6px;margin:22px 0 18px}
+.steps i{flex:1;height:2px;background:var(--line);transition:background .3s}
+.steps i.done{background:var(--ink)}
+.sheet .nav{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.sheet .nav .row{flex-wrap:nowrap}
+@media (max-width:480px){
+  .sheet{padding:24px 22px 20px}
+  .sheet .nav{flex-direction:column-reverse;align-items:stretch}
+  .sheet .nav .row>.btn{flex:1}
+  .sheet .nav #inBack{align-self:flex-start}
+}
+@keyframes fade{from{opacity:0}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes swap{from{opacity:0;transform:translateX(10px)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
+<div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="inTitle">
+  <div class="sheet">
+    <div class="count" id="inCount">1 of 5</div>
+    <h2 id="inTitle"></h2>
+    <div class="body" id="inBody"></div>
+    <div class="steps" id="inSteps" aria-hidden="true"></div>
+    <div class="nav">
+      <button class="btn quiet" id="inBack">Back</button>
+      <div class="row" id="inNav">
+        <button class="btn primary" id="inNext">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="float-timer" id="floatTimer" aria-hidden="true"><span>Time</span><b id="fTime">--</b><span class="bar"><i id="fFill"></i></span></div>
 <div class="wrap">
   <header>
     <div class="brand">
-      <h1>Druvikaran <span class="deva">ध्रुवीकरण</span></h1>
-      <p>Turn the three paddles of the fibre polarisation controller until the light lands on the target on the Poincaré sphere.</p>
+      <h1>Druvikaran<span class="deva">ध्रुवीकरण</span></h1>
+      <p>Turn the three paddles of a fibre polarisation controller until the light lands on its target. <button class="linkbtn" id="btnHelp">How to play</button></p>
     </div>
     <div class="stats" aria-live="polite">
       <div class="stat"><span>Level</span><b id="sLevel">1</b></div>
@@ -163,20 +228,16 @@ footer{margin-top:16px;color:var(--muted);font-size:13px;max-width:80ch}
 
   <div class="main">
     <section class="card sphere-card">
-      <h2>Polarimeter · Poincaré sphere</h2>
-      <p class="sub">Drag the sphere to look around. Hold the light inside the target ring until it locks.</p>
+      <span class="eyebrow">Polarimeter</span>
+      <h2>Poincaré sphere</h2>
+      <p class="sub">Drag to look around. Hold the light inside the ring until it locks.</p>
       <div class="sphere-box" id="sphereBox">
         <canvas id="sphere"></canvas>
         <div class="toast" id="toast">Locked</div>
-        <div class="overlay" id="overlay">
+        <div class="overlay hidden" id="overlay">
           <div class="box">
-            <h3 id="ovTitle">Align the polarisation</h3>
-            <p id="ovText">Each round the fibre scrambles the input polarisation and a new target appears. Rotate the λ/4, λ/2 and λ/4 paddles to steer the red point into the violet ring before time runs out.</p>
-            <ul id="ovList">
-              <li>Hold a rotate button (or key) to turn a paddle; tap for a small step.</li>
-              <li>Keys: <b>Q/A</b> paddle 1, <b>W/S</b> paddle 2, <b>E/D</b> paddle 3. Hold <b>Shift</b> for fine control.</li>
-              <li>Each level shortens the clock and shrinks the target ring.</li>
-            </ul>
+            <h3 id="ovTitle">Ready</h3>
+            <p id="ovText"></p>
             <div class="row">
               <button class="btn primary" id="btnStart">Start game</button>
               <button class="btn" id="btnLab">Free practice</button>
@@ -186,15 +247,16 @@ footer{margin-top:16px;color:var(--muted);font-size:13px;max-width:80ch}
       </div>
       <div class="timebar" id="timebar"><i id="timefill"></i></div>
       <div class="legend">
-        <span style="--c:var(--laser)">Output polarisation</span>
-        <span style="--c:var(--target)">Target</span>
+        <span><i class="sw-dot"></i>Your light</span>
+        <span><i class="sw-ring"></i>Target</span>
       </div>
     </section>
 
     <div class="side">
       <section class="card">
-        <h2>Readout</h2>
-        <p class="sub">Polarisation ellipse and normalised Stokes parameters.</p>
+        <span class="eyebrow">Readout</span>
+        <h2>Polarisation state</h2>
+        <p class="sub">The ellipse traced by the field, and its Stokes parameters.</p>
         <div class="meter">
           <canvas id="ellipse" width="264" height="264" aria-label="Polarisation ellipse"></canvas>
           <table class="readout">
@@ -216,12 +278,13 @@ footer{margin-top:16px;color:var(--muted);font-size:13px;max-width:80ch}
       </section>
 
       <section class="card">
-        <h2>Paddle controller</h2>
-        <p class="sub">Paddle angle sets the waveplate's fast axis around the fibre.</p>
+        <span class="eyebrow">Controller</span>
+        <h2>Paddles</h2>
+        <p class="sub">Each paddle's angle sets a waveplate's fast axis around the fibre.</p>
         <div class="paddles" id="paddles"></div>
         <div class="toolbar">
           <button class="chip" id="chipFine" aria-pressed="false">Fine control</button>
-          <button class="chip" id="chipTrail" aria-pressed="true">Show trail</button>
+          <button class="chip" id="chipTrail" aria-pressed="true">Trail</button>
           <button class="chip" id="chipView">Reset view</button>
           <button class="chip hidden" id="chipNew">New target</button>
           <button class="chip" id="chipEnd">End game</button>
@@ -300,7 +363,7 @@ function success(){
   if(mode==="play"){
     const gained=Math.round(100*level+timeLeft*10*level);
     score+=gained; level++;
-    toast(`Locked · +${gained}`);
+    toast(`Locked   +${gained}`);
   } else toast("Locked");
   pause=1.2;
 }
@@ -316,7 +379,6 @@ function updateStats(){
 }
 function showOverlay(title,text,showList,btn){
   el("ovTitle").textContent=title; el("ovText").textContent=text;
-  el("ovList").classList.toggle("hidden",!showList);
   el("btnStart").textContent=btn||"Start game";
   el("overlay").classList.remove("hidden");
   el("btnStart").focus({preventScroll:true});
@@ -329,22 +391,22 @@ function toast(t){const e=el("toast");e.textContent=t;e.classList.add("show");cl
 const padWrap=el("paddles");
 PADDLES.forEach((p,i)=>{
   const d=document.createElement("div"); d.className="paddle"; d.id="pad"+i;
-  d.innerHTML=`<h3>${p.name}</h3><div class="wp">${p.wp} retarder</div>
+  d.innerHTML=`<h3>${p.name}</h3><div class="wp">${p.wp.split(" ")[0]} plate</div>
   <svg viewBox="-40 -40 80 80" aria-hidden="true">
-    <circle r="34" fill="none" stroke="var(--line)" stroke-width="2"/>
-    ${[-90,-45,0,45,90].map(a=>{const r=a*D2R;return `<line x1="${Math.sin(r)*30}" y1="${-Math.cos(r)*30}" x2="${Math.sin(r)*35}" y2="${-Math.cos(r)*35}" stroke="var(--muted)" stroke-width="${a===0?2.4:1.4}"/>`}).join("")}
-    <g id="needle${i}"><rect x="-4" y="-29" width="8" height="58" rx="3" fill="var(--ink)" opacity=".85"/><circle r="4" fill="var(--fiber)"/></g>
+    <circle r="34" fill="none" stroke="var(--line)" stroke-width="1"/>
+    ${[-90,-45,0,45,90].map(a=>{const r=a*D2R;return `<line x1="${Math.sin(r)*30}" y1="${-Math.cos(r)*30}" x2="${Math.sin(r)*35}" y2="${-Math.cos(r)*35}" stroke="var(--muted)" stroke-width="${a===0?1.6:1}"/>`}).join("")}
+    <g id="needle${i}"><rect x="-3" y="-28" width="6" height="56" rx="1" fill="var(--ink)"/><circle r="2.6" fill="var(--panel)"/></g>
   </svg>
   <div class="ang" id="ang${i}">0.0°</div>
   <div class="rots">
     <button class="rot" data-i="${i}" data-d="-1" aria-label="Rotate ${p.name} anticlockwise">⟲</button>
     <button class="rot" data-i="${i}" data-d="1" aria-label="Rotate ${p.name} clockwise">⟳</button>
   </div>
-  <div class="keys"><kbd>${p.keys[0].toUpperCase()}</kbd> ⟳ &nbsp;<kbd>${p.keys[1].toUpperCase()}</kbd> ⟲</div>`;
+  <div class="keys"><kbd>${p.keys[1].toUpperCase()}</kbd> <kbd>${p.keys[0].toUpperCase()}</kbd></div>`;
   padWrap.appendChild(d);
 });
 
-function canControl(){return mode==="play"||mode==="lab";}
+function canControl(){return !introOpen&&(mode==="play"||mode==="lab");}
 function stepNow(i,d){ theta[i]=wrap(theta[i]+d*(fine||shiftDown?0.4:1.5)); }
 function startPress(i,d){ if(!canControl()) return; if(press[i]&&press[i].d===d) return; press[i]={d,t0:performance.now()}; stepNow(i,d); }
 function endPress(i){ press[i]=null; }
@@ -360,6 +422,11 @@ document.querySelectorAll(".rot").forEach(b=>{
 const keyMap={};
 PADDLES.forEach((p,i)=>{keyMap[p.keys[0]]=[i,1];keyMap[p.keys[1]]=[i,-1];});
 window.addEventListener("keydown",e=>{
+  if(introOpen){
+    if(e.key==="ArrowRight"&&step<STEPS.length-1){e.preventDefault();goStep(step+1);}
+    else if(e.key==="ArrowLeft"&&step>0){e.preventDefault();goStep(step-1);}
+    return;
+  }
   if(e.key==="Shift") shiftDown=true;
   const k=keyMap[e.key.toLowerCase()];
   if(k && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); if(!e.repeat) startPress(k[0],k[1]); }
@@ -372,12 +439,59 @@ window.addEventListener("keyup",e=>{
 window.addEventListener("blur",()=>{press.fill(null);shiftDown=false;});
 
 el("btnStart").onclick=startGame;
+el("btnHelp").onclick=openIntro;
 el("btnLab").onclick=startLab;
 el("chipFine").onclick=e=>{fine=!fine;e.currentTarget.setAttribute("aria-pressed",fine);};
 el("chipTrail").onclick=e=>{showTrail=!showTrail;e.currentTarget.setAttribute("aria-pressed",showTrail);};
 el("chipView").onclick=()=>{view.yaw=-0.62;view.pitch=0.42;};
 el("chipNew").onclick=()=>{if(mode==="lab"){newRound(true);}};
 el("chipEnd").onclick=()=>{if(mode==="play"||mode==="lab") endGame("user");};
+
+
+// ---------- welcome walkthrough ----------
+const STEPS=[
+  {t:"Light that won't sit still", b:`<p>A laser sends light down an optical fibre. On the way, the fibre twists the light's polarisation, and it twists it differently every round.</p><p>At the end of the fibre sits a polarisation controller. Your job is to untwist the light so it comes out in exactly the state you're asked for.</p>`},
+  {t:"Reading the sphere", b:`<p>Every polarisation state is a point on the Poincaré sphere. Linear light sits on the equator, and circular light sits at the poles.</p><div class="key-row"><span><i class="sw-dot"></i>Your light</span><span><i class="sw-ring"></i>The target</span></div><p>Get the dot inside the ring and hold it there for a moment. It locks, and a new target appears.</p><p class="aside">You can drag the sphere to look at it from another side.</p>`},
+  {t:"Three paddles", b:`<p>The controller has three paddles: a quarter-wave plate, a half-wave plate, then another quarter-wave plate. Turning a paddle swings your light around the sphere.</p><table><tr><td>Paddle 1 · λ/4</td><td><kbd>Q</kbd> <kbd>A</kbd></td></tr><tr><td>Paddle 2 · λ/2</td><td><kbd>W</kbd> <kbd>S</kbd></td></tr><tr><td>Paddle 3 · λ/4</td><td><kbd>E</kbd> <kbd>D</kbd></td></tr></table><p class="aside">Hold a button or key to turn a paddle, or tap for a small nudge. Hold <kbd>Shift</kbd> for slow, fine turns.</p>`},
+  {t:"Against the clock", b:`<p>You get a minute for the first target. Lock it and you go up a level. With every level the clock gets shorter and the ring gets smaller.</p><p>Points depend on your level and the time you have left, so a quick lock is worth more.</p><p>When the clock runs out, the game is over.</p>`},
+  {t:"A way in", b:`<p>If you get stuck, try it in this order:</p><ol><li>Set paddle 3 to the target's azimuth ψ, which is shown in the readout.</li><li>Turn paddle 1 until your light's ψ matches the target's.</li><li>Use paddle 2 to slide the light onto the target. It moves quickly, so turn on fine control.</li></ol><p class="aside">Free practice has no clock, so it's a good place to try this.</p>`},
+];
+let introOpen=false, step=0;
+const inSteps=el("inSteps");
+inSteps.innerHTML=STEPS.map(()=>"<i></i>").join("");
+function goStep(n){
+  step=n;
+  const last=step===STEPS.length-1, midGame=mode==="play"||mode==="lab";
+  el("inCount").textContent=`${step+1} of ${STEPS.length}`;
+  el("inTitle").textContent=STEPS[step].t;
+  const body=el("inBody");
+  body.innerHTML=STEPS[step].b;
+  body.classList.remove("swap"); void body.offsetWidth; body.classList.add("swap");
+  [...inSteps.children].forEach((b,i)=>b.classList.toggle("done",i<=step));
+  el("inBack").style.visibility=step>0?"visible":"hidden";
+  const nav=el("inNav");
+  if(!last) nav.innerHTML=`<button class="btn primary" id="inNext">Next</button>`;
+  else if(midGame) nav.innerHTML=`<button class="btn primary" id="inGo">Back to the game</button>`;
+  else nav.innerHTML=`<button class="btn" id="inLab">Practise first</button><button class="btn primary" id="inGo">Start the game</button>`;
+  if(!last) el("inNext").onclick=()=>goStep(step+1);
+  else {
+    el("inGo").onclick=()=>{ closeIntro(); if(!midGame) startGame(); };
+    if(!midGame) el("inLab").onclick=()=>{ closeIntro(); startLab(); };
+  }
+  nav.querySelector(".primary").focus({preventScroll:true});
+}
+el("inBack").onclick=()=>{ if(step>0) goStep(step-1); };
+function openIntro(){
+  introOpen=true; press.fill(null); shiftDown=false;
+  el("intro").classList.remove("hidden");
+  document.body.style.overflow="hidden";
+  goStep(0);
+}
+function closeIntro(){
+  introOpen=false;
+  el("intro").classList.add("hidden");
+  document.body.style.overflow="";
+}
 
 // sphere drag
 const box=el("sphereBox");
@@ -390,30 +504,30 @@ const dEnd=()=>drag=null; box.addEventListener("pointerup",dEnd); box.addEventLi
 const bench=el("bench");
 const PX=[300,410,520], FY=78, PR=46;
 bench.innerHTML=`
-  <rect x="40" y="128" width="660" height="8" rx="3" fill="var(--panel-2)"/>
-  <rect x="14" y="52" width="104" height="52" rx="6" fill="var(--panel-2)" stroke="var(--line)"/>
+  <line x1="20" y1="132" x2="740" y2="132" stroke="var(--line)" stroke-width="1"/>
+  <rect x="14" y="52" width="104" height="52" rx="1" fill="var(--panel)" stroke="var(--ink)" stroke-width="1"/>
   <circle cx="34" cy="78" r="6" fill="var(--laser)"><animate attributeName="opacity" values="1;.55;1" dur="2.4s" repeatCount="indefinite"/></circle>
-  <text x="48" y="74" font-family="var(--display)" font-size="14" font-weight="600" fill="var(--ink)">Laser</text>
-  <text x="48" y="91" font-family="var(--body)" font-size="11" fill="var(--muted)">1550 nm</text>
+  <text x="48" y="75" font-family="var(--display)" font-size="16" fill="var(--ink)">Laser</text>
+  <text x="48" y="92" font-family="var(--mono)" font-size="10.5" fill="var(--muted)">1550 nm</text>
   <path id="fib" d="M118 78 C 160 78, 170 78, 200 78 L 620 78" fill="none" stroke="var(--fiber)" stroke-width="3" stroke-linecap="round"/>
   <path d="M200 78 C 214 60, 226 96, 240 78" fill="none" stroke="var(--fiber)" stroke-width="3" opacity=".7"/>
-  <text x="168" y="56" font-family="var(--body)" font-size="11" fill="var(--muted)" text-anchor="middle">fibre birefringence</text>
-  <text x="168" y="69" font-family="var(--body)" font-size="11" fill="var(--muted)" text-anchor="middle">(random each round)</text>
+  <text x="192" y="54" font-family="var(--display)" font-style="italic" font-size="12" fill="var(--muted)" text-anchor="middle">fibre birefringence</text>
+  <text x="192" y="68" font-family="var(--body)" font-size="10.5" fill="var(--muted)" text-anchor="middle">random each round</text>
   ${PX.map((x,i)=>`
-    <line x1="${x}" y1="${FY+PR}" x2="${x}" y2="130" stroke="var(--muted)" stroke-width="3"/>
+    <line x1="${x}" y1="${FY+PR}" x2="${x}" y2="132" stroke="var(--muted)" stroke-width="1.5"/>
     <g id="bp${i}">
-      <ellipse id="be${i}" cx="${x}" cy="${FY}" rx="${PR}" ry="${PR}" fill="var(--panel-2)" stroke="var(--ink)" stroke-width="1.6" fill-opacity=".85"/>
-      <ellipse id="bc${i}" cx="${x}" cy="${FY}" rx="${PR*0.55}" ry="${PR*0.55}" fill="none" stroke="var(--fiber)" stroke-width="2"/>
-      <ellipse id="bd${i}" cx="${x}" cy="${FY}" rx="${PR*0.48}" ry="${PR*0.48}" fill="none" stroke="var(--fiber)" stroke-width="2"/>
+      <ellipse id="be${i}" cx="${x}" cy="${FY}" rx="${PR}" ry="${PR}" fill="var(--panel)" stroke="var(--ink)" stroke-width="1.1" fill-opacity=".9"/>
+      <ellipse id="bc${i}" cx="${x}" cy="${FY}" rx="${PR*0.55}" ry="${PR*0.55}" fill="none" stroke="var(--fiber)" stroke-width="1.6"/>
+      <ellipse id="bd${i}" cx="${x}" cy="${FY}" rx="${PR*0.48}" ry="${PR*0.48}" fill="none" stroke="var(--fiber)" stroke-width="1.6"/>
     </g>
-    <text x="${x}" y="20" text-anchor="middle" font-family="var(--display)" font-size="13" font-weight="600" fill="var(--ink)">${PADDLES[i].wp.split(" ")[0]}</text>
-    <text id="bt${i}" x="${x}" y="146" text-anchor="middle" font-family="var(--display)" font-size="12" fill="var(--muted)">0°</text>`).join("")}
-  <rect x="620" y="44" width="126" height="68" rx="6" fill="var(--panel-2)" stroke="var(--line)"/>
-  <text x="634" y="68" font-family="var(--display)" font-size="14" font-weight="600" fill="var(--ink)">Polarimeter</text>
-  <circle cx="650" cy="90" r="12" fill="none" stroke="var(--grid)"/>
+    <text x="${x}" y="20" text-anchor="middle" font-family="var(--display)" font-size="15" fill="var(--ink)">${PADDLES[i].wp.split(" ")[0]}</text>
+    <text id="bt${i}" x="${x}" y="147" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--muted)">0°</text>`).join("")}
+  <rect x="620" y="44" width="126" height="68" rx="1" fill="var(--panel)" stroke="var(--ink)" stroke-width="1"/>
+  <text x="634" y="69" font-family="var(--display)" font-size="16" fill="var(--ink)">Polarimeter</text>
+  <circle cx="650" cy="90" r="12" fill="none" stroke="var(--grid)" stroke-width="1"/>
   <circle id="bdot" cx="650" cy="90" r="3.5" fill="var(--laser)"/>
-  <text x="670" y="94" font-family="var(--body)" font-size="11" fill="var(--muted)">to sphere</text>
-  <circle r="4" fill="var(--laser)" opacity=".9"><animateMotion dur="2.2s" repeatCount="indefinite"><mpath href="#fib"/></animateMotion></circle>`;
+  <text x="670" y="94" font-family="var(--body)" font-size="10.5" fill="var(--muted)">to sphere</text>
+  <circle r="3" fill="var(--laser)"><animateMotion dur="2.2s" repeatCount="indefinite"><mpath href="#fib"/></animateMotion></circle>`;
 function drawBench(s){
   for(let i=0;i<3;i++){
     const ry=Math.max(2,PR*Math.abs(Math.cos(theta[i]*D2R)));
@@ -437,6 +551,9 @@ function resize(){
 new ResizeObserver(resize).observe(box); resize();
 
 let C={};
+const rootCS=getComputedStyle(document.documentElement);
+const FONT_SERIF=rootCS.getPropertyValue("--display").trim()||"serif";
+const FONT_MONO=rootCS.getPropertyValue("--mono").trim()||"monospace";
 function readColors(){const cs=getComputedStyle(document.documentElement);["laser","laser-soft","target","target-soft","ink","muted","grid","sphere-hi","sphere-lo","ok","panel","line"].forEach(k=>C[k]=cs.getPropertyValue("--"+k).trim());}
 readColors();
 try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",readColors);}catch(e){}
@@ -483,11 +600,11 @@ function drawSphere(s,tNow){
   const g=ctx.createRadialGradient(cx-R*0.35,cy-R*0.4,R*0.1,cx,cy,R*1.05);
   g.addColorStop(0,C["sphere-hi"]); g.addColorStop(1,C["sphere-lo"]);
   ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.fillStyle=g;ctx.fill();
-  ctx.lineWidth=1.5;ctx.strokeStyle=C.grid;ctx.globalAlpha=.7;ctx.stroke();ctx.globalAlpha=1;
+  ctx.lineWidth=1;ctx.strokeStyle=C.ink;ctx.globalAlpha=.55;ctx.stroke();ctx.globalAlpha=1;
   // latitude/longitude grid
   for(const lat of [-60,-30,30,60]){const z=Math.sin(lat*D2R),r=Math.cos(lat*D2R);const pts=[];for(let i=0;i<=96;i++){const p=i/96*2*Math.PI;pts.push([r*Math.cos(p),r*Math.sin(p),z]);}curve(pts,cx,cy,R,C.grid,0.6,0.5,false);}
   for(const lon of [45,135]){const a=lon*D2R;curve(greatCircle([Math.cos(a),Math.sin(a),0],[0,0,1]),cx,cy,R,C.grid,0.6,0.5,false);}
-  curve(greatCircle([1,0,0],[0,1,0]),cx,cy,R,C.ink,1.4,1,true);
+  curve(greatCircle([1,0,0],[0,1,0]),cx,cy,R,C.ink,1.1,0.8,true);
   curve(greatCircle([1,0,0],[0,0,1]),cx,cy,R,C.grid,1.1,0.8,true);
   curve(greatCircle([0,1,0],[0,0,1]),cx,cy,R,C.grid,1.1,0.8,true);
   // axes
@@ -497,9 +614,9 @@ function drawSphere(s,tNow){
     ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=C.muted;ctx.lineWidth=1;ctx.globalAlpha=on.front?.8:.3;ctx.setLineDash(on.front?[]:[3,4]);ctx.stroke();ctx.setLineDash([]);
     ctx.beginPath();ctx.arc(on.x,on.y,3,0,7);ctx.fillStyle=C.muted;ctx.fill();
     const l=proj(v.map(x=>x*1.32),cx,cy,R);
-    ctx.globalAlpha=on.front?1:.45;ctx.fillStyle=C.ink;ctx.font=`600 ${Math.max(13,R*0.075)}px ${getComputedStyle(document.body).getPropertyValue("--display")||"sans-serif"}`;
+    ctx.globalAlpha=on.front?1:.45;ctx.fillStyle=C.ink;ctx.font=`italic 400 ${Math.max(15,R*0.085)}px ${FONT_SERIF}`;
     ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(lab,l.x,l.y);
-    if(sl){ctx.font=`500 ${Math.max(11,R*0.055)}px sans-serif`;ctx.fillStyle=C.muted;ctx.fillText(sl,l.x,l.y+Math.max(14,R*0.075));}
+    if(sl){ctx.font=`400 ${Math.max(10.5,R*0.05)}px ${FONT_MONO}`;ctx.fillStyle=C.muted;ctx.fillText(sl,l.x,l.y+Math.max(14,R*0.075));}
     ctx.globalAlpha=1;
   }
   // target
@@ -522,7 +639,7 @@ function drawSphere(s,tNow){
   // output vector
   const o=proj([0,0,0],cx,cy,R), p=proj(s,cx,cy,R);
   ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(p.x,p.y);ctx.strokeStyle=C.laser;ctx.lineWidth=2;ctx.globalAlpha=p.front?.9:.4;ctx.stroke();ctx.globalAlpha=1;
-  dotAt(s,cx,cy,R,C.laser,7,C["laser-soft"]);
+  dotAt(s,cx,cy,R,C.laser,6.5,C["laser-soft"]);
 }
 function drawEllipse(s){
   const w=ecv.width,h=ecv.height,cx=w/2,cy=h/2,A=w*0.38;
@@ -543,8 +660,8 @@ function drawEllipse(s){
       ectx.fillStyle=color;ectx.fill();
     }
   };
-  if(mode!=="idle") one(target,C.target,3,[8,7],false);
-  one(s,C.laser,4.5,[],true);
+  if(mode!=="idle") one(target,C.target,2.5,[7,7],false);
+  one(s,C.laser,3.5,[],true);
 }
 function readouts(s){
   const set=(id,v)=>el(id).textContent=v;
@@ -616,6 +733,7 @@ if("IntersectionObserver" in window){
 }
 updateStats();
 sIn=randUnit(); theta=[12,-30,47];
+openIntro();
 requestAnimationFrame(frame);
 })();
 </script>
