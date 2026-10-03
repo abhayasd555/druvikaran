@@ -78,6 +78,14 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 28px;justify-co
 .timebar{height:6px;border-radius:3px;background:var(--panel-2);overflow:hidden;margin-top:8px}
 .timebar i{display:block;height:100%;width:100%;background:var(--ink);transform-origin:left;transition:background .3s}
 .timebar.low i{background:var(--warn)}
+.float-timer{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));z-index:50;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 12px 8px;min-width:86px;box-shadow:0 4px 14px rgba(0,0,0,.18);opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .2s,transform .2s}
+.float-timer.show{opacity:1;transform:none}
+.float-timer span{display:block;font-size:12px;color:var(--muted)}
+.float-timer b{display:block;font-family:var(--display);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.float-timer.low b{color:var(--warn)}
+.float-timer .bar{display:block;height:4px;border-radius:2px;background:var(--panel-2);overflow:hidden;margin-top:4px}
+.float-timer .bar i{display:block;height:100%;background:var(--ink);transform-origin:left}
+.float-timer.low .bar i{background:var(--warn)}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
 .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;background:var(--c)}
 
@@ -134,6 +142,7 @@ footer{margin-top:16px;color:var(--muted);font-size:13px;max-width:80ch}
 </style>
 </head>
 <body>
+<div class="float-timer" id="floatTimer" aria-hidden="true"><span>Time</span><b id="fTime">--</b><span class="bar"><i id="fFill"></i></span></div>
 <div class="wrap">
   <header>
     <div class="brand">
@@ -590,8 +599,20 @@ function frame(now){
     el("timefill").style.transform=`scaleX(${timeLeft/timeTotal})`;
     const low=timeLeft<8; ts.classList.toggle("low",low); tb.classList.toggle("low",low);
   } else { el("sTime").textContent=mode==="lab"?"∞":"--"; el("timefill").style.transform="scaleX(1)"; ts.classList.remove("low"); tb.classList.remove("low"); }
+  // floating timer, shown while the header timer is scrolled out of view
+  const ft=el("floatTimer");
+  ft.classList.toggle("show",mode==="play"&&!timerInView);
+  if(mode==="play"){
+    el("fTime").textContent=timeLeft.toFixed(1);
+    el("fFill").style.transform=`scaleX(${timeLeft/timeTotal})`;
+    ft.classList.toggle("low",timeLeft<8);
+  }
   drawSphere(s,now); drawEllipse(s); readouts(s); drawBench(s);
   requestAnimationFrame(frame);
+}
+let timerInView=true;
+if("IntersectionObserver" in window){
+  new IntersectionObserver(es=>{timerInView=es[0].isIntersecting;}).observe(el("timerStat"));
 }
 updateStats();
 sIn=randUnit(); theta=[12,-30,47];
