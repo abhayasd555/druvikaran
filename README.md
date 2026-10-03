@@ -4,6 +4,10 @@ A browser game about polarisation. Light from a laser travels through a fibre in
 
 It's a single self-contained `index.html` with no build step and no dependencies. Open it in a browser, or serve it with GitHub Pages.
 
+## Tomography lesson
+
+`tomography.html` is a learning page rather than a game. It walks through two-photon polarisation state tomography in six sections: prepare an entangled state (or a hidden mystery state), choose analyser settings, collect simulated coincidence counts with shot noise and accidentals, then reconstruct the density matrix by linear inversion and by maximum likelihood, and compare fidelity, purity and concurrence with the true state.
+
 ## How to play
 
 Each round, the fibre scrambles the input polarisation at random and a new target appears on the sphere. Hold the output (red) inside the target ring (violet) for 0.8 s to lock it. Every level shortens the clock and shrinks the ring. Free practice mode has no timer.

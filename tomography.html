@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>State Tomography · Druvikaran</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --table:#f2eee5; --panel:#faf8f3; --panel-2:#ebe6da;
+  --ink:#1d1b18; --muted:#6e685c; --line:#dcd5c6; --rule:#1d1b18;
+  --pos:#24508a; --neg:#c0392b;
+  --ok:#3b6e45; --warn:#b5541c;
+  --scrim:rgba(242,238,229,.86);
+  --display:"Newsreader", "Iowan Old Style", Georgia, serif;
+  --body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --table:#161513; --panel:#1d1c19; --panel-2:#272520;
+    --ink:#ebe5d8; --muted:#9b9485; --line:#35322c; --rule:#ebe5d8;
+    --pos:#82a6d8; --neg:#e2614f;
+    --ok:#83b28d; --warn:#e2925a;
+    --scrim:rgba(22,21,19,.86);
+  }
+}
+:root[data-theme="dark"]{
+  --table:#161513; --panel:#1d1c19; --panel-2:#272520;
+  --ink:#ebe5d8; --muted:#9b9485; --line:#35322c; --rule:#ebe5d8;
+  --pos:#82a6d8; --neg:#e2614f;
+  --ok:#83b28d; --warn:#e2925a;
+  --scrim:rgba(22,21,19,.86);
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;color:var(--ink);font-family:var(--body);font-size:15.5px;line-height:1.6;background:var(--table);-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit;color:inherit}
+.hidden{display:none!important}
+.wrap{max-width:1140px;margin:0 auto;padding:0 20px 48px}
+
+/* portal nav */
+.portals{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.portals .home{font-family:var(--display);font-size:18px;text-decoration:none}
+.portals .links{display:flex;gap:18px}
+.portals .links a{text-decoration:none;color:var(--muted);padding-bottom:2px;border-bottom:1px solid transparent}
+.portals .links a:hover{color:var(--ink)}
+.portals .links a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
+
+/* masthead */
+.mast{padding:40px 0 26px;border-bottom:1px solid var(--rule)}
+.eyebrow{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.mast h1{font-family:var(--display);font-weight:400;font-size:clamp(36px,6vw,58px);line-height:1.02;letter-spacing:-.02em;margin:0;max-width:16ch}
+.mast p{color:var(--muted);font-size:16.5px;max-width:60ch;margin:16px 0 0}
+
+/* layout */
+.layout{display:grid;grid-template-columns:190px minmax(0,1fr);gap:48px;margin-top:34px}
+@media (max-width:900px){.layout{grid-template-columns:1fr;gap:0}.toc{display:none}}
+.toc{position:sticky;top:24px;align-self:start;font-size:13.5px}
+.toc ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+.toc a{display:block;padding:6px 0 6px 14px;margin-left:-1px;border-left:1px solid transparent;text-decoration:none;color:var(--muted)}
+.toc a:hover{color:var(--ink)}
+.toc a.on{color:var(--ink);border-left-color:var(--ink)}
+.toc .n{font-family:var(--mono);font-size:11.5px;margin-right:8px}
+
+section.sec{padding:8px 0 40px;margin-bottom:34px;border-bottom:1px solid var(--line)}
+section.sec:last-of-type{border-bottom:0}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:10px}
+.sec-head .n{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.sec-head h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,4vw,36px);line-height:1.1;letter-spacing:-.01em;margin:0}
+.prose{max-width:64ch}
+.prose p{margin:0 0 14px}
+.prose .f{font-family:var(--display);font-size:19px;text-align:center;margin:18px 0;max-width:none}
+.prose em,.f em{font-family:var(--display);font-size:1.08em}
+.try{border-left:2px solid var(--ink);padding:2px 0 2px 16px;margin:18px 0 0;max-width:64ch;color:var(--muted);font-size:14.5px}
+.try b{color:var(--ink);font-weight:500}
+.try ul{margin:6px 0 0;padding-left:18px}
+.next{margin-top:22px}
+.next a{font-size:14px;text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px}
+.next a:hover{border-bottom-color:var(--ink)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:20px;margin-top:20px}
+.card h3{font-family:var(--display);font-weight:500;font-size:19px;margin:0 0 2px}
+.card .sub{color:var(--muted);font-size:13.5px;margin:0 0 14px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+@media (max-width:760px){.cols{grid-template-columns:1fr}}
+.cols.fit{grid-template-columns:auto minmax(240px,1fr)}
+@media (max-width:1060px){.cols.fit{grid-template-columns:1fr}}
+
+/* controls */
+.btn{font-family:var(--body);font-weight:500;font-size:14px;padding:9px 16px;border-radius:2px;border:1px solid var(--rule);background:transparent;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.btn.primary:hover{opacity:.88;background:var(--ink)}
+.btn.quiet{border-color:transparent;color:var(--muted);padding-left:4px;padding-right:4px}
+.btn.quiet:hover{background:none;color:var(--ink)}
+.chip{font-size:13px;padding:6px 11px;border-radius:2px;border:1px solid var(--line);background:transparent;cursor:pointer}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn:focus-visible,.chip:focus-visible,.cell:focus-visible,a:focus-visible{outline:2px solid var(--pos);outline-offset:2px}
+.field{margin:14px 0 0}
+.field .lbl{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted)}
+.field .lbl output{font-family:var(--mono);color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--ink);margin:6px 0 0}
+select{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:2px;background:var(--panel);color:var(--ink)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:6px 12px;font-size:13px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.check{display:inline-flex;gap:8px;align-items:center;font-size:13.5px;color:var(--muted);cursor:pointer}
+.check input{accent-color:var(--ink)}
+.ket{font-family:var(--display);font-size:20px;margin:16px 0 4px;line-height:1.4}
+.ket small{display:block;font-family:var(--body);font-size:13px;color:var(--muted);margin-top:2px}
+
+/* tables */
+table.data{border-collapse:collapse;width:100%;font-size:14px}
+table.data th{font-weight:400;color:var(--muted);text-align:left;padding:7px 10px 7px 0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--rule)}
+table.data td{padding:8px 10px 8px 0;border-bottom:1px solid var(--line)}
+table.data td.m{font-family:var(--mono);font-size:13.5px}
+table.data td.s{font-family:var(--display);font-size:17px}
+.scroll-x{overflow-x:auto}
+
+/* counts grid */
+.grid6{border-collapse:separate;border-spacing:3px;margin:0 auto}
+.grid6 th{font-family:var(--display);font-weight:400;font-size:16px;color:var(--ink);padding:2px 4px;text-align:center}
+.grid6 th.corner{font-family:var(--body);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);line-height:1.2;text-align:right}
+.cell{position:relative;width:58px;height:44px;border:1px solid var(--line);border-radius:2px;background:var(--panel);cursor:pointer;font-family:var(--mono);font-size:12.5px;padding:0;transition:border-color .1s}
+.cell:hover{border-color:var(--ink)}
+.cell.sel{outline:2px solid var(--ink);outline-offset:1px}
+.cell.std::after{content:"";position:absolute;top:4px;right:4px;width:4px;height:4px;border-radius:50%;background:var(--muted)}
+.cell .e{color:var(--muted)}
+@media (max-width:520px){.cell{width:40px;height:38px;font-size:11px}.grid6{border-spacing:2px}}
+.readline{font-size:13.5px;color:var(--muted);margin-top:14px;min-height:1.6em}
+.readline b{font-family:var(--mono);font-weight:400;color:var(--ink)}
+.legend-seq{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:12px}
+.legend-seq i{display:block;width:120px;height:8px;border-radius:2px;background:linear-gradient(90deg,var(--panel),color-mix(in srgb,var(--pos) 78%,var(--panel)));border:1px solid var(--line)}
+
+/* meters & stats */
+.meter16{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;margin:8px 0 4px}
+.meter16 i{height:8px;border-radius:1px;background:var(--line)}
+.meter16 i.on{background:var(--ink)}
+.eig{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.eig span{font-family:var(--mono);font-size:13px;border:1px solid var(--line);border-radius:2px;padding:3px 8px}
+.eig span.bad{color:var(--warn);border-color:var(--warn)}
+.note{font-size:13.5px;color:var(--muted);margin:10px 0 0}
+.note.warn{color:var(--warn)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--rule);border-bottom:1px solid var(--line)}
+@media (max-width:700px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{padding:14px 16px 16px;border-left:1px solid var(--line)}
+.stat:first-child{border-left:0;padding-left:0}
+@media (max-width:700px){.stat:nth-child(3){border-left:0;padding-left:0}.stat:nth-child(n+3){border-top:1px solid var(--line)}}
+.stat span{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.stat b{display:block;font-family:var(--mono);font-weight:400;font-size:28px;line-height:1.25;font-variant-numeric:tabular-nums}
+.stat small{display:block;font-size:12.5px;color:var(--muted)}
+
+/* density matrix figure */
+.mfig .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.mfig .panes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:10px}
+@media (max-width:560px){.mfig .panes{grid-template-columns:1fr}}
+.mfig .pane .t{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mfig canvas{display:block;width:100%;aspect-ratio:4/3}
+.mfig table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12.5px;margin-top:8px}
+.mfig table th{font-family:var(--display);font-weight:400;font-size:14px;color:var(--muted);padding:4px}
+.mfig table td{text-align:right;padding:5px 4px;border-top:1px solid var(--line)}
+.mfig table td.p{color:var(--pos)} .mfig table td.n{color:var(--neg)}
+.mfig .keyrow{display:flex;gap:16px;font-size:12.5px;color:var(--muted)}
+.mfig .keyrow span{display:inline-flex;align-items:center;gap:6px}
+.mfig .keyrow i{width:10px;height:10px;display:inline-block;border-radius:1px}
+.mfig .empty{display:flex;align-items:center;justify-content:center;aspect-ratio:4/3;border:1px dashed var(--line);color:var(--muted);font-size:13.5px;text-align:center;padding:16px}
+.veil{position:relative}
+.veil .cover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:var(--panel);border:1px dashed var(--line);text-align:center;padding:20px;color:var(--muted);font-size:14px;z-index:2}
+.veil .cover b{font-family:var(--display);font-weight:400;font-size:22px;color:var(--ink)}
+
+.tip{position:fixed;z-index:200;pointer-events:none;background:var(--ink);color:var(--panel);font-family:var(--mono);font-size:12px;padding:6px 9px;border-radius:2px;white-space:nowrap;opacity:0;transition:opacity .1s}
+.tip.show{opacity:1}
+
+footer{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer p{margin:0 0 8px;max-width:80ch}
+
+/* welcome walkthrough (shared with the game) */
+.intro{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--scrim);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);animation:fade .35s ease-out}
+.sheet{background:var(--panel);border:1px solid var(--rule);border-radius:2px;width:100%;max-width:540px;max-height:calc(100dvh - 32px);overflow:auto;padding:30px 32px 24px;box-shadow:0 30px 70px -40px rgba(0,0,0,.5);animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+.sheet .count{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.sheet h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,34px);line-height:1.1;letter-spacing:-.01em;margin:10px 0 14px}
+.sheet .body{min-height:170px}
+.sheet .body.swap{animation:swap .3s ease-out}
+.sheet p{margin:0 0 12px;font-size:15.5px;line-height:1.6}
+.sheet p.aside{color:var(--muted);font-size:14px}
+.steps{display:flex;gap:6px;margin:22px 0 18px}
+.steps i{flex:1;height:2px;background:var(--line);transition:background .3s}
+.steps i.done{background:var(--ink)}
+.sheet .nav{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.sheet .nav .row{flex-wrap:nowrap}
+@media (max-width:480px){
+  .sheet{padding:24px 22px 20px}
+  .sheet .nav{flex-direction:column-reverse;align-items:stretch}
+  .sheet .nav .row>.btn{flex:1}
+  .sheet .nav #inBack{align-self:flex-start}
+}
+@keyframes fade{from{opacity:0}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes swap{from{opacity:0;transform:translateX(10px)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="intro hidden" id="intro" role="dialog" aria-modal="true" aria-labelledby="inTitle">
+  <div class="sheet">
+    <div class="count" id="inCount"></div>
+    <h2 id="inTitle"></h2>
+    <div class="body" id="inBody"></div>
+    <div class="steps" id="inSteps" aria-hidden="true"></div>
+    <div class="nav">
+      <button class="btn quiet" id="inBack">Back</button>
+      <div class="row" id="inNav"></div>
+    </div>
+  </div>
+</div>
+<div class="tip" id="tip" role="status"></div>
+
+<div class="wrap">
+  <nav class="portals" aria-label="Portals">
+    <a class="home" href="index.html">Druvikaran</a>
+    <div class="links">
+      <a href="index.html">Polarisation game</a>
+      <a href="tomography.html" aria-current="page">Tomography lesson</a>
+    </div>
+  </nav>
+
+  <div class="mast">
+    <span class="eyebrow">Learning portal · Two-photon polarisation</span>
+    <h1>Reconstructing an entangled state</h1>
+    <p>A source makes pairs of entangled photons. You can't look at the state directly, but you can measure each photon in a few different ways and count what comes out. From those counts you can rebuild the whole state. This is quantum state tomography, and here you get to do it yourself.</p>
+  </div>
+
+  <div class="layout">
+    <aside class="toc" aria-label="Contents">
+      <ol>
+        <li><a href="#s1"><span class="n">01</span>The source</a></li>
+        <li><a href="#s2"><span class="n">02</span>Measuring one photon</a></li>
+        <li><a href="#s3"><span class="n">03</span>Counting coincidences</a></li>
+        <li><a href="#s4"><span class="n">04</span>Linear inversion</a></li>
+        <li><a href="#s5"><span class="n">05</span>Maximum likelihood</a></li>
+        <li><a href="#s6"><span class="n">06</span>How good is it?</a></li>
+      </ol>
+    </aside>
+
+    <main>
+      <!-- 01 -->
+      <section class="sec" id="s1">
+        <div class="sec-head"><span class="n">01</span><h2>The source</h2></div>
+        <div class="prose">
+          <p>In a nonlinear crystal such as BBO, a pump photon at 405 nm now and then splits into two photons at 810 nm. This is spontaneous parametric down-conversion. Stack two thin crystals with their axes at right angles and the pair comes out in a superposition: both photons horizontal, or both vertical.</p>
+          <p class="f"><em>|ψ⟩</em> = cos <em>θ</em> |HH⟩ + e<sup><em>iφ</em></sup> sin <em>θ</em> |VV⟩</p>
+          <p>Here you set that state yourself. <em>θ</em> balances the two terms, <em>φ</em> is the phase between them, and the visibility <em>V</em> mixes in white noise, the way imperfect alignment and timing do in a real source. The full state is then</p>
+          <p class="f"><em>ρ</em> = <em>V</em> |ψ⟩⟨ψ| + (1 − <em>V</em>) 𝟙/4</p>
+          <p>We call one photon Alice's and the other Bob's.</p>
+        </div>
+        <div class="card">
+          <div class="cols">
+            <div>
+              <h3>Prepare a state</h3>
+              <p class="sub">Start from a preset, then adjust.</p>
+              <div class="row" id="presets"></div>
+              <div class="field">
+                <div class="lbl"><span>Terms</span></div>
+                <div class="seg" style="margin-top:6px">
+                  <button id="famPhi" aria-pressed="true">|HH⟩ and |VV⟩</button>
+                  <button id="famPsi" aria-pressed="false">|HV⟩ and |VH⟩</button>
+                </div>
+              </div>
+              <div class="field"><div class="lbl"><span>Balance θ</span><output id="oTh"></output></div><input type="range" id="th" min="0" max="90" step="0.5"></div>
+              <div class="field"><div class="lbl"><span>Phase φ</span><output id="oPh"></output></div><input type="range" id="ph" min="0" max="360" step="1"></div>
+              <div class="field"><div class="lbl"><span>Visibility V</span><output id="oV"></output></div><input type="range" id="vis" min="0" max="1" step="0.01"></div>
+            </div>
+            <div>
+              <h3>What the source makes</h3>
+              <p class="sub">Changing the state clears any counts you've taken.</p>
+              <div class="ket" id="ket"></div>
+              <div class="row" style="margin-top:16px">
+                <button class="btn" id="btnMystery">Give me a mystery state</button>
+              </div>
+            </div>
+          </div>
+          <div class="veil" id="trueVeil" style="margin-top:24px">
+              <div class="cover hidden" id="trueCover"><b>A mystery state</b>It stays hidden until you check your reconstruction in section 6.</div>
+              <div id="figTrue"></div>
+          </div>
+        </div>
+        <div class="try"><b>Look at the bars.</b> A density matrix is a 4 × 4 grid of complex numbers. The four tall bars of |Φ⁺⟩ in the corners are what entanglement looks like: the off-diagonal pair ⟨HH|ρ|VV⟩ is the coherence between the two terms. Turn V down and watch only those two shrink.</div>
+        <div class="next"><a href="#s2">Next: Measuring one photon →</a></div>
+      </section>
+
+      <!-- 02 -->
+      <section class="sec" id="s2">
+        <div class="sec-head"><span class="n">02</span><h2>Measuring one photon</h2></div>
+        <div class="prose">
+          <p>One detector click tells you very little. To learn a polarisation state you project each photon onto one of six states: horizontal, vertical, diagonal, anti-diagonal, and right- and left-circular. They sit in opposite pairs on the Poincaré sphere, one pair per axis.</p>
+          <p>In the lab each arm has a quarter-wave plate, a half-wave plate and a polarising beam splitter that passes H. Turning the two plates picks which state reaches the detector. The angles below come from the same model the simulation uses.</p>
+        </div>
+        <div class="card">
+          <h3>Six analyser settings</h3>
+          <p class="sub">Fast-axis angles from horizontal. Light meets the quarter-wave plate first.</p>
+          <div class="scroll-x">
+            <table class="data" id="wpTable">
+              <thead><tr><th>State</th><th>Vector</th><th>Sphere</th><th>Quarter-wave</th><th>Half-wave</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="try"><b>Why six and not two?</b> Measuring only H and V tells you how much of each there is, but nothing about the phase between them. D/A and R/L are what reveal the phase, and the phase is where the entanglement lives.</div>
+        <div class="next"><a href="#s3">Next: Counting coincidences →</a></div>
+      </section>
+
+      <!-- 03 -->
+      <section class="sec" id="s3">
+        <div class="sec-head"><span class="n">03</span><h2>Counting coincidences</h2></div>
+        <div class="prose">
+          <p>Set Alice's analyser to one state and Bob's to another, then count how often both detectors click within a few nanoseconds of each other. That count is proportional to the probability <em>⟨ab|ρ|ab⟩</em> of finding the pair in |a⟩|b⟩.</p>
+          <p>Photon counting is random. A setting that should give 400 counts gives 400 ± 20 or so, because the noise grows as √<em>N</em>. On top of that, unrelated photons sometimes arrive together by chance. These accidentals add a flat background, which is usually subtracted.</p>
+          <p>Click a cell to measure that pair of settings. Each cell is one experiment: rows are Alice's setting, columns are Bob's.</p>
+        </div>
+        <div class="card">
+          <div class="row" style="justify-content:space-between;align-items:flex-end;gap:16px">
+            <div>
+              <h3>Coincidence counts</h3>
+              <p class="sub" style="margin:0">Dotted cells are the 16 standard settings of James et al.</p>
+            </div>
+            <div class="row">
+              <button class="btn" id="btnStd">Measure the standard 16</button>
+              <button class="btn" id="btnAll">Measure all 36</button>
+              <button class="btn quiet" id="btnClear">Clear</button>
+            </div>
+          </div>
+          <div class="cols fit" style="margin-top:18px;align-items:start">
+            <div class="scroll-x"><table class="grid6" id="grid"></table>
+              <div class="legend-seq"><span>0</span><i></i><span id="legMax">max</span><span>counts</span></div>
+            </div>
+            <div>
+              <div class="field" style="margin-top:0"><div class="lbl"><span>Pair rate at the detectors</span><output id="oRate"></output></div><input type="range" id="rate" min="0" max="100" step="1"></div>
+              <div class="field"><div class="lbl"><span>Integration time per setting</span></div>
+                <select id="tInt" style="margin-top:6px"><option value="0.1">0.1 s</option><option value="0.5">0.5 s</option><option value="1" selected>1 s</option><option value="5">5 s</option><option value="20">20 s</option></select>
+              </div>
+              <div class="field"><div class="lbl"><span>Accidental rate</span><output id="oAcc"></output></div><input type="range" id="acc" min="0" max="40" step="1"></div>
+              <div class="field"><label class="check"><input type="checkbox" id="subAcc" checked> Subtract expected accidentals before analysis</label></div>
+              <div class="readline" id="readline">Pick a cell to see its waveplate settings and count.</div>
+              <div class="readline" id="totals"></div>
+            </div>
+          </div>
+        </div>
+        <div class="try"><b>Try this.</b> Measure H for both photons a few times by clicking the same cell. The number changes every time. That spread is the shot noise every later step has to live with.</div>
+        <div class="next"><a href="#s4">Next: Linear inversion →</a></div>
+      </section>
+
+      <!-- 04 -->
+      <section class="sec" id="s4">
+        <div class="sec-head"><span class="n">04</span><h2>Linear inversion</h2></div>
+        <div class="prose">
+          <p>Any two-photon polarisation state can be written with 16 real numbers, the two-photon Stokes parameters <em>S<sub>ij</sub></em>:</p>
+          <p class="f"><em>ρ</em> = ¼ Σ<sub><em>i,j</em></sub> <em>S<sub>ij</sub> σ<sub>i</sub></em> ⊗ <em>σ<sub>j</sub></em></p>
+          <p>Each coincidence count is a fixed linear combination of these 16 numbers. If your settings give 16 independent equations, you can solve for all of them with ordinary linear algebra. With more than 16 the page takes the least-squares fit.</p>
+          <p>There's a catch. Noise can push the answer outside the set of physical states. A real density matrix never has a negative eigenvalue, but linear inversion can produce one, especially when counts are low.</p>
+        </div>
+        <div class="card">
+          <div class="cols">
+            <div>
+              <h3>What your settings pin down</h3>
+              <p class="sub" id="rankText"></p>
+              <div class="meter16" id="meter16"></div>
+              <h3 style="margin-top:22px">Two-photon Stokes parameters</h3>
+              <p class="sub">Rows are Alice's, columns are Bob's. S₀ is the identity.</p>
+              <div class="scroll-x"><table class="data" id="stokes"></table></div>
+            </div>
+            <div>
+              <h3>Eigenvalues of ρ</h3>
+              <p class="sub">All four should be zero or positive and sum to 1.</p>
+              <div class="eig" id="eigLin"></div>
+              <p class="note" id="linNote"></p>
+            </div>
+          </div>
+          <div id="figLin" style="margin-top:22px"></div>
+        </div>
+        <div class="try"><b>Try this.</b> Clear the grid, set the pair rate to its lowest, and measure the standard 16 at 0.1 s. Measure it a few times and you'll soon get a negative eigenvalue: an answer no real source could produce.</div>
+        <div class="next"><a href="#s5">Next: Maximum likelihood →</a></div>
+      </section>
+
+      <!-- 05 -->
+      <section class="sec" id="s5">
+        <div class="sec-head"><span class="n">05</span><h2>Maximum likelihood</h2></div>
+        <div class="prose">
+          <p>Instead of solving the equations exactly, ask a different question: of all the physical states, which one makes the counts you actually saw most likely? The answer is always a valid state, with no negative eigenvalues, and it uses the data more sensibly when counts are low.</p>
+          <p>This page finds it with the iterative R·ρ·R method. It starts from the completely mixed state and repeatedly nudges ρ toward the data, keeping it positive at every step.</p>
+        </div>
+        <div class="card">
+          <div class="cols">
+            <div>
+              <h3>Eigenvalues of ρ</h3>
+              <p class="sub">Always zero or positive here.</p>
+              <div class="eig" id="eigMl"></div>
+              <p class="note" id="mlNote"></p>
+            </div>
+            <div>
+              <h3>Compared with linear inversion</h3>
+              <p class="sub">How far apart the two answers are, as a trace distance.</p>
+              <div class="stat" style="padding:0;border:0"><b id="dLinMl">–</b><small>0 means identical, 1 means completely different.</small></div>
+            </div>
+          </div>
+          <div id="figMl" style="margin-top:22px"></div>
+        </div>
+        <div class="try"><b>Notice</b> that maximum likelihood still gives an answer with fewer than 16 independent settings. It's the most likely state, but many states fit equally well, so don't trust it until the meter in section 4 is full.</div>
+        <div class="next"><a href="#s6">Next: How good is it? →</a></div>
+      </section>
+
+      <!-- 06 -->
+      <section class="sec" id="s6">
+        <div class="sec-head"><span class="n">06</span><h2>How good is it?</h2></div>
+        <div class="prose">
+          <p>Three numbers sum up the reconstruction. <b>Fidelity</b> says how close it is to the true state, from 0 to 1. <b>Purity</b>, Tr <em>ρ</em>², is 1 for a pure state and ¼ for complete noise. <b>Concurrence</b> measures entanglement: 0 for a state that could be made without it, 1 for a Bell state.</p>
+        </div>
+        <div class="card">
+          <div class="row" style="justify-content:space-between;margin-bottom:14px">
+            <h3>Maximum-likelihood state against the source</h3>
+            <button class="btn hidden" id="btnReveal">Reveal the mystery state</button>
+          </div>
+          <div class="stats">
+            <div class="stat"><span>Fidelity</span><b id="stF">–</b><small id="stFs">with the true state</small></div>
+            <div class="stat"><span>Purity</span><b id="stP">–</b><small id="stPs">true: –</small></div>
+            <div class="stat"><span>Concurrence</span><b id="stC">–</b><small id="stCs">true: –</small></div>
+            <div class="stat"><span>Coincidences</span><b id="stN">–</b><small id="stNs">in the analysis</small></div>
+          </div>
+          <p class="note" id="revealNote"></p>
+        </div>
+        <div class="try"><b>Things to try</b>
+          <ul>
+            <li>Raise the integration time and measure all 36 again. Fidelity creeps toward 1, but each tenfold increase in counts only cuts the error by about three.</li>
+            <li>Set |Φ⁺⟩ and lower V. Concurrence falls to zero at V = ⅓, even though the state still shows strong correlations in H/V.</li>
+            <li>Try a mystery state with the standard 16 and see how close you get before revealing it.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <p><button class="btn quiet" id="btnNotes" style="padding-left:0">Show the welcome notes again</button></p>
+    <p>Conventions: |D⟩ = (|H⟩ + |V⟩)/√2, |R⟩ = (|H⟩ + i|V⟩)/√2, so S₃ &gt; 0 is right-circular, as in the polarisation game. Pauli operators map to S₁ = σ<sub>z</sub> (H/V), S₂ = σ<sub>x</sub> (D/A), S₃ = σ<sub>y</sub> (R/L). Waveplates are ideal and detectors identical.</p>
+    <p>Further reading: D. F. V. James, P. G. Kwiat, W. J. Munro and A. G. White, “Measurement of qubits”, Phys. Rev. A 64, 052312 (2001). J. Řeháček, Z. Hradil, E. Knill and A. I. Lvovsky, “Diluted maximum-likelihood algorithm for quantum tomography”, Phys. Rev. A 75, 042108 (2007). W. K. Wootters, Phys. Rev. Lett. 80, 2245 (1998).</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+const el=id=>document.getElementById(id);
+const D2R=Math.PI/180;
+
+// ---------- complex 4×4 matrices ----------
+const Z4=()=>({re:new Float64Array(16),im:new Float64Array(16)});
+function mul(A,B){const C=Z4();for(let i=0;i<4;i++)for(let j=0;j<4;j++){let r=0,m=0;for(let k=0;k<4;k++){const ar=A.re[i*4+k],ai=A.im[i*4+k],br=B.re[k*4+j],bi=B.im[k*4+j];r+=ar*br-ai*bi;m+=ar*bi+ai*br;}C.re[i*4+j]=r;C.im[i*4+j]=m;}return C;}
+function adj(A){const C=Z4();for(let i=0;i<4;i++)for(let j=0;j<4;j++){C.re[i*4+j]=A.re[j*4+i];C.im[i*4+j]=-A.im[j*4+i];}return C;}
+function add(A,B,s=1){const C=Z4();for(let k=0;k<16;k++){C.re[k]=A.re[k]+s*B.re[k];C.im[k]=A.im[k]+s*B.im[k];}return C;}
+function scale(A,s){const C=Z4();for(let k=0;k<16;k++){C.re[k]=A.re[k]*s;C.im[k]=A.im[k]*s;}return C;}
+function ident(){const C=Z4();C.re[0]=C.re[5]=C.re[10]=C.re[15]=1;return C;}
+const trRe=A=>A.re[0]+A.re[5]+A.re[10]+A.re[15];
+function trProd(A,B){let s=0;for(let i=0;i<4;i++)for(let k=0;k<4;k++)s+=A.re[i*4+k]*B.re[k*4+i]-A.im[i*4+k]*B.im[k*4+i];return s;}
+function hermitize(A){const C=Z4();for(let i=0;i<4;i++)for(let j=0;j<4;j++){C.re[i*4+j]=(A.re[i*4+j]+A.re[j*4+i])/2;C.im[i*4+j]=(A.im[i*4+j]-A.im[j*4+i])/2;}return C;}
+function outer(v){const C=Z4();for(let i=0;i<4;i++)for(let j=0;j<4;j++){const [ar,ai]=v[i],[br,bi]=v[j];C.re[i*4+j]=ar*br+ai*bi;C.im[i*4+j]=ai*br-ar*bi;}return C;}
+const cm=([a,b],[c,d])=>[a*c-b*d,a*d+b*c];
+const kronVec=(a,b)=>[cm(a[0],b[0]),cm(a[0],b[1]),cm(a[1],b[0]),cm(a[1],b[1])];
+function kron2(a,b){const C=Z4();for(let i1=0;i1<2;i1++)for(let i2=0;i2<2;i2++)for(let j1=0;j1<2;j1++)for(let j2=0;j2<2;j2++){const x=[a.re[i1*2+j1],a.im[i1*2+j1]],y=[b.re[i2*2+j2],b.im[i2*2+j2]];const [r,m]=cm(x,y);const k=(i1*2+i2)*4+(j1*2+j2);C.re[k]=r;C.im[k]=m;}return C;}
+
+// Jacobi eigen-solver on the real 8×8 embedding [[A,−B],[B,A]] of a Hermitian A+iB
+function jacobi(S,n){
+  const a=Float64Array.from(S), V=new Float64Array(n*n);
+  for(let i=0;i<n;i++)V[i*n+i]=1;
+  for(let sweep=0;sweep<80;sweep++){
+    let off=0;for(let p=0;p<n;p++)for(let q=p+1;q<n;q++)off+=a[p*n+q]*a[p*n+q];
+    if(off<1e-24)break;
+    for(let p=0;p<n-1;p++)for(let q=p+1;q<n;q++){
+      const apq=a[p*n+q]; if(Math.abs(apq)<1e-300)continue;
+      const th=(a[q*n+q]-a[p*n+p])/(2*apq);
+      const t=(th>=0?1:-1)/(Math.abs(th)+Math.sqrt(th*th+1));
+      const c=1/Math.sqrt(t*t+1), s=t*c;
+      for(let k=0;k<n;k++){const x=a[k*n+p],y=a[k*n+q];a[k*n+p]=c*x-s*y;a[k*n+q]=s*x+c*y;}
+      for(let k=0;k<n;k++){const x=a[p*n+k],y=a[q*n+k];a[p*n+k]=c*x-s*y;a[q*n+k]=s*x+c*y;}
+      for(let k=0;k<n;k++){const x=V[k*n+p],y=V[k*n+q];V[k*n+p]=c*x-s*y;V[k*n+q]=s*x+c*y;}
+    }
+  }
+  const vals=[];for(let i=0;i<n;i++)vals.push(a[i*n+i]);
+  return {vals,V};
+}
+function embed(M){const E=new Float64Array(64);for(let i=0;i<4;i++)for(let j=0;j<4;j++){const r=M.re[i*4+j],m=M.im[i*4+j];E[i*8+j]=r;E[i*8+j+4]=-m;E[(i+4)*8+j]=m;E[(i+4)*8+j+4]=r;}return E;}
+function eigvals(M){const v=jacobi(embed(hermitize(M)),8).vals.sort((x,y)=>y-x);return [0,2,4,6].map(i=>(v[i]+v[i+1])/2);}
+function psdSqrt(M){
+  const {vals,V}=jacobi(embed(hermitize(M)),8), n=8, S=new Float64Array(64);
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){let s=0;for(let k=0;k<n;k++)s+=V[i*n+k]*Math.sqrt(Math.max(0,vals[k]))*V[j*n+k];S[i*n+j]=s;}
+  const C=Z4();for(let i=0;i<4;i++)for(let j=0;j<4;j++){C.re[i*4+j]=S[i*8+j];C.im[i*4+j]=S[(i+4)*8+j];}
+  return C;
+}
+function fidelity(r,s){const q=psdSqrt(r);const ev=eigvals(mul(mul(q,s),q));const t=ev.reduce((a,x)=>a+Math.sqrt(Math.max(0,x)),0);return Math.min(1,t*t);}
+const purity=r=>{let s=0;for(let k=0;k<16;k++)s+=r.re[k]*r.re[k]+r.im[k]*r.im[k];return s;};
+function concurrence(r){
+  const YY=Z4();YY.re[3]=-1;YY.re[6]=1;YY.re[9]=1;YY.re[12]=-1;
+  const conj=Z4();for(let k=0;k<16;k++){conj.re[k]=r.re[k];conj.im[k]=-r.im[k];}
+  const rt=mul(mul(YY,conj),YY), q=psdSqrt(r);
+  const l=eigvals(mul(mul(q,rt),q)).map(x=>Math.sqrt(Math.max(0,x))).sort((a,b)=>b-a);
+  return Math.max(0,l[0]-l[1]-l[2]-l[3]);
+}
+function traceDist(a,b){return eigvals(add(a,b,-1)).reduce((s,x)=>s+Math.abs(x),0)/2;}
+
+// ---------- polarisation states & operators ----------
+const s2=Math.SQRT1_2;
+const BASES=["H","V","D","A","R","L"];
+const POL={H:[[1,0],[0,0]],V:[[0,0],[1,0]],D:[[s2,0],[s2,0]],A:[[s2,0],[-s2,0]],R:[[s2,0],[0,s2]],L:[[s2,0],[0,-s2]]};
+const PROJ=BASES.map(a=>BASES.map(b=>outer(kronVec(POL[a],POL[b]))));
+const P2=(re,im=[0,0,0,0])=>({re,im});
+const STK=[P2([1,0,0,1]),P2([1,0,0,-1]),P2([0,1,1,0]),P2([0,0,0,0],[0,-1,1,0])]; // 𝟙, σz, σx, σy
+const SIG=[];for(let i=0;i<4;i++)for(let j=0;j<4;j++)SIG.push(kron2(STK[i],STK[j]));
+const JAMES=["HH","HV","VV","VH","RH","RV","DV","DH","DR","DD","RD","HD","VD","VL","HL","RL"];
+const isStd=(a,b)=>JAMES.includes(BASES[a]+BASES[b]);
+const BLBL=["HH","HV","VH","VV"];
+
+// waveplate angles that send each state to H at the beam splitter (QWP first, then HWP)
+function wpAmp(q,h,v){
+  const W=(th,G)=>{const c=Math.cos(th),s=Math.sin(th),e=[Math.cos(G),Math.sin(G)];
+    return [[[c*c+s*s*e[0],s*s*e[1]],[c*s*(1-e[0]),-c*s*e[1]]],[[c*s*(1-e[0]),-c*s*e[1]],[s*s+c*c*e[0],c*c*e[1]]]];};
+  const app=(M,x)=>[[cm(M[0][0],x[0])[0]+cm(M[0][1],x[1])[0],cm(M[0][0],x[0])[1]+cm(M[0][1],x[1])[1]],[cm(M[1][0],x[0])[0]+cm(M[1][1],x[1])[0],cm(M[1][0],x[0])[1]+cm(M[1][1],x[1])[1]]];
+  const out=app(W(h*D2R,Math.PI),app(W(q*D2R,Math.PI/2),v));
+  return out[0][0]**2+out[0][1]**2;
+}
+const WP={};
+BASES.forEach(b=>{let best=null;
+  for(let q=-90;q<90;q+=0.5)for(let h=-90;h<90;h+=0.5){const p=wpAmp(q,h,POL[b]);const cost=Math.abs(q)+Math.abs(h)+(q<0?0.01:0)+(h<0?0.01:0);
+    if(!best||p>best.p+1e-9||(Math.abs(p-best.p)<=1e-9&&cost<best.cost))best={p,q,h,cost};}
+  WP[b]=best;});
+
+// ---------- the source ----------
+const src={fam:"phi",th:45,ph:0,V:1};
+let mystery=null, revealed=false, rhoTrue=null;
+const PRESETS=[
+  ["|Φ⁺⟩",{fam:"phi",th:45,ph:0,V:1}],["|Φ⁻⟩",{fam:"phi",th:45,ph:180,V:1}],
+  ["|Ψ⁺⟩",{fam:"psi",th:45,ph:0,V:1}],["|Ψ⁻⟩",{fam:"psi",th:45,ph:180,V:1}],
+  ["Partly entangled",{fam:"phi",th:25,ph:0,V:1}],["Noisy |Φ⁺⟩",{fam:"phi",th:45,ph:0,V:0.7}],["|HH⟩",{fam:"phi",th:0,ph:0,V:1}],
+];
+function pureRho(p){
+  const v=[[0,0],[0,0],[0,0],[0,0]], [i0,i1]=p.fam==="phi"?[0,3]:[1,2];
+  v[i0]=[Math.cos(p.th*D2R),0]; v[i1]=[Math.sin(p.th*D2R)*Math.cos(p.ph*D2R),Math.sin(p.th*D2R)*Math.sin(p.ph*D2R)];
+  return add(scale(outer(v),p.V),scale(ident(),(1-p.V)/4));
+}
+function randU(){let q=[0,0,0,0].map(()=>{let u=0,v=0;while(!u)u=Math.random();v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);});
+  const n=Math.hypot(...q);q=q.map(x=>x/n);return {re:[q[0],q[2],-q[2],q[0]],im:[q[1],q[3],q[3],-q[1]]};}
+function makeMystery(){
+  const p={fam:Math.random()<.5?"phi":"psi",th:20+Math.random()*50,ph:Math.random()*360,V:0.72+Math.random()*0.28};
+  const U=kron2(randU(),randU());
+  return mul(mul(U,pureRho(p)),adj(U));
+}
+
+// ---------- counts ----------
+let counts=new Array(36).fill(null), selCell=-1;
+const rateFromSlider=v=>Math.round(20*Math.pow(10,v/100*2.7)); // 20 … ~10 000 per second
+function poisson(m){if(m<=0)return 0;if(m<40){const L=Math.exp(-m);let k=0,p=1;do{k++;p*=Math.random();}while(p>L);return k-1;}
+  let u=0;while(!u)u=Math.random();const z=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*Math.random());return Math.max(0,Math.round(m+Math.sqrt(m)*z));}
+function measure(k){
+  const a=Math.floor(k/6),b=k%6, t=+el("tInt").value, R=rateFromSlider(+el("rate").value), acc=+el("acc").value;
+  const p=Math.max(0,trProd(rhoTrue,PROJ[a][b]));
+  counts[k]={n:poisson(t*(R*p+acc)),t,acc};
+}
+
+// ---------- reconstruction ----------
+function rankOf(rows){
+  const M=rows.map(r=>r.slice()), n=16; let rank=0;
+  for(let c=0;c<n&&rank<M.length;c++){
+    let piv=-1,best=1e-9;for(let r=rank;r<M.length;r++)if(Math.abs(M[r][c])>best){best=Math.abs(M[r][c]);piv=r;}
+    if(piv<0)continue;[M[rank],M[piv]]=[M[piv],M[rank]];
+    for(let r=0;r<M.length;r++)if(r!==rank){const f=M[r][c]/M[rank][c];if(f)for(let k=c;k<n;k++)M[r][k]-=f*M[rank][k];}
+    rank++;
+  }
+  return rank;
+}
+function solve(A,b){const n=b.length,M=A.map((r,i)=>[...r,b[i]]);
+  for(let c=0;c<n;c++){let p=c;for(let r=c+1;r<n;r++)if(Math.abs(M[r][c])>Math.abs(M[p][c]))p=r;[M[c],M[p]]=[M[p],M[c]];
+    for(let r=0;r<n;r++)if(r!==c){const f=M[r][c]/M[c][c];for(let k=c;k<=n;k++)M[r][k]-=f*M[c][k];}}
+  return M.map((r,i)=>r[n]/r[i]);}
+function mle(meas){
+  const N=meas.reduce((s,m)=>s+m.n,0); if(N<=0)return null;
+  let St=Z4(); meas.forEach(m=>{St=add(St,m.P,m.t);});
+  let rho=scale(ident(),0.25);
+  for(let it=0;it<3000;it++){
+    let g=Z4(); const sT=trProd(rho,St);
+    for(const m of meas){if(!m.n)continue;const p=Math.max(1e-12,trProd(rho,m.P));g=add(g,m.P,(m.n/N)/p);}
+    g=add(g,St,-1/sT);
+    const R=add(ident(),g,0.5);
+    let nr=mul(mul(R,rho),R); nr=hermitize(scale(nr,1/trRe(nr)));
+    let d=0;for(let k=0;k<16;k++)d+=Math.abs(nr.re[k]-rho.re[k])+Math.abs(nr.im[k]-rho.im[k]);
+    rho=nr; if(d<1e-11)break;
+  }
+  return rho;
+}
+let A={};
+function analyse(){
+  const sub=el("subAcc").checked, meas=[];
+  counts.forEach((c,k)=>{if(!c)return;const a=Math.floor(k/6),b=k%6;meas.push({a,b,P:PROJ[a][b],t:c.t,n:sub?Math.max(0,c.n-c.acc*c.t):c.n});});
+  const rows=meas.map(m=>SIG.map(S=>trProd(m.P,S)/4));
+  const rank=meas.length?rankOf(rows):0;
+  let lin=null,stokes=null;
+  if(rank===16){
+    const AtA=Array.from({length:16},(_,i)=>Array.from({length:16},(_,j)=>rows.reduce((s,r)=>s+r[i]*r[j],0)));
+    const Atb=Array.from({length:16},(_,i)=>rows.reduce((s,r,m)=>s+r[i]*meas[m].n/meas[m].t,0));
+    const y=solve(AtA,Atb);
+    if(y[0]>0){stokes=y.map(v=>v/y[0]);lin=Z4();SIG.forEach((S,k)=>{lin=add(lin,S,stokes[k]/4);});}
+  }
+  A={meas,rank,lin,stokes,ml:meas.length?mle(meas):null,N:meas.reduce((s,m)=>s+m.n,0)};
+}
+
+// ---------- density-matrix figure ----------
+const tip=el("tip");
+let C={};
+function readColors(){const cs=getComputedStyle(document.documentElement);["pos","neg","ink","muted","line","panel","panel-2"].forEach(k=>C[k]=cs.getPropertyValue("--"+k).trim());}
+readColors();
+const fmtC=(r,i)=>`${r<0?"−":" "}${Math.abs(r).toFixed(3)} ${i<0?"−":"+"} ${Math.abs(i).toFixed(3)}i`;
+const figs=[];
+function makeFig(host,title){
+  host.innerHTML=`<div class="mfig"><div class="top"><div><h3>${title}</h3><div class="keyrow"><span><i style="background:var(--pos)"></i>positive</span><span><i style="background:var(--neg)"></i>negative</span></div></div>
+    <div class="seg"><button aria-pressed="true" data-v="bars">Bars</button><button aria-pressed="false" data-v="nums">Numbers</button></div></div>
+    <div class="panes">${["re","im"].map(p=>`<div class="pane"><div class="t">${p==="re"?"Real part":"Imaginary part"}</div><canvas data-p="${p}" role="img" aria-label="${title}, ${p==="re"?"real":"imaginary"} part"></canvas><table class="hidden" data-p="${p}"></table><div class="empty hidden" data-p="${p}">No data yet</div></div>`).join("")}</div></div>`;
+  const f={host,M:null,view:"bars",hover:{re:-1,im:-1},polys:{re:[],im:[]},empty:"No data yet"};
+  host.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{f.view=b.dataset.v;host.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderFig(f);});
+  host.querySelectorAll("canvas").forEach(cv=>{
+    const p=cv.dataset.p;
+    cv.addEventListener("pointermove",e=>{
+      if(!f.M)return;const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+      let hit=-1;for(let k=f.polys[p].length-1;k>=0;k--){if(inPoly(x,y,f.polys[p][k].pts)){hit=f.polys[p][k].idx;break;}}
+      if(hit!==f.hover[p]){f.hover[p]=hit;drawCity(f,cv,p);}
+      if(hit>=0){const i=Math.floor(hit/4),j=hit%4;tip.textContent=`⟨${BLBL[i]}|ρ|${BLBL[j]}⟩ = ${fmtC(f.M.re[hit],f.M.im[hit])}`;
+        tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,e.clientX+14)+"px";tip.style.top=(e.clientY+14)+"px";tip.classList.add("show");}
+      else tip.classList.remove("show");
+    });
+    cv.addEventListener("pointerleave",()=>{f.hover[p]=-1;tip.classList.remove("show");drawCity(f,cv,p);});
+  });
+  new ResizeObserver(()=>renderFig(f)).observe(host);
+  figs.push(f);return f;
+}
+function inPoly(x,y,P){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){if(((P[i][1]>y)!==(P[j][1]>y))&&(x<(P[j][0]-P[i][0])*(y-P[i][1])/(P[j][1]-P[i][1])+P[i][0]))c=!c;}return c;}
+function hull(pts){pts=pts.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]);const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);
+  const lo=[],up=[];for(const p of pts){while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],p)<=0)lo.pop();lo.push(p);}
+  for(const p of pts.reverse()){while(up.length>=2&&cr(up[up.length-2],up[up.length-1],p)<=0)up.pop();up.push(p);}
+  return lo.slice(0,-1).concat(up.slice(0,-1));}
+function setFig(f,M,empty){f.M=M;if(empty)f.empty=empty;renderFig(f);}
+function renderFig(f){
+  f.host.querySelectorAll(".pane").forEach(pane=>{
+    const cv=pane.querySelector("canvas"),tb=pane.querySelector("table"),em=pane.querySelector(".empty"),p=cv.dataset.p;
+    em.textContent=f.empty;
+    em.classList.toggle("hidden",!!f.M);
+    cv.classList.toggle("hidden",!f.M||f.view!=="bars");
+    tb.classList.toggle("hidden",!f.M||f.view!=="nums");
+    if(!f.M)return;
+    if(f.view==="bars")drawCity(f,cv,p);
+    else{const v=f.M[p];tb.innerHTML=`<tr><th></th>${BLBL.map(b=>`<th>${b}</th>`).join("")}</tr>`+BLBL.map((r,i)=>`<tr><th>${r}</th>${[0,1,2,3].map(j=>{const x=v[i*4+j];return `<td class="${Math.abs(x)<5e-4?"":x>0?"p":"n"}">${(x<0?"−":"")+Math.abs(x).toFixed(3)}</td>`;}).join("")}</tr>`).join("");}
+  });
+}
+function shade(hex,amt){const m=hex.match(/^#?([0-9a-f]{6})$/i);if(!m)return hex;const n=parseInt(m[1],16);const f=c=>Math.round(c*(1-amt));return `rgb(${f(n>>16&255)},${f(n>>8&255)},${f(n&255)})`;}
+function drawCity(f,cv,p){
+  const DPR=Math.min(2,devicePixelRatio||1),r=cv.getBoundingClientRect(),W=r.width,H=r.height;if(!W)return;
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  const ctx=cv.getContext("2d");ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);
+  const cell=Math.min(W/7.4,H/6.4), zs=cell*2.8, cos30=Math.cos(Math.PI/6), cx=W/2, y0=H*0.52-cell*2;
+  const P=(i,j,z)=>[cx+(j-i)*cell*cos30, y0+(i+j)*cell*0.5-z*zs];
+  const poly=pts=>{ctx.beginPath();pts.forEach((q,k)=>k?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();};
+  // floor
+  poly([P(0,0,0),P(0,4,0),P(4,4,0),P(4,0,0)]);ctx.fillStyle=C["panel-2"];ctx.fill();
+  ctx.strokeStyle=C.line;ctx.lineWidth=1;
+  for(let k=0;k<=4;k++){ctx.beginPath();let a=P(k,0,0),b=P(k,4,0);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);a=P(0,k,0);b=P(4,k,0);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();}
+  // labels
+  ctx.fillStyle=C.muted;ctx.font=`400 ${Math.max(10,cell*0.3)}px ${getComputedStyle(document.body).getPropertyValue("--mono")}`;ctx.textBaseline="middle";
+  for(let k=0;k<4;k++){let q=P(k+0.5,4.35,0);ctx.textAlign="left";ctx.fillText(BLBL[k],q[0],q[1]);q=P(4.35,k+0.5,0);ctx.textAlign="right";ctx.fillText(BLBL[k],q[0],q[1]);}
+  // bars, back to front
+  const v=f.M[p], order=[];for(let i=0;i<4;i++)for(let j=0;j<4;j++)order.push([i,j]);
+  order.sort((a,b)=>(a[0]+a[1])-(b[0]+b[1])||a[0]-b[0]);
+  f.polys[p]=[];
+  for(const [i,j] of order){
+    const idx=i*4+j,val=v[idx],z0=Math.min(0,val),z1=Math.max(0,val),a=0.18,b=0.82,col=val>=0?C.pos:C.neg;
+    const i0=i+a,i1=i+b,j0=j+a,j1=j+b;
+    const top=[P(i0,j0,z1),P(i0,j1,z1),P(i1,j1,z1),P(i1,j0,z1)];
+    const fl=[P(i1,j0,z0),P(i1,j1,z0),P(i1,j1,z1),P(i1,j0,z1)];
+    const fr=[P(i0,j1,z0),P(i1,j1,z0),P(i1,j1,z1),P(i0,j1,z1)];
+    if(Math.abs(val)<0.004){poly(top);ctx.strokeStyle=C.muted;ctx.globalAlpha=.5;ctx.stroke();ctx.globalAlpha=1;}
+    else{poly(fl);ctx.fillStyle=shade(col,.22);ctx.fill();poly(fr);ctx.fillStyle=shade(col,.38);ctx.fill();poly(top);ctx.fillStyle=col;ctx.fill();}
+    if(f.hover[p]===idx){[fl,fr,top].forEach(q=>{poly(q);ctx.strokeStyle=C.ink;ctx.lineWidth=1.5;ctx.stroke();});}
+    f.polys[p].push({idx,pts:hull([...top,...fl,...fr])});
+  }
+}
+
+// ---------- UI ----------
+const figTrue=makeFig(el("figTrue"),"True density matrix");
+const figLin=makeFig(el("figLin"),"Reconstructed by linear inversion");
+const figMl=makeFig(el("figMl"),"Reconstructed by maximum likelihood");
+
+const presetWrap=el("presets");
+PRESETS.forEach(([name,p])=>{const b=document.createElement("button");b.className="chip";b.textContent=name;b.onclick=()=>{Object.assign(src,p);mystery=null;syncSource();};presetWrap.appendChild(b);});
+["th","ph","vis"].forEach(id=>el(id).addEventListener("input",()=>{src.th=+el("th").value;src.ph=+el("ph").value;src.V=+el("vis").value;mystery=null;syncSource();}));
+el("famPhi").onclick=()=>{src.fam="phi";mystery=null;syncSource();};
+el("famPsi").onclick=()=>{src.fam="psi";mystery=null;syncSource();};
+el("btnMystery").onclick=()=>{mystery=makeMystery();revealed=false;syncSource();};
+el("btnReveal").onclick=()=>{revealed=true;syncSource(true);};
+
+function syncSource(keepCounts){
+  el("th").value=src.th;el("ph").value=src.ph;el("vis").value=src.V;
+  el("oTh").textContent=(+src.th).toFixed(1)+"°";el("oPh").textContent=Math.round(src.ph)+"°";el("oV").textContent=(+src.V).toFixed(2);
+  el("famPhi").setAttribute("aria-pressed",src.fam==="phi");el("famPsi").setAttribute("aria-pressed",src.fam==="psi");
+  const [k0,k1]=src.fam==="phi"?["HH","VV"]:["HV","VH"], c=Math.cos(src.th*D2R), s=Math.sin(src.th*D2R);
+  const hidden=mystery&&!revealed;
+  el("ket").innerHTML=mystery?(hidden?`|ψ⟩ = <em>?</em><small>Reconstruct it, then reveal it in section 6.</small>`:`A mystery state<small>A random entangled state with noise and a random waveplate in each arm.</small>`)
+    :`|ψ⟩ = ${c.toFixed(3)} |${k0}⟩ + ${s.toFixed(3)} e<sup><em>i</em>${Math.round(src.ph)}°</sup> |${k1}⟩<small>Mixed with ${(100*(1-src.V)).toFixed(0)}% white noise.</small>`;
+  rhoTrue=mystery||pureRho(src);
+  el("trueCover").classList.toggle("hidden",!hidden);
+  el("btnReveal").classList.toggle("hidden",!hidden);
+  setFig(figTrue,rhoTrue);
+  if(!keepCounts){counts.fill(null);selCell=-1;}
+  refresh();
+}
+
+// waveplate table
+el("wpTable").querySelector("tbody").innerHTML=BASES.map(b=>{
+  const v=POL[b],f=([r,i])=>Math.abs(i)<1e-9?(r<0?"−":"")+(Math.abs(r)>0.9?"1":Math.abs(r)<1e-9?"0":"1/√2"):(i<0?"−":"")+"i/√2";
+  const sph={H:"+S₁",V:"−S₁",D:"+S₂",A:"−S₂",R:"+S₃ (north pole)",L:"−S₃ (south pole)"}[b];
+  const ang=x=>(x<0?"−":"")+Math.abs(x).toFixed(1)+"°";
+  return `<tr><td class="s">|${b}⟩</td><td class="m">(${f(v[0])}, ${f(v[1])})</td><td>${sph}</td><td class="m">${ang(WP[b].q)}</td><td class="m">${ang(WP[b].h)}</td></tr>`;}).join("");
+
+// counts grid
+const grid=el("grid");
+grid.innerHTML=`<tr><th class="corner">Alice ↓<br>Bob →</th>${BASES.map(b=>`<th>${b}</th>`).join("")}</tr>`+
+  BASES.map((a,i)=>`<tr><th>${a}</th>${BASES.map((b,j)=>`<td><button class="cell${isStd(i,j)?" std":""}" data-k="${i*6+j}" aria-label="Measure Alice ${a}, Bob ${b}"><span class="e">·</span></button></td>`).join("")}</tr>`).join("");
+grid.querySelectorAll(".cell").forEach(b=>b.onclick=()=>{const k=+b.dataset.k;measure(k);selCell=k;refresh();});
+el("btnStd").onclick=()=>{for(let i=0;i<6;i++)for(let j=0;j<6;j++)if(isStd(i,j))measure(i*6+j);refresh();};
+el("btnAll").onclick=()=>{for(let k=0;k<36;k++)measure(k);refresh();};
+el("btnClear").onclick=()=>{counts.fill(null);selCell=-1;refresh();};
+el("rate").value=55;el("acc").value=5;
+const syncKnobs=()=>{el("oRate").textContent=rateFromSlider(+el("rate").value).toLocaleString()+" /s";el("oAcc").textContent=el("acc").value+" /s";};
+["rate","acc"].forEach(id=>el(id).addEventListener("input",syncKnobs));syncKnobs();
+el("subAcc").addEventListener("change",refresh);
+
+const meter=el("meter16");meter.innerHTML="<i></i>".repeat(16);
+const STL=["S₀","S₁","S₂","S₃"];
+const f3=x=>(x<=-5e-4?"−":"")+Math.abs(x).toFixed(3);
+const eigHTML=ev=>ev.map(x=>`<span class="${x<-1e-6?"bad":""}">${f3(x)}</span>`).join("");
+
+function refresh(){
+  analyse();
+  // grid
+  const max=Math.max(1,...counts.map(c=>c?c.n:0));
+  el("legMax").textContent=counts.some(c=>c)?max.toLocaleString():"max";
+  grid.querySelectorAll(".cell").forEach(b=>{const k=+b.dataset.k,c=counts[k];
+    b.classList.toggle("sel",k===selCell);
+    if(!c){b.innerHTML=`<span class="e">·</span>`;b.style.background="";b.style.color="";return;}
+    const pct=Math.round(6+72*c.n/max);
+    b.textContent=c.n.toLocaleString();b.style.background=`color-mix(in srgb, var(--pos) ${pct}%, var(--panel))`;b.style.color=pct>48?"var(--panel)":"var(--ink)";});
+  if(selCell>=0&&counts[selCell]){const a=BASES[Math.floor(selCell/6)],b=BASES[selCell%6],c=counts[selCell];
+    el("readline").innerHTML=`Alice |${a}⟩: QWP <b>${WP[a].q}°</b>, HWP <b>${WP[a].h}°</b> &nbsp;·&nbsp; Bob |${b}⟩: QWP <b>${WP[b].q}°</b>, HWP <b>${WP[b].h}°</b><br><b>${c.n.toLocaleString()}</b> coincidences in ${c.t} s`;}
+  else el("readline").textContent="Pick a cell to see its waveplate settings and count.";
+  const m=counts.filter(Boolean).length;
+  el("totals").innerHTML=m?`<b>${m}</b> of 36 settings measured · <b>${counts.reduce((s,c)=>s+(c?c.n:0),0).toLocaleString()}</b> coincidences in total`:"";
+  // section 4
+  [...meter.children].forEach((x,i)=>x.classList.toggle("on",i<A.rank));
+  el("rankText").textContent=A.rank===16?"All 16 parameters are pinned down. The state is fully determined.":`${A.rank} of 16 independent parameters so far. ${m?"Add settings that probe new combinations.":"Measure some settings in section 3."}`;
+  el("stokes").innerHTML=`<tr><th>Alice \\ Bob</th>${STL.map(s=>`<th>${s}</th>`).join("")}</tr>`+STL.map((s,i)=>`<tr><td class="s">${s}</td>${[0,1,2,3].map(j=>`<td class="m">${A.stokes?f3(A.stokes[i*4+j]):"–"}</td>`).join("")}</tr>`).join("");
+  if(A.lin){const ev=eigvals(A.lin);el("eigLin").innerHTML=eigHTML(ev);const neg=ev.some(x=>x<-1e-6);
+    el("linNote").className="note"+(neg?" warn":"");el("linNote").textContent=neg?"One eigenvalue is negative, so this ρ is not a physical state. Noise did that.":"All eigenvalues are non-negative this time, so the answer happens to be physical.";}
+  else{el("eigLin").innerHTML="";el("linNote").className="note";el("linNote").textContent="Needs 16 independent settings.";}
+  setFig(figLin,A.lin,A.rank<16?`Needs 16 independent settings (${A.rank} so far)`:"No data yet");
+  // section 5
+  setFig(figMl,A.ml,"Measure something in section 3");
+  if(A.ml){el("eigMl").innerHTML=eigHTML(eigvals(A.ml));el("mlNote").textContent=A.rank<16?"Underdetermined: other states fit this data equally well.":"";}
+  else{el("eigMl").innerHTML="";el("mlNote").textContent="";}
+  el("dLinMl").textContent=A.lin&&A.ml?traceDist(A.lin,A.ml).toFixed(3):"–";
+  // section 6
+  const hide=mystery&&!revealed;
+  el("stN").textContent=A.N?Math.round(A.N).toLocaleString():"–";
+  el("stP").textContent=A.ml?purity(A.ml).toFixed(3):"–";
+  el("stC").textContent=A.ml?concurrence(A.ml).toFixed(3):"–";
+  el("stPs").textContent="true: "+(hide?"hidden":purity(rhoTrue).toFixed(3));
+  el("stCs").textContent="true: "+(hide?"hidden":concurrence(rhoTrue).toFixed(3));
+  el("stF").textContent=A.ml&&!hide?fidelity(rhoTrue,A.ml).toFixed(4):hide&&A.ml?"?":"–";
+  el("stFs").textContent=hide?"revealed with the state":"with the true state";
+  el("revealNote").textContent=hide?"The true state is hidden. Reconstruct it as well as you can, then reveal it to see how close you got.":A.rank<16&&A.ml?"With fewer than 16 independent settings, a good fidelity here is partly luck.":"";
+}
+
+// theme changes redraw the figures
+const redrawAll=()=>{readColors();figs.forEach(renderFig);};
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",redrawAll);}catch(e){}
+new MutationObserver(redrawAll).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+// contents highlight
+const tocLinks=[...document.querySelectorAll(".toc a")];
+const secs=[...document.querySelectorAll("section.sec")];
+function spy(){let cur=secs[0];for(const s of secs)if(s.getBoundingClientRect().top<innerHeight*0.35)cur=s;
+  tocLinks.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+cur.id));}
+addEventListener("scroll",spy,{passive:true});spy();
+
+// ---------- welcome walkthrough ----------
+const STEPS=[
+  {t:"Welcome", b:`<p>This is a hands-on lesson in quantum state tomography: how experimenters find out exactly which two-photon state their source is making.</p><p class="aside">It takes about fifteen minutes. No maths beyond matrices is assumed.</p>`},
+  {t:"Six short sections", b:`<p>Work down the page. Each section explains one idea and gives you an instrument to try it on.</p><p>They're all wired together. The state you prepare in section 1 is the one you measure in section 3 and reconstruct in sections 4 and 5.</p>`},
+  {t:"Simulated, but honest", b:`<p>The photons are simulated, but the noise isn't faked. Counts are drawn at random, with the shot noise and accidental coincidences you'd see on a real bench.</p><p>Run the same measurement twice and you'll get different numbers, just like in the lab.</p>`},
+  {t:"Where to start", b:`<p>Begin with section 1 and pick a state. Or ask for a mystery state, keep it hidden, and see if you can work out what it is.</p><p class="aside">You can reopen these notes from the link at the bottom of the page.</p>`},
+];
+let step=0;
+const inSteps=el("inSteps");inSteps.innerHTML=STEPS.map(()=>"<i></i>").join("");
+function goStep(n){
+  step=n;const last=step===STEPS.length-1;
+  el("inCount").textContent=`${step+1} of ${STEPS.length}`;el("inTitle").textContent=STEPS[step].t;
+  const body=el("inBody");body.innerHTML=STEPS[step].b;body.classList.remove("swap");void body.offsetWidth;body.classList.add("swap");
+  [...inSteps.children].forEach((b,i)=>b.classList.toggle("done",i<=step));
+  el("inBack").style.visibility=step>0?"visible":"hidden";
+  el("inNav").innerHTML=last?`<button class="btn primary" id="inGo">Start the lesson</button>`:`<button class="btn primary" id="inNext">Next</button>`;
+  if(last)el("inGo").onclick=closeIntro;else el("inNext").onclick=()=>goStep(step+1);
+  el("inNav").querySelector(".primary").focus({preventScroll:true});
+}
+el("inBack").onclick=()=>{if(step>0)goStep(step-1);};
+function openIntro(){el("intro").classList.remove("hidden");document.body.style.overflow="hidden";goStep(0);}
+function closeIntro(){el("intro").classList.add("hidden");document.body.style.overflow="";}
+window.addEventListener("keydown",e=>{if(el("intro").classList.contains("hidden"))return;
+  if(e.key==="ArrowRight"&&step<STEPS.length-1){e.preventDefault();goStep(step+1);}
+  else if(e.key==="ArrowLeft"&&step>0){e.preventDefault();goStep(step-1);}});
+el("btnNotes").onclick=openIntro;
+
+syncSource();
+openIntro();
+})();
+</script>
+</body>
+</html>
